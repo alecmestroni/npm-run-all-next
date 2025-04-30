@@ -26,46 +26,43 @@ const parseCLIArgs = require("../common/parse-cli-args")
  * @private
  */
 module.exports = function npmRunAll(args, stdout, stderr) {
-    try {
-        const stdin = process.stdin
-        const argv = parseCLIArgs(args, { parallel: false }, { singleMode: true })
-        const group = argv.lastGroup
+  try {
+    const stdin = process.stdin
+    const argv = parseCLIArgs(args, { parallel: false }, { singleMode: true })
+    const group = argv.lastGroup
 
-        if (group.patterns.length === 0) {
-            return Promise.resolve(null)
-        }
-
-        const promise = runAll(
-            group.patterns,
-            {
-                stdout,
-                stderr,
-                stdin,
-                parallel: group.parallel,
-                continueOnError: argv.continueOnError,
-                printLabel: argv.printLabel,
-                printName: argv.printName,
-                config: argv.config,
-                packageConfig: argv.packageConfig,
-                silent: argv.silent,
-                arguments: argv.rest,
-                npmPath: argv.npmPath,
-            }
-        )
-
-        if (!argv.silent) {
-            promise.catch(err => {
-                //eslint-disable-next-line no-console
-                console.error("ERROR:", err.message)
-            })
-        }
-
-        return promise
+    if (group.patterns.length === 0) {
+      return Promise.resolve(null)
     }
-    catch (err) {
-        //eslint-disable-next-line no-console
-        console.error("ERROR:", err.message)
 
-        return Promise.reject(err)
+    const promise = runAll(group.patterns, {
+      stdout,
+      stderr,
+      stdin,
+      parallel: group.parallel,
+      continueOnError: argv.continueOnError,
+      printLabel: argv.printLabel,
+      printName: argv.printName,
+      config: argv.config,
+      packageConfig: argv.packageConfig,
+      silent: argv.silent,
+      arguments: argv.rest,
+      npmPath: argv.npmPath,
+      retry: argv.retry
+    })
+
+    if (!argv.silent) {
+      promise.catch((err) => {
+         
+        console.error("\nERROR:", err.message)
+      })
     }
+
+    return promise
+  } catch (err) {
+     
+    console.error("\nERROR:", err.message)
+
+    return Promise.reject(err)
+  }
 }

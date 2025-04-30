@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 
 const spawn = require("cross-spawn")
-const assert = require("power-assert")
+const assert = require("assert")
 const BufferStream = require("./lib/buffer-stream")
 const util = require("./lib/util")
 const result = util.result
@@ -27,20 +27,20 @@ const removeResult = util.removeResult
  * @returns {Promise<void>} The result of child process's stdout.
  */
 function exec(command, args) {
-    return new Promise((resolve, reject) => {
-        const stderr = new BufferStream()
-        const cp = spawn(command, args, { stdio: ["ignore", "ignore", "pipe"] })
+  return new Promise((resolve, reject) => {
+    const stderr = new BufferStream()
+    const cp = spawn(command, args, { stdio: ["ignore", "ignore", "pipe"] })
 
-        cp.stderr.pipe(stderr)
-        cp.on("exit", (exitCode) => {
-            if (exitCode) {
-                reject(new Error(`Exited with ${exitCode}: ${stderr.value}`))
-                return
-            }
-            resolve()
-        })
-        cp.on("error", reject)
+    cp.stderr.pipe(stderr)
+    cp.on("exit", (exitCode) => {
+      if (exitCode) {
+        reject(new Error(`Exited with ${exitCode}: ${stderr.value}`))
+        return
+      }
+      resolve()
     })
+    cp.on("error", reject)
+  })
 }
 
 const nodeVersion = Number(process.versions.node.split(".")[0])
@@ -50,15 +50,15 @@ const nodeVersion = Number(process.versions.node.split(".")[0])
 //------------------------------------------------------------------------------
 
 ;(nodeVersion >= 6 ? describe : xdescribe)("[yarn]", () => {
-    before(() => process.chdir("test-workspace"))
-    after(() => process.chdir(".."))
+  before(() => process.chdir("test-workspace"))
+  after(() => process.chdir(".."))
 
-    beforeEach(removeResult)
+  beforeEach(removeResult)
 
-    describe("'yarn run' command", () => {
-        it("should run 'npm-run-all' in scripts with yarn.", async () => {
-            await exec("yarn", ["run", "test-task:yarn"])
-            assert(result() === "aabb")
-        })
+  describe("'yarn run' command", () => {
+    it("should run 'npm-run-all' in scripts with yarn.", async () => {
+      await exec("yarn", ["run", "test-task:yarn"])
+      assert(result() === "aabb")
     })
+  })
 })
