@@ -1,5 +1,5 @@
 | [index](../README.md) | [npm-run-all](npm-run-all.md) | [run-s](run-s.md) | run-p | [Node API](node-api.md) |
-|-----------------------|-------------------------------|-------------------|-------|-------------------------|
+| --------------------- | ----------------------------- | ----------------- | ----- | ----------------------- |
 
 # `run-p` command
 
@@ -42,9 +42,9 @@ Options:
     For example, '-clns' equals to '-c -l -n -s'.
 
 Examples:
-    $ run-p watch:**
-    $ run-p --print-label "build:** -- --watch"
-    $ run-p -l "build:** -- --watch"
+    $ run-p 'watch:*'*
+    $ run-p --print-label "'build:*'* -- --watch"
+    $ run-p -l "'build:*'* -- --watch"
     $ run-p start-server start-browser start-electron
 ```
 
@@ -55,11 +55,11 @@ For example:
 
 ```json
 {
-    "scripts": {
-        "clean": "rimraf dist",
-        "lint":  "eslint src",
-        "build": "babel src -o lib"
-    }
+  "scripts": {
+    "clean": "rimraf dist",
+    "lint": "eslint src",
+    "build": "babel src -o lib"
+  }
 }
 ```
 
@@ -85,14 +85,14 @@ We can use [glob]-like patterns to specify npm-scripts.
 The difference is one -- the separator is `:` instead of `/`.
 
 ```
-$ run-p watch:*
+$ run-p 'watch:*'
 ```
 
 In this case, runs sub scripts of `watch`. For example: `watch:html`, `watch:js`.
 But, doesn't run sub-sub scripts. For example: `watch:js:index`.
 
 ```
-$ run-p watch:**
+$ run-p 'watch:*'*
 ```
 
 If we use a globstar `**`, runs both sub scripts and sub-sub scripts.
@@ -105,7 +105,7 @@ We can enclose a script name or a pattern in quotes to use arguments.
 The following 2 commands are similar.
 
 ```
-$ run-p "build:* -- --watch"
+$ run-p "'build:*' -- --watch"
 $ npm run build:aaa -- --watch & npm run build:bbb -- --watch
 ```
 
@@ -123,9 +123,9 @@ This is useful to pass through arguments from `npm run` command.
 
 ```json
 {
-    "scripts": {
-        "start": "run-p \"start-server -- --port {1}\" --"
-    }
+  "scripts": {
+    "start": "run-p \"start-server -- --port {1}\" --"
+  }
 }
 ```
 

@@ -14,10 +14,10 @@
     "docs"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">= 4"
   },
   "scripts": {
-    "_mocha": "mocha \"test/package-config.js\" --timeout 120000",
+    "_mocha": "mocha \"test/*.js\" --timeout 120000",
     "clean": "rimraf .nyc_output coverage jsdoc \"test-workspace/{build,test.txt}\"",
     "docs": "jsdoc -c jsdoc.json",
     "lint": "eslint bin lib scripts test \"test-workspace/tasks/*.js\"",
@@ -25,35 +25,34 @@
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
     "test": "nyc --require @babel/register npm run _mocha",
-    "watch": "npm run _mocha -- --require @babel/register --watch",
+    "watch": "npm run _mocha -- --require @babel/register --watch --growl",
     "codecov": "nyc report -r lcovonly && codecov"
   },
   "dependencies": {
-    "@mysticatea/eslint-plugin": "^13.0.0",
     "ansi-styles": "^6.2.1",
     "chalk": "^4.1.2",
     "cross-spawn": "^7.0.6",
     "memorystream": "^0.3.1",
     "minimatch": "^10.0.1",
-    "npm-check-updates": "^18.0.1",
     "pidtree": "^0.6.0",
-    "read-pkg": "^5.2.0",
+    "read-pkg": "^9.0.1",
     "shell-quote": "^1.8.2",
     "string.prototype.padend": "^3.1.6"
   },
   "devDependencies": {
-    "@babel/cli": "^7.27.0",
-    "@babel/core": "^7.26.10",
-    "@babel/node": "^7.26.0",
-    "@babel/preset-env": "^7.26.9",
-    "@babel/register": "^7.25.9",
     "@types/node": "^22.15.3",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-power-assert": "^3.0.0",
+    "@babel/register": "^7.25.9",
     "eslint": "^9.25.1",
+    "@mysticatea/eslint-plugin": "^13.0.0",
     "fs-extra": "^11.3.0",
     "mocha": "^11.1.0",
     "nyc": "^17.1.0",
     "p-queue": "^8.1.0",
-    "rimraf": "^6.0.1"
+    "power-assert": "^1.6.1",
+    "rimraf": "^6.0.1",
+    "yarn": "^1.22.22"
   },
   "repository": "mysticatea/npm-run-all",
   "keywords": [

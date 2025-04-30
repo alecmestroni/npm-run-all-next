@@ -17,7 +17,7 @@
  * @private
  */
 module.exports = function printHelp(output) {
-    output.write(`
+  output.write(`
 Usage:
     $ run-p [--help | -h | --version | -v]
     $ run-p [OPTIONS] <tasks>
@@ -53,14 +53,14 @@ Options:
     For example, '-clns' equals to '-c -l -n -s'.
 
 Examples:
-    $ run-p watch:**
-    $ run-p --print-label "build:** -- --watch"
-    $ run-p -sl "build:** -- --watch"
+    $ run-p 'watch:*'*
+    $ run-p --print-label "'build:*'* -- --watch"
+    $ run-p -sl "'build:*'* -- --watch"
     $ run-p start-server start-browser start-electron
 
 See Also:
     https://github.com/mysticatea/npm-run-all#readme
 `)
 
-    return Promise.resolve(null)
+  return Promise.resolve(null)
 }

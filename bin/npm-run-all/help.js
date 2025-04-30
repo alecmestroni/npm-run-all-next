@@ -17,7 +17,7 @@
  * @private
  */
 module.exports = function printHelp(output) {
-    output.write(`
+  output.write(`
 Usage:
     $ npm-run-all [--help | -h | --version | -v]
     $ npm-run-all [tasks] [OPTIONS]
@@ -58,14 +58,14 @@ Options:
     --silent   - - - - - - - - Set 'silent' to the log level of npm.
 
 Examples:
-    $ npm-run-all --serial clean lint build:**
-    $ npm-run-all --parallel watch:**
-    $ npm-run-all clean lint --parallel "build:** -- --watch"
+    $ npm-run-all --serial clean lint 'build:*'*
+    $ npm-run-all --parallel 'watch:*'*
+    $ npm-run-all clean lint --parallel "'build:*'* -- --watch"
     $ npm-run-all -l -p start-server start-browser start-electron
 
 See Also:
     https://github.com/mysticatea/npm-run-all#readme
 `)
 
-    return Promise.resolve(null)
+  return Promise.resolve(null)
 }
