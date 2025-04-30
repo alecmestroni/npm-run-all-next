@@ -1,6 +1,6 @@
 {
-    "presets": ["power-assert"],
-    "plugins": ["transform-async-to-generator"],
-    "only": "/test/*.js",
-    "sourceMaps": "inline"
+  "presets": ["@babel/preset-env"],
+  "plugins": ["transform-async-to-generator"],
+  "only": ["/test/*.js"],
+  "sourceMaps": "inline"
 }

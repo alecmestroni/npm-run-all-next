@@ -17,7 +17,7 @@
  * @private
  */
 module.exports = function printHelp(output) {
-    output.write(`
+  output.write(`
 Usage:
     $ run-s [--help | -h | --version | -v]
     $ run-s [OPTIONS] <tasks>
@@ -47,14 +47,14 @@ Options:
     For example, '-clns' equals to '-c -l -n -s'.
 
 Examples:
-    $ run-s build:**
-    $ run-s lint clean build:**
-    $ run-s --silent --print-name lint clean build:**
-    $ run-s -sn lint clean build:**
+    $ run-s 'build:*'*
+    $ run-s lint clean 'build:*'*
+    $ run-s --silent --print-name lint clean 'build:*'*
+    $ run-s -sn lint clean 'build:*'*
 
 See Also:
     https://github.com/mysticatea/npm-run-all#readme
 `)
 
-    return Promise.resolve(null)
+  return Promise.resolve(null)
 }
