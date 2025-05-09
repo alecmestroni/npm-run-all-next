@@ -17,27 +17,25 @@ if (isNaN(threshold) || threshold < 0) {
 }
 
 // Load and increment the run counter
-let count = 0
-const countChar = result() ? (result().match(new RegExp(char, 'g')) || []).length : 0
-console.log(`Res: ${result()}`)
-console.log(`Count char: ${countChar}`)
+let countChar = result() ? (result().match(/f/g) || []).length : 0
 if (countChar > 0) {
-  count = result().length
-  console.log(`Recovered count: ${count}`)
+  console.log(`Res: ${result()}`)
+  console.log(`Recovered count: ${countChar}`)
 }
-count += 1
-console.log(`Current count: ${count}`)
+appendResult(char)
+
+countChar += 1
+console.log(`Current count: ${countChar}`)
 console.log(`Threshold: ${threshold}`)
 
 setTimeout(() => {
-  appendResult(char)
-  if (count < threshold) {
-    console.log(`Exiting with failure (count: ${count})`)
+  if (countChar <= threshold) {
+    console.log(`Exiting with failure (count: ${countChar})`)
     process.exit(1)
   } else {
     process.exit(0)
   }
-}, 3000)
+}, 1000)
 
 // SIGINT/SIGTERM Handling.
 process.on('SIGINT', () => {

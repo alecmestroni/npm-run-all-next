@@ -28,7 +28,7 @@
     "test-task:append2": "node tasks/append2.js",
     "test-task:abort": "node tasks/abort.js",
     "test-task:error": "node tasks/error.js",
-    "test-task:flaky": "node tasks/flaky.js",
+    "test-task:flaky": "node tasks/flaky.js 5",
     "test-task:append1Error": "node tasks/append1Error.js",
     "test-task:append2Error": "node tasks/append2Error.js",
     "test-task:stdout": "node tasks/stdout.js > test.txt",

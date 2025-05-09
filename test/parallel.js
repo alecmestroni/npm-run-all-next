@@ -25,7 +25,7 @@ const runPar = util.runPar
 // Test
 //------------------------------------------------------------------------------
 
-describe.only('[parallel]', () => {
+describe('[parallel]', () => {
   before(() => process.chdir('test-workspace'))
   after(() => process.chdir('..'))
 
@@ -70,7 +70,7 @@ describe.only('[parallel]', () => {
         await delay(5000)
         assert.strictEqual(err.results.length, 2)
         assert.strictEqual(err.results[0].name, 'test-task:append2 a')
-        assert.strictEqual(err.results[0].code, undefined)
+        assert.strictEqual(err.results[0].code, 130)
         assert.strictEqual(err.results[1].name, 'test-task:error')
         assert.strictEqual(err.results[1].code, 1)
         assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)

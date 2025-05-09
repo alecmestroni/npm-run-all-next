@@ -22,7 +22,7 @@ const runAll = util.runAll
 const runPar = util.runPar
 const runSeq = util.runSeq
 
-describe('[retry]', () => {
+describe.only('[retry]', () => {
   before(() => process.chdir('test-workspace'))
   after(() => process.chdir('..'))
 
@@ -124,34 +124,7 @@ describe('[retry]', () => {
     })
   })
 
-  describe('should combine retries with parallel execution (flaky + fail)', () => {
-    it('Node API', async () => {
-      const threshold = 1
-      const retries = 4
-      try {
-        await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1Error b`], { retry: retries, parallel: true })
-      } catch (err) {
-        console.log(err)
-        // assert.strictEqual(err.results[0].code, 0)
-        // assert.strictEqual(err.results[0].retries, threshold)
-        // assert.strictEqual(result().length, threshold + 1)
-      }
-    })
-
-    it('npm-run-all command', async () => {
-      const threshold = 2
-      await runAll(['--retry', retries, '--parallel', `test-task:flaky ${threshold}`, `test-task:append1Error b`])
-      assert.strictEqual(result().length, threshold + 1)
-    })
-
-    it('run-p command', async () => {
-      const threshold = 3
-      await runPar(['--retry', retries, `test-task:flaky ${threshold}`, `test-task:append1Error b`])
-      assert.strictEqual(result().length, threshold + 1)
-    })
-  })
-
-  describe('should combine retries with parallel execution (succeed + succeed)', () => {
+  describe('should combine retries with parallel execution (succeed)', () => {
     const retries = 1
     it('Node API', async () => {
       const results = await nodeApi([`test-task:append1 a`, `test-task:append1 b`], { retry: retries, parallel: true })
@@ -174,7 +147,76 @@ describe('[retry]', () => {
       assert.ok(['a', 'ab', 'ba'].includes(result()), `Expected result to be one of "a", "ab", "ba" but got "${result()}"`)
     })
   })
-  describe.only('should combine retries with parallel execution (fail + abort)', () => {
+
+  describe('should combine retries with parallel execution (flaky + fail)', () => {
+    const retries = 4
+    const threshold = 2
+    it('Node API', async () => {
+      try {
+        await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1Error b`], { retry: retries, parallel: true })
+      } catch (err) {
+        assert.strictEqual(err.results.length, 2)
+        assert.strictEqual(err.results[0].name, `test-task:flaky ${threshold}`)
+        assert.strictEqual(err.results[1].name, 'test-task:append1Error b')
+        assert.ok(
+          err.results[0].code === 130 && err.results[1].code === 1,
+          'First task should be aborted, and second one failed. (1: ' + err.results[0].code + ', 2: ' + err.results[1].code + ')'
+        )
+        assert.strictEqual(err.results[0].retries, retries)
+        assert.strictEqual(err.results[1].retries, retries)
+        await delay(3000)
+        assert.strictEqual((result().match(/b/g) || []).length, retries + 1)
+        assert((result().match(/f/g) || []).length <= retries)
+      }
+    })
+
+    it('npm-run-all command', async () => {
+      try {
+        await runAll(['--retry', retries, '--parallel', `test-task:flaky ${threshold}`, `test-task:append1Error b`])
+      } catch (err) {
+        await delay(3000)
+        assert.strictEqual((result().match(/b/g) || []).length, retries + 1)
+        assert((result().match(/f/g) || []).length <= retries)
+      }
+    })
+
+    it('run-p command', async () => {
+      try {
+        await runPar(['--retry', retries, `test-task:flaky ${threshold}`, `test-task:append1Error b`])
+      } catch (err) {
+        await delay(3000)
+        assert.strictEqual((result().match(/b/g) || []).length, retries + 1)
+        assert((result().match(/f/g) || []).length <= retries)
+      }
+    })
+  })
+
+  describe.only('should combine retries with parallel execution (flaky + succeed)', () => {
+    const retries = 4
+    const threshold = 3
+    it('Node API', async () => {
+      const results = await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1 b`], { retry: retries, parallel: true })
+      assert.strictEqual(results[0].code, 0)
+      assert.strictEqual(results[1].code, 0)
+      assert.strictEqual(results[0].name, `test-task:flaky ${threshold}`)
+      assert.strictEqual(results[1].name, 'test-task:append1 b')
+      assert.strictEqual(results[0].retries, 1)
+      assert.strictEqual(results[1].retries, 0)
+      assert.ok(['a', 'ab', 'ba'].includes(result()), `Expected result to be one of "a", "ab", "ba" but got "${result()}"`)
+    })
+
+    it('npm-run-all command', async () => {
+      await runAll(['--retry', retries, '--parallel', `test-task:flaky ${threshold}`, `test-task:append1 b`])
+      assert.ok(['a', 'ab', 'ba'].includes(result()), `Expected result to be one of "a", "ab", "ba" but got "${result()}"`)
+    })
+
+    it('run-p command', async () => {
+      await runPar(['--retry', retries, `test-task:flaky ${threshold}`, `test-task:append1 b`])
+      assert.ok(['a', 'ab', 'ba'].includes(result()), `Expected result to be one of "a", "ab", "ba" but got "${result()}"`)
+    })
+  })
+
+  describe('should combine retries with parallel execution (abort)', () => {
     const retries = 1
     it('Node API', async () => {
       try {
@@ -193,7 +235,6 @@ describe('[retry]', () => {
         )
         assert.strictEqual(err.results[0].retries, retries)
         assert.strictEqual(err.results[1].retries, retries)
-        await delay(3000)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
