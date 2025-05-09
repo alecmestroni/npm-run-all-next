@@ -1,0 +1,11 @@
+node_modules
+package-lock.json
+.gitignore
+test
+test-workspace
+img
+.vscode
+.env
+.DS_Store
+*.log
+coverage

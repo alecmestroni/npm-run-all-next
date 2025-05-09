@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": [
+    "plugin:@mysticatea/es2017", // o es2018, es2019, es2020...
+    "plugin:@mysticatea/+node" // per l’ambiente Node.js
+  ],
+  "rules": {
+    "prefer-rest-params": "off",
+    "prefer-spread": "off"
+  }
+}

@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -58,7 +60,7 @@ const nodeVersion = Number(process.versions.node.split(".")[0])
   describe("'yarn run' command", () => {
     it("should run 'npm-run-all' in scripts with yarn.", async () => {
       await exec("yarn", ["run", "test-task:yarn"])
-      assert(result() === "aabb")
+      assert.strictEqual(result(), "aabb")
     })
   })
 })

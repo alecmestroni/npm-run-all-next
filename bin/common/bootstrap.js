@@ -1,11 +1,11 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
-
- 
 
 module.exports = function bootstrap(name) {
   const argv = process.argv.slice(2)
@@ -26,24 +26,7 @@ module.exports = function bootstrap(name) {
       process.stderr.setMaxListeners(0)
       process.stdin.setMaxListeners(0)
 
-      // Supporto --retry <count>
-      const retryIndex = argv.findIndex((arg) => arg === "-r" || arg === "--retry")
-      let retryCount = 0
-      if (retryIndex !== -1) {
-        retryCount = parseInt(argv[retryIndex + 1], 10) || 0
-        argv.splice(retryIndex, 2)
-      }
-
-      // Supporto --summary
-      const summaryIndex = argv.findIndex((arg) => arg === "--summary")
-      let summaryFlag = false
-      if (summaryIndex !== -1) {
-        summaryFlag = true
-        argv.splice(summaryIndex, 1)
-      }
-
-      const options = { retry: retryCount, summary: summaryFlag }
-      return require(`../${name}/main`)(argv, process.stdout, process.stderr, options).then(
+      return require(`../${name}/main`)(argv, process.stdout, process.stderr).then(
         () => {
           // On some platforms the process may not exit automatically.
           process.exit(0)
@@ -54,5 +37,3 @@ module.exports = function bootstrap(name) {
       )
   }
 }
-
- 

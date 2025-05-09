@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -53,7 +55,7 @@ Examples:
     $ run-s -sn lint clean 'build:*'*
 
 See Also:
-    https://github.com/mysticatea/npm-run-all#readme
+    https://github.com/alecmestroni/npm-run-all-next#readme
 `)
 
   return Promise.resolve(null)

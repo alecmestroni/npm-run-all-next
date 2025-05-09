@@ -28,6 +28,9 @@
     "test-task:append2": "node tasks/append2.js",
     "test-task:abort": "node tasks/abort.js",
     "test-task:error": "node tasks/error.js",
+    "test-task:flaky": "node tasks/flaky.js",
+    "test-task:append1Error": "node tasks/append1Error.js",
+    "test-task:append2Error": "node tasks/append2Error.js",
     "test-task:stdout": "node tasks/stdout.js > test.txt",
     "test-task:stderr": "node tasks/stderr.js 2> test.txt",
     "test-task:stdin": "echo STDIN | node tasks/stdin.js",
@@ -45,8 +48,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mysticatea/npm-run-all.git"
+    "url": "https://github.com/alecmestroni/npm-run-all-next.git"
   },
-  "author": "Toru Nagashima",
+  "author": "Alec Mestroni",
   "license": "MIT"
 }

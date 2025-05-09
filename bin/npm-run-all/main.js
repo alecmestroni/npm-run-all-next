@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2015 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2015 Toru Nagashima
+ * @copyright 2025 Alec Mestroni
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -22,24 +24,13 @@ const parseCLIArgs = require("../common/parse-cli-args")
  * @param {string[]} args - Arguments to parse.
  * @param {stream.Writable} stdout - A writable stream to print logs.
  * @param {stream.Writable} stderr - A writable stream to print errors.
- * @param {object} options - Options passed from bootstrap.
- * @param {number} options.retry - Number of retry attempts.
- * @param {boolean} options.summary - Whether to show the summary table.
  * @returns {Promise} A promise which fulfills when all npm-scripts are done.
  * @private
  */
-module.exports = function npmRunAll(args, stdout, stderr, options) {
+module.exports = function npmRunAll(args, stdout, stderr) {
   try {
     const stdin = process.stdin
     const argv = parseCLIArgs(args)
-
-    // Merge bootstrap-provided retry and summary into parsed args
-    if (typeof options.retry === "number") {
-      argv.retry = options.retry
-    }
-    if (typeof options.summary === "boolean") {
-      argv.summary = options.summary
-    }
 
     const promise = argv.groups.reduce((prev, group) => {
       if (group.patterns.length === 0) {

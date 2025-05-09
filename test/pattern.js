@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -31,61 +33,61 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
   describe('"test-task:append:*" to "test-task:append:a" and "test-task:append:b"', () => {
     it("Node API", async () => {
       await nodeApi("test-task:append:*")
-      assert(result() === "aabb")
+      assert.strictEqual(result(), "aabb")
     })
 
     it("npm-run-all command", async () => {
       await runAll(["test-task:append:*"])
-      assert(result() === "aabb")
+      assert.strictEqual(result(), "aabb")
     })
 
     it("run-s command", async () => {
       await runSeq(["test-task:append:*"])
-      assert(result() === "aabb")
+      assert.strictEqual(result(), "aabb")
     })
 
     it("run-p command", async () => {
       await runPar(["test-task:append:*"])
-      assert(result() === "abab" || result() === "abba" || result() === "baba" || result() === "baab")
+      assert.ok(["abab", "abba", "baba", "baab"].includes(result()), `Expected result to be one of "abab", "abba", "baba", "baab" but got "${result()}"`)
     })
   })
 
   describe('"test-task:append:**:*" to "test-task:append:a", "test-task:append:a:c", "test-task:append:a:d", and "test-task:append:b"', () => {
     it("Node API", async () => {
       await nodeApi("test-task:append:**:*")
-      assert(result() === "aaacacadadbb")
+      assert.strictEqual(result(), "aaacacadadbb")
     })
 
     it("npm-run-all command", async () => {
       await runAll(["test-task:append:**:*"])
-      assert(result() === "aaacacadadbb")
+      assert.strictEqual(result(), "aaacacadadbb")
     })
 
     it("run-s command", async () => {
       await runSeq(["test-task:append:**:*"])
-      assert(result() === "aaacacadadbb")
+      assert.strictEqual(result(), "aaacacadadbb")
     })
   })
 
   describe('(should ignore duplications) "test-task:append:b" "test-task:append:*" to "test-task:append:b", "test-task:append:a"', () => {
     it("Node API", async () => {
       await nodeApi(["test-task:append:b", "test-task:append:*"])
-      assert(result() === "bbaa")
+      assert.strictEqual(result(), "bbaa")
     })
 
     it("npm-run-all command", async () => {
       await runAll(["test-task:append:b", "test-task:append:*"])
-      assert(result() === "bbaa")
+      assert.strictEqual(result(), "bbaa")
     })
 
     it("run-s command", async () => {
       await runSeq(["test-task:append:b", "test-task:append:*"])
-      assert(result() === "bbaa")
+      assert.strictEqual(result(), "bbaa")
     })
 
     it("run-p command", async () => {
       await runPar(["test-task:append:b", "test-task:append:*"])
-      assert(result() === "baba" || result() === "baab" || result() === "abab" || result() === "abba")
+      assert.ok(["baba", "baab", "abab", "abba"].includes(result()), `Expected result to be one of "baba", "baab", "abab", "abba" but got "${result()}"`)
     })
   })
 
@@ -93,7 +95,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
     it("Node API", async () => {
       try {
         await nodeApi("a")
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (err) {
         assert(/not found/i.test(err.message))
       }
@@ -103,7 +105,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runAll(["a"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -113,7 +115,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runSeq(["a"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -123,7 +125,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runPar(["a"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -134,7 +136,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
     it("Node API", async () => {
       try {
         await nodeApi("!test-task:**")
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (err) {
         assert(/not found/i.test(err.message))
       }
@@ -144,7 +146,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runAll(["!test-task:**"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -154,7 +156,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runSeq(["!test-task:**"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -164,7 +166,7 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
       const stderr = new BufferStream()
       try {
         await runPar(["!test-task:**"], null, stderr)
-        assert(false, "should not match")
+        assert.fail("should not match")
       } catch (_err) {
         assert(/not found/i.test(stderr.value))
       }
@@ -174,22 +176,22 @@ describe("[pattern] it should run matched tasks if glob like patterns are given.
   describe('"!test" "?test" to "!test", "?test"', () => {
     it("Node API", async () => {
       await nodeApi(["!test", "?test"])
-      assert(result().trim() === "XQ")
+      assert.strictEqual(result().trim(), "XQ")
     })
 
     it("npm-run-all command", async () => {
       await runAll(["!test", "?test"])
-      assert(result().trim() === "XQ")
+      assert.strictEqual(result().trim(), "XQ")
     })
 
     it("run-s command", async () => {
       await runSeq(["!test", "?test"])
-      assert(result().trim() === "XQ")
+      assert.strictEqual(result().trim(), "XQ")
     })
 
     it("run-p command", async () => {
       await runPar(["!test", "?test"])
-      assert(result().trim() === "XQ" || result().trim() === "QX")
+      assert.ok(["XQ", "QX"].includes(result().trim()), `Expected result to be either "XQ" or "QX" but got "${result().trim()}"`)
     })
   })
 })

@@ -8,8 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mysticatea/npm-run-all.git"
+    "url": "https://github.com/alecmestroni/npm-run-all-next.git"
   },
-  "author": "Toru Nagashima",
+  "author": "Alec Mestroni",
   "license": "MIT"
 }

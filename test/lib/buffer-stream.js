@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -19,29 +21,29 @@ const stream = require("stream")
  * The stream to accumulate written data as a single string.
  */
 module.exports = class BufferStream extends stream.Writable {
-    /**
-     * Initialize the current data as a empty string.
-     */
-    constructor() {
-        super()
-
-        /**
-         * Accumulated data.
-         * @type {string}
-         */
-        this.value = ""
-    }
+  /**
+   * Initialize the current data as a empty string.
+   */
+  constructor() {
+    super()
 
     /**
-     * Accumulates written data.
-     *
-     * @param {string|Buffer} chunk - A written data.
-     * @param {string} _encoding - The encoding of chunk.
-     * @param {function} callback - The callback to notify done.
-     * @returns {void}
+     * Accumulated data.
+     * @type {string}
      */
-    _write(chunk, _encoding, callback) {
-        this.value += chunk.toString()
-        callback()
-    }
+    this.value = ""
+  }
+
+  /**
+   * Accumulates written data.
+   *
+   * @param {string|Buffer} chunk - A written data.
+   * @param {string} _encoding - The encoding of chunk.
+   * @param {function} callback - The callback to notify done.
+   * @returns {void}
+   */
+  _write(chunk, _encoding, callback) {
+    this.value += chunk.toString()
+    callback()
+  }
 }

@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -17,9 +19,9 @@
  * @private
  */
 module.exports = function printVersion(output) {
-    const version = require("../../package.json").version
+  const version = require("../../package.json").version
 
-    output.write(`v${version}\n`)
+  output.write(`v${version}\n`)
 
-    return Promise.resolve(null)
+  return Promise.resolve(null)
 }

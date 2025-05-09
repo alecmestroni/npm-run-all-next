@@ -1,11 +1,11 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
-
- 
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -112,7 +112,10 @@ function parseCLIArgsCore(set, args) {
         break
 
       case "--retry":
-        set.retry = Number(args[++i]) || 0
+        set.retry = parseInt(args[++i], 10)
+        if (!Number.isFinite(set.retry) || set.retry <= 0) {
+          throw new Error(`Invalid Option: --retry ${args[i]}`)
+        }
         break
 
       case "--summary":
@@ -207,5 +210,3 @@ function parseCLIArgsCore(set, args) {
 module.exports = function parseCLIArgs(args, initialValues, options) {
   return parseCLIArgsCore(new ArgumentSet(initialValues, options), args)
 }
-
- 

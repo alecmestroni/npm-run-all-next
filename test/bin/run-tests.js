@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima <https://github.com/mysticatea>
- * @copyright 2017 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2017 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -19,7 +21,7 @@ const spawn = require("child_process").spawn
 const path = require("path")
 const os = require("os")
 const fs = require("fs-extra")
-const PQueue = require("p-queue")
+const { default: PQueue } = require("p-queue")
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -35,7 +37,7 @@ const MOCHA_PATH = path.resolve(__dirname, "../../node_modules/mocha/bin/_mocha"
  * @returns {string} The string of the duration.
  */
 function durationToText(durationInSec) {
-    return `${durationInSec / 60 | 0}m ${durationInSec % 60 | 0}s`
+  return `${(durationInSec / 60) | 0}m ${durationInSec % 60 | 0}s`
 }
 
 /**
@@ -51,57 +53,53 @@ function durationToText(durationInSec) {
  * - `text` is the result text of the child process.
  */
 function runMocha(filePath, workspacePath) {
-    return new Promise((resolve, reject) => {
-        const startInSec = process.uptime()
-        const cp = spawn(
-            process.execPath,
-            [MOCHA_PATH, filePath, "--reporter", "dot", "--timeout", "120000"],
-            { cwd: workspacePath, stdio: ["ignore", "pipe", "inherit"] }
-        )
+  return new Promise((resolve, reject) => {
+    const startInSec = process.uptime()
+    const cp = spawn(process.execPath, [MOCHA_PATH, filePath, "--reporter", "dot", "--timeout", "120000"], { cwd: workspacePath, stdio: ["ignore", "pipe", "inherit"] })
 
-        let resultText = ""
+    let resultText = ""
 
-        cp.stdout.setEncoding("utf8")
-        cp.stdout.on("data", (rawChunk) => {
-            const chunk = rawChunk.trim().replace(/^[․.!]+/, (dots) => {
-                process.stdout.write(dots)
-                return ""
-            })
-            if (chunk) {
-                resultText += chunk
-                resultText += "\n\n"
-            }
-        })
-
-        cp.on("exit", (exitCode) => {
-            let passing = 0
-            let failing = 0
-            const text = resultText
-                .replace(/(\d+) passing\s*\(.+?\)/, (_, n) => {
-                    passing += Number(n)
-                    return ""
-                })
-                .replace(/(\d+) failing\s*/, (_, n) => {
-                    failing += Number(n)
-                    return ""
-                })
-                .replace(/^\s*\d+\)/gm, "")
-                .split("\n")
-                .filter(line => !line.includes("empower-core"))
-                .join("\n")
-                .trim()
-
-            resolve({
-                duration: process.uptime() - startInSec,
-                exitCode,
-                failing,
-                id: path.basename(filePath, ".js"),
-                passing,
-                text,
-            })
-        })
-        cp.on("error", reject)
+    cp.stdout.setEncoding("utf8")
+    cp.stdout.on("data", (rawChunk) => {
+      const chunk = rawChunk.trim().replace(/^[․.!]+/, (dots) => {
+        process.stdout.write(dots)
+        return ""
+      })
+      if (chunk) {
+        resultText += chunk
+        resultText += "\n\n"
+      }
     })
+
+    cp.on("exit", (exitCode) => {
+      let passing = 0
+      let failing = 0
+      const text = resultText
+        .replace(/(\d+) passing\s*\(.+?\)/, (_, n) => {
+          passing += Number(n)
+          return ""
+        })
+        .replace(/(\d+) failing\s*/, (_, n) => {
+          failing += Number(n)
+          return ""
+        })
+        .replace(/^\s*\d+\)/gm, "")
+        .split("\n")
+        .filter((line) => !line.includes("empower-core"))
+        .join("\n")
+        .trim()
+
+      resolve({
+        duration: process.uptime() - startInSec,
+        exitCode,
+        failing,
+        id: path.basename(filePath, ".js"),
+        passing,
+        text
+      })
+    })
+    cp.on("error", reject)
+  })
 }
 
 /**
@@ -116,58 +114,56 @@ function runMocha(filePath, workspacePath) {
  * - `text` is the result text of the child process.
  */
 async function runMochaWithWorkspace(filePath) {
-    const basename = path.basename(filePath, ".js")
-    const workspacePath = path.resolve(__dirname, `../../test-workspace-${basename}`)
+  const basename = path.basename(filePath, ".js")
+  const workspacePath = path.resolve(__dirname, `../../test-workspace-${basename}`)
 
-    await fs.remove(workspacePath)
-    await fs.copy(WORKSPACE_PATH, workspacePath, { dereference: true, recursive: true })
+  await fs.remove(workspacePath)
+  await fs.copy(WORKSPACE_PATH, workspacePath, { dereference: true, recursive: true })
+  try {
+    return await runMocha(filePath, workspacePath)
+  } finally {
     try {
-        return await runMocha(filePath, workspacePath)
+      await fs.remove(workspacePath)
+    } catch (_error) {
+      // ignore to keep the original error.
     }
-    finally {
-        try {
-            await fs.remove(workspacePath)
-        }
-        catch (_error) {
-            // ignore to keep the original error.
-        }
-    }
+  }
 }
 
 //------------------------------------------------------------------------------
 // Main
 //------------------------------------------------------------------------------
 
-(async () => {
-    const startInSec = process.uptime()
-    const queue = new PQueue({ concurrency: os.cpus().length + 1 })
-    const results = await Promise.all(
-        (await fs.readdir(ROOT_PATH))
-            .filter(fileName => path.extname(fileName) === ".js")
-            .map(fileName => path.join(ROOT_PATH, fileName))
-            .map(filePath => queue.add(() => runMochaWithWorkspace(filePath)))
-    )
+;(async () => {
+  const startInSec = process.uptime()
+  const queue = new PQueue({ concurrency: os.cpus().length + 1 })
+  const results = await Promise.all(
+    (await fs.readdir(ROOT_PATH))
+      .filter((fileName) => path.extname(fileName) === ".js")
+      .map((fileName) => path.join(ROOT_PATH, fileName))
+      .map((filePath) => queue.add(() => runMochaWithWorkspace(filePath)))
+  )
 
-    process.stdout.write("\n\n")
+  process.stdout.write("\n\n")
 
-    for (const result of results) {
-        if (result.text) {
-            process.stdout.write(`\n${result.text}\n\n`)
-        }
-        if (result.exitCode) {
-            process.exitCode = 1
-        }
+  for (const result of results) {
+    if (result.text) {
+      process.stdout.write(`\n${result.text}\n\n`)
     }
-
-    let passing = 0
-    let failing = 0
-    for (const result of results) {
-        passing += result.passing
-        failing += result.failing
-        process.stdout.write(`\n${result.id}: passing ${result.passing} failing ${result.failing} (${durationToText(result.duration)})`)
+    if (result.exitCode) {
+      process.exitCode = 1
     }
-    process.stdout.write(`\n\nTOTAL: passing ${passing} failing ${failing} (${durationToText(process.uptime() - startInSec)})\n\n`)
-})().catch(error => {
-    process.stderr.write(`\n\n${error.stack}\n\n`)
-    process.exit(1)  
+  }
+
+  let passing = 0
+  let failing = 0
+  for (const result of results) {
+    passing += result.passing
+    failing += result.failing
+    process.stdout.write(`\n${result.id}: passing ${result.passing} failing ${result.failing} (${durationToText(result.duration)})`)
+  }
+  process.stdout.write(`\n\nTOTAL: passing ${passing} failing ${failing} (${durationToText(process.uptime() - startInSec)})\n\n`)
+})().catch((error) => {
+  process.stderr.write(`\n\n${error.stack}\n\n`)
+  process.exit(1)
 })

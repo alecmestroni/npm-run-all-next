@@ -1,6 +1,8 @@
 /**
- * @author Toru Nagashima
- * @copyright 2016 Toru Nagashima. All rights reserved.
+ * @author Toru Nagashima (2015)
+ * @author Alec Mestroni (2025)
+ * @copyright 2016 Toru Nagashima.
+ * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
 "use strict"
@@ -30,7 +32,7 @@ const runSeq = util.runSeq
  */
 function shouldFail(p) {
   return p.then(
-    () => assert(false, "should fail"),
+    () => assert.fail("should fail"),
     () => null // OK!
   )
 }
@@ -109,13 +111,13 @@ describe("[fail] it should fail", () => {
     it("run-p command", () => shouldFail(runPar(["test-task:abort"])))
     it("with correct exit code", () =>
       nodeApi("test-task:abort")
-        .then(() => assert(false, "should fail"))
+        .then(() => assert.fail("should fail"))
         .catch((err) => {
           // In NodeJS versions > 6, the child process correctly sends back
           // the signal + code of null. In NodeJS versions <= 6, the child
           // process does not set the signal, and sets the code to 1.
           const code = Number(process.version.match(/^v(\d+)/)[1]) > 6 ? 134 : 1
-          assert(err.code === code, "should have correct exit code")
+          assert.strictEqual(err.code, code, "should have correct exit code")
         }))
   })
 })
