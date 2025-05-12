@@ -3,7 +3,7 @@ name: CI, Coverage & Publish
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   test-and-coverage:
