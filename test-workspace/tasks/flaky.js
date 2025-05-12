@@ -6,6 +6,7 @@
  */
 const { result, appendResult } = require('./lib/util')
 const char = 'f'
+const resulted = result()
 // Read the threshold argument from the command line
 if (process.argv.length < 3) {
   console.error('Missing Argument. Usage: node flaky.js <threshold>')
@@ -17,9 +18,9 @@ if (isNaN(threshold) || threshold < 0) {
 }
 
 // Load and increment the run counter
-let countChar = result() ? (result().match(/f/g) || []).length : 0
+let countChar = resulted ? (resulted.match(/f/g) || []).length : 0
 if (countChar > 0) {
-  console.log(`Res: ${result()}`)
+  console.log(`Res: ${resulted}`)
   console.log(`Recovered count: ${countChar}`)
 }
 appendResult(char)

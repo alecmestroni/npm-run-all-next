@@ -6,7 +6,7 @@ appendResult(process.argv[2])
 setTimeout(() => {
   appendResult(process.argv[2])
   process.exit(1)
-}, 1500)
+}, 3000)
 
 // SIGINT/SIGTERM Handling.
 process.on('SIGINT', () => {

@@ -25,8 +25,7 @@
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
     "test": "nyc --require @babel/register npm run _mocha",
-    "watch": "npm run _mocha -- --require @babel/register --watch",
-    "codecov": "nyc report -r lcovonly && codecov"
+    "watch": "npm run _mocha -- --require @babel/register --watch"
   },
   "dependencies": {
     "@mysticatea/eslint-plugin": "^13.0.0",
@@ -51,10 +50,29 @@
     "@types/node": "^22.15.3",
     "eslint": "^9.25.1",
     "fs-extra": "^11.3.0",
+    "jest": "^29.7.0",
     "mocha": "^11.1.0",
     "nyc": "^17.1.0",
     "p-queue": "^8.1.0",
     "rimraf": "^6.0.1"
+  },
+  "nyc": {
+    "extension": [
+      ".js"
+    ],
+    "include": [
+      "lib/**/*.js"
+    ],
+    "exclude": [
+      "test/**/*.js"
+    ],
+    "all": true,
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "temp-dir": ".nyc_output",
+    "report-dir": "coverage"
   },
   "repository": "alecmestroni/npm-run-all-next",
   "keywords": [

@@ -5,7 +5,7 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-"use strict"
+'use strict'
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -62,7 +62,7 @@ class ArgumentSet {
     this.printName = false
     this.race = false
     this.rest = []
-    this.silent = process.env.npm_config_loglevel === "silent"
+    this.silent = process.env.npm_config_loglevel === 'silent'
     this.singleMode = Boolean(options && options.singleMode)
     this.retry = (initialValues && initialValues.retry) || 0
     this.summary = (initialValues && initialValues.summary) || false
@@ -83,60 +83,60 @@ function parseCLIArgsCore(set, args) {
   LOOP: for (let i = 0; i < args.length; ++i) {
     const arg = args[i]
     switch (arg) {
-      case "--":
+      case '--':
         set.rest = args.slice(i + 1)
         break LOOP
 
-      case "--color":
-      case "--no-color":
+      case '--color':
+      case '--no-color':
         break
 
-      case "-c":
-      case "--continue-on-error":
+      case '-c':
+      case '--continue-on-error':
         set.continueOnError = true
         break
 
-      case "-l":
-      case "--print-label":
+      case '-l':
+      case '--print-label':
         set.printLabel = true
         break
 
-      case "-n":
-      case "--print-name":
+      case '-n':
+      case '--print-name':
         set.printName = true
         break
 
-      case "-r":
-      case "--race":
+      case '-r':
+      case '--race':
         set.race = true
         break
 
-      case "--retry":
+      case '--retry':
         set.retry = parseInt(args[++i], 10)
         if (!Number.isFinite(set.retry) || set.retry <= 0) {
           throw new Error(`Invalid Option: --retry ${args[i]}`)
         }
         break
 
-      case "--summary":
+      case '--summary':
         set.summary = true
         break
 
-      case "--silent":
+      case '--silent':
         set.silent = true
         break
 
-      case "--max-parallel":
+      case '--max-parallel':
         set.maxParallel = parseInt(args[++i], 10)
         if (!Number.isFinite(set.maxParallel) || set.maxParallel <= 0) {
           throw new Error(`Invalid Option: --max-parallel ${args[i]}`)
         }
         break
 
-      case "-s":
-      case "--sequential":
-      case "--serial":
-        if (set.singleMode && arg === "-s") {
+      case '-s':
+      case '--sequential':
+      case '--serial':
+        if (set.singleMode && arg === '-s') {
           set.silent = true
           break
         }
@@ -146,19 +146,19 @@ function parseCLIArgsCore(set, args) {
         addGroup(set.groups)
         break
 
-      case "--aggregate-output":
+      case '--aggregate-output':
         set.aggregateOutput = true
         break
 
-      case "-p":
-      case "--parallel":
+      case '-p':
+      case '--parallel':
         if (set.singleMode) {
           throw new Error(`Invalid Option: ${arg}`)
         }
         addGroup(set.groups, { parallel: true })
         break
 
-      case "--npm-path":
+      case '--npm-path':
         set.npmPath = args[++i] || null
         break
 
@@ -173,10 +173,10 @@ function parseCLIArgsCore(set, args) {
             set,
             arg
               .slice(1)
-              .split("")
+              .split('')
               .map((c) => `-${c}`)
           )
-        } else if (arg[0] === "-") {
+        } else if (arg[0] === '-') {
           throw new Error(`Invalid Option: ${arg}`)
         } else {
           set.lastGroup.patterns.push(arg)
@@ -186,14 +186,14 @@ function parseCLIArgsCore(set, args) {
   }
 
   if (!set.parallel && set.aggregateOutput) {
-    throw new Error("Invalid Option: --aggregate-output (without parallel)")
+    throw new Error('Invalid Option: --aggregate-output (without parallel)')
   }
   if (!set.parallel && set.race) {
-    const flag = args.includes("--race") ? "--race" : "-r"
+    const flag = args.includes('--race') ? '--race' : '-r'
     throw new Error(`Invalid Option: ${flag} (without parallel)`)
   }
   if (!set.parallel && set.maxParallel !== 0) {
-    throw new Error("Invalid Option: --max-parallel (without parallel)")
+    throw new Error('Invalid Option: --max-parallel (without parallel)')
   }
 
   return set

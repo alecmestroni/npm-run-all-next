@@ -5,15 +5,15 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-"use strict"
+'use strict'
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const assert = require("assert")
-const nodeApi = require("../lib")
-const util = require("./lib/util")
+const assert = require('assert')
+const nodeApi = require('../lib')
+const util = require('./lib/util')
 const delay = util.delay
 const removeResult = util.removeResult
 const runAll = util.runAll
@@ -32,7 +32,7 @@ const runSeq = util.runSeq
  */
 function shouldFail(p) {
   return p.then(
-    () => assert.fail("should fail"),
+    () => assert.fail('should fail'),
     () => null // OK!
   )
 }
@@ -41,83 +41,158 @@ function shouldFail(p) {
 // Test
 //------------------------------------------------------------------------------
 
-describe("[fail] it should fail", () => {
-  before(() => process.chdir("test-workspace"))
-  after(() => process.chdir(".."))
+describe('[fail] it should fail', () => {
+  before(() => process.chdir('test-workspace'))
+  after(() => process.chdir('..'))
 
   beforeEach(removeResult)
   afterEach(() => delay(1000))
 
-  describe("if an invalid option exists.", () => {
-    it("npm-run-all command", () => shouldFail(runAll(["--invalid"])))
-    it("run-s command", () => shouldFail(runSeq(["--parallel"])))
-    it("run-p command", () => shouldFail(runPar(["--sequential"])))
+  describe('if an invalid option exists.', () => {
+    it('npm-run-all command', () => shouldFail(runAll(['--invalid'])))
+    it('run-s command', () => shouldFail(runSeq(['--parallel'])))
+    it('run-p command', () => shouldFail(runPar(['--sequential'])))
 
-    it("npm-run-all command with --race without --parallel", () => shouldFail(runAll(["--race"])))
-    it("npm-run-all command with --r without --parallel", () => shouldFail(runAll(["--r"])))
-    it("run-s command with --race", () => shouldFail(runSeq(["--race"])))
-    it("run-s command with --r", () => shouldFail(runSeq(["--r"])))
+    it('npm-run-all command with --race without --parallel', () => shouldFail(runAll(['--race'])))
+    it('npm-run-all command with --r without --parallel', () => shouldFail(runAll(['--r'])))
+    it('run-s command with --race', () => shouldFail(runSeq(['--race'])))
+    it('run-s command with --r', () => shouldFail(runSeq(['--r'])))
   })
 
-  describe("if invalid `options.taskList` is given.", () => {
-    it("Node API", () => shouldFail(nodeApi("test-task:append a", { taskList: { invalid: 0 } })))
+  describe('if invalid `options.taskList` is given.', () => {
+    it('Node API', () => shouldFail(nodeApi('test-task:append a', { taskList: { invalid: 0 } })))
   })
 
-  describe("if unknown tasks are given:", () => {
-    it("Node API", () => shouldFail(nodeApi("unknown-task")))
-    it("npm-run-all command", () => shouldFail(runAll(["unknown-task"])))
-    it("run-s command", () => shouldFail(runSeq(["unknown-task"])))
-    it("run-p command", () => shouldFail(runPar(["unknown-task"])))
+  describe('if unknown tasks are given:', () => {
+    it('Node API', () => shouldFail(nodeApi('unknown-task')))
+    it('npm-run-all command', () => shouldFail(runAll(['unknown-task'])))
+    it('run-s command', () => shouldFail(runSeq(['unknown-task'])))
+    it('run-p command', () => shouldFail(runPar(['unknown-task'])))
   })
 
-  describe("if unknown tasks are given (2):", () => {
-    it("Node API", () => shouldFail(nodeApi(["test-task:append:a", "unknown-task"])))
-    it("npm-run-all command", () => shouldFail(runAll(["test-task:append:a", "unknown-task"])))
-    it("run-s command", () => shouldFail(runSeq(["test-task:append:a", "unknown-task"])))
-    it("run-p command", () => shouldFail(runPar(["test-task:append:a", "unknown-task"])))
+  describe('if unknown tasks are given (2):', () => {
+    it('Node API', () => shouldFail(nodeApi(['test-task:append:a', 'unknown-task'])))
+    it('npm-run-all command', () => shouldFail(runAll(['test-task:append:a', 'unknown-task'])))
+    it('run-s command', () => shouldFail(runSeq(['test-task:append:a', 'unknown-task'])))
+    it('run-p command', () => shouldFail(runPar(['test-task:append:a', 'unknown-task'])))
   })
 
-  describe("if package.json is not found:", () => {
-    before(() => process.chdir("no-package-json"))
-    after(() => process.chdir(".."))
+  describe('if package.json is not found:', () => {
+    before(() => process.chdir('no-package-json'))
+    after(() => process.chdir('..'))
 
-    it("Node API", () => shouldFail(nodeApi(["test-task:append:a"])))
-    it("npm-run-all command", () => shouldFail(runAll(["test-task:append:a"])))
-    it("run-s command", () => shouldFail(runSeq(["test-task:append:a"])))
-    it("run-p command", () => shouldFail(runPar(["test-task:append:a"])))
+    it('Node API', () => shouldFail(nodeApi(['test-task:append:a'])))
+    it('npm-run-all command', () => shouldFail(runAll(['test-task:append:a'])))
+    it('run-s command', () => shouldFail(runSeq(['test-task:append:a'])))
+    it('run-p command', () => shouldFail(runPar(['test-task:append:a'])))
   })
 
-  describe("if package.json does not have scripts field:", () => {
-    before(() => process.chdir("no-scripts"))
-    after(() => process.chdir(".."))
+  describe('if package.json does not have scripts field:', () => {
+    before(() => process.chdir('no-scripts'))
+    after(() => process.chdir('..'))
 
-    it("Node API", () => shouldFail(nodeApi(["test-task:append:a"])))
-    it("npm-run-all command", () => shouldFail(runAll(["test-task:append:a"])))
-    it("run-s command", () => shouldFail(runSeq(["test-task:append:a"])))
-    it("run-p command", () => shouldFail(runPar(["test-task:append:a"])))
+    it('Node API', () => shouldFail(nodeApi(['test-task:append:a'])))
+    it('npm-run-all command', () => shouldFail(runAll(['test-task:append:a'])))
+    it('run-s command', () => shouldFail(runSeq(['test-task:append:a'])))
+    it('run-p command', () => shouldFail(runPar(['test-task:append:a'])))
   })
 
-  describe("if tasks exited with non-zero code:", () => {
-    it("Node API", () => shouldFail(nodeApi("test-task:error")))
-    it("npm-run-all command", () => shouldFail(runAll(["test-task:error"])))
-    it("run-s command", () => shouldFail(runSeq(["test-task:error"])))
-    it("run-p command", () => shouldFail(runPar(["test-task:error"])))
+  describe('if tasks exited with non-zero code:', () => {
+    it('Node API', () => shouldFail(nodeApi('test-task:error')))
+    it('npm-run-all command', () => shouldFail(runAll(['test-task:error'])))
+    it('run-s command', () => shouldFail(runSeq(['test-task:error'])))
+    it('run-p command', () => shouldFail(runPar(['test-task:error'])))
   })
 
-  describe("if tasks exited via a signal:", () => {
-    it("Node API", () => shouldFail(nodeApi("test-task:abort")))
-    it("npm-run-all command", () => shouldFail(runAll(["test-task:abort"])))
-    it("run-s command", () => shouldFail(runSeq(["test-task:abort"])))
-    it("run-p command", () => shouldFail(runPar(["test-task:abort"])))
-    it("with correct exit code", () =>
-      nodeApi("test-task:abort")
-        .then(() => assert.fail("should fail"))
+  describe('if tasks exited via a signal:', () => {
+    it('Node API', () => shouldFail(nodeApi('test-task:abort')))
+    it('npm-run-all command', () => shouldFail(runAll(['test-task:abort'])))
+    it('run-s command', () => shouldFail(runSeq(['test-task:abort'])))
+    it('run-p command', () => shouldFail(runPar(['test-task:abort'])))
+    it('with correct exit code', () =>
+      nodeApi('test-task:abort')
+        .then(() => assert.fail('should fail'))
         .catch((err) => {
           // In NodeJS versions > 6, the child process correctly sends back
           // the signal + code of null. In NodeJS versions <= 6, the child
           // process does not set the signal, and sets the code to 1.
           const code = Number(process.version.match(/^v(\d+)/)[1]) > 6 ? 134 : 1
-          assert.strictEqual(err.code, code, "should have correct exit code")
+          assert.strictEqual(err.code, code, 'should have correct exit code')
         }))
+  })
+
+  describe("if indirectionMark is used as placeholder '{!1}'", () => {
+    it('Node API', async () => {
+      try {
+        await nodeApi('test-task:dump {!1}', { arguments: ['1st'] })
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, 'Invalid Placeholder: {!1}')
+      }
+    })
+
+    it('npm-run-all command', async () => {
+      try {
+        await runAll(['test-task:dump {!1}', '--', '1st'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {!1}\n')
+      }
+    })
+
+    it('run-s command', async () => {
+      try {
+        await runSeq(['test-task:dump {!1}', '--', '1st'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {!1}\n')
+      }
+    })
+
+    it('run-p command', async () => {
+      try {
+        await runPar(['test-task:dump {!1}', '--', '1st'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {!1}\n')
+      }
+    })
+  })
+  describe("if an invalid placeholder is used '{1:foo}'", () => {
+    it('Node API', async () => {
+      try {
+        await nodeApi('test-task:dump {1:foo}', { arguments: [] })
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, 'Invalid Placeholder: {1:foo}')
+      }
+    })
+
+    it('npm-run-all command', async () => {
+      try {
+        await runAll(['test-task:dump {1:foo}'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {1:foo}\n')
+      }
+    })
+
+    it('run-s command', async () => {
+      try {
+        await runSeq(['test-task:dump {1:foo}'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {1:foo}\n')
+      }
+    })
+
+    it('run-p command', async () => {
+      try {
+        await runPar(['test-task:dump {1:foo}'])
+        assert.fail('Expected error not thrown')
+      } catch (err) {
+        assert.strictEqual(err.message, '\nERROR: Invalid Placeholder: {1:foo}\n')
+      }
+    })
   })
 })

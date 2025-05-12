@@ -60,9 +60,11 @@ describe('[aggregated-output] npm-run-all', () => {
         await nodeApi(['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000'], {
           stdout,
           silent: true,
-          aggregateOutput: true
+          aggregateOutput: true,
+          parallel: false
         })
-      } catch (_err) {
+      } catch (err) {
+        assert.ok(/Invalid options.aggregateOutput; It requires parallel/i.test(err.message))
         return
       }
       assert.fail('should fail')

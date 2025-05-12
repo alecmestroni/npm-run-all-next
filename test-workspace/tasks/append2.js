@@ -1,6 +1,6 @@
-"use strict"
+'use strict'
 
-const appendResult = require("./lib/util").appendResult
+const appendResult = require('./lib/util').appendResult
 
 appendResult(process.argv[2])
 setTimeout(() => {
@@ -9,9 +9,9 @@ setTimeout(() => {
 }, 3000)
 
 // SIGINT/SIGTERM Handling.
-process.on("SIGINT", () => {
+process.on('SIGINT', () => {
   process.exit(0)
 })
-process.on("SIGTERM", () => {
+process.on('SIGTERM', () => {
   process.exit(0)
 })

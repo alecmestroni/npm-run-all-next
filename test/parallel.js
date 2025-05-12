@@ -83,7 +83,7 @@ describe('[parallel]', () => {
       try {
         await runAll(['--parallel', 'test-task:append2 a', 'test-task:error'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)
         return
       }
@@ -94,7 +94,7 @@ describe('[parallel]', () => {
       try {
         await runPar(['test-task:append2 a', 'test-task:error'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)
         return
       }
@@ -153,7 +153,7 @@ describe('[parallel]', () => {
       try {
         await nodeApi(['test-task:append a', 'test-task:error', 'test-task:append b'], { parallel: true, continueOnError: true })
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
@@ -167,7 +167,7 @@ describe('[parallel]', () => {
       try {
         await runAll(['--continue-on-error', '--parallel', 'test-task:append a', 'test-task:error', 'test-task:append b'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
@@ -181,7 +181,7 @@ describe('[parallel]', () => {
       try {
         await runAll(['-cp', 'test-task:append a', 'test-task:error', 'test-task:append b'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
@@ -195,7 +195,7 @@ describe('[parallel]', () => {
       try {
         await runPar(['--continue-on-error', 'test-task:append a', 'test-task:error', 'test-task:append b'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
@@ -209,7 +209,7 @@ describe('[parallel]', () => {
       try {
         await runPar(['-c', 'test-task:append a', 'test-task:error', 'test-task:append b'])
       } catch (_err) {
-        await delay(3000)
+        await delay(1500)
         assert.ok(
           ['abab', 'baba', 'abba', 'baab'].includes(result()),
           `Expected result to be one of "abab", "baba", "abba", "baab" but got "${result()}"`
@@ -282,12 +282,65 @@ describe('[parallel]', () => {
       )
     })
 
+    it('npm-run-all command', async () => {
+      await runAll(['--parallel', 'test-task:append a', 'test-task:append b', 'test-task:append c', '--max-parallel', '2.2'])
+      assert.ok(
+        ['ababcc', 'babacc', 'abbacc', 'baabcc'].includes(result()),
+        `Expected result to be one of "ababcc", "babacc", "abbacc", "baabcc" but got "${result()}"`
+      )
+    })
+
     it('run-p command', async () => {
       await runPar(['test-task:append a', 'test-task:append b', 'test-task:append c', '--max-parallel', '2'])
       assert.ok(
         ['ababcc', 'babacc', 'abbacc', 'baabcc'].includes(result()),
         `Expected result to be one of "ababcc", "babacc", "abbacc", "baabcc" but got "${result()}"`
       )
+    })
+  })
+  describe('should get an error on an invalid --max-parallel:', () => {
+    it('Node API', async () => {
+      try {
+        await nodeApi(['test-task:append a', 'test-task:append b', 'test-task:append c'], { parallel: true, maxParallel: 'a' })
+      } catch (err) {
+        assert.ok(/Invalid options.maxParallel/i.test(err.message))
+      }
+    })
+    it("npm-run-all command --max-parallel '-1'", async () => {
+      try {
+        await runAll(['--parallel', '--max-parallel', '-1', 'test-task:append1 a'])
+      } catch (err) {
+        assert.ok(/ERROR: Invalid Option: --max-parallel/i.test(err.message))
+        return
+      }
+      assert.fail('Expected an error about invalid maxParallel count')
+    })
+    it('npm-run-all command --max-parallel -1', async () => {
+      try {
+        await runAll(['--parallel', '--max-parallel', -1, 'test-task:append1 a'])
+      } catch (err) {
+        assert.ok(/ERROR: Invalid Option: --max-parallel/i.test(err.message))
+        return
+      }
+      assert.fail('Expected an error about invalid maxParallel count')
+    })
+    it('npm-run-all command --max-parallel a', async () => {
+      try {
+        await runAll(['--parallel', '--max-parallel', 'a', 'test-task:append1 a'])
+      } catch (err) {
+        assert.ok(/ERROR: Invalid Option: --max-parallel/i.test(err.message))
+        return
+      }
+      assert.fail('Expected an error about invalid maxParallel count')
+    })
+    it('npm-run-all command --max-parallel 0', async () => {
+      try {
+        await runAll(['--parallel', '--max-parallel', 0, 'test-task:append1 a'])
+      } catch (err) {
+        assert.ok(/ERROR: Invalid Option: --max-parallel/i.test(err.message))
+        return
+      }
+      assert.fail('Expected an error about invalid maxParallel count')
     })
   })
 })
