@@ -147,6 +147,7 @@ describe('[retry] npm-run-all', () => {
           await runAll(['--retry', '-1', 'test-task:append1 a'])
         } catch (err) {
           assert.ok(/ERROR: Invalid Option: --retry/i.test(err.message))
+          return
         }
         assert.fail('Expected an error about invalid retry count')
       })
