@@ -26,8 +26,11 @@ jobs:
       - name: Lint & Pre-test
         run: npm run pretest
 
-      - name: Run tests with coverage
+      - name: Run tests
         run: npm test
+
+      - name: Print Coverage
+        run: npm run coverage:report
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -62,4 +65,4 @@ jobs:
       - name: Publish to GitHub Packages
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

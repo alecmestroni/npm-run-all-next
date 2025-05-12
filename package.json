@@ -25,6 +25,7 @@
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
     "test": "nyc --require @babel/register npm run _mocha",
+    "coverage:report": "nyc report --reporter=text --reporter=text-summary",
     "watch": "npm run _mocha -- --require @babel/register --watch"
   },
   "dependencies": {
