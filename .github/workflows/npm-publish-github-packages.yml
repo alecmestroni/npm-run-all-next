@@ -6,43 +6,43 @@ on:
       - master
 
 jobs:
-  # test-and-coverage:
-  #   name: Test & Coverage
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0    # importante per Codecov sulle PR
+  test-and-coverage:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # importante per Codecov sulle PR
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Lint & Pre-test
-  #       run: npm run pretest
+      - name: Lint & Pre-test
+        run: npm run pretest
 
-  #     - name: Run tests
-  #       run: npm test
+      - name: Run tests
+        run: npm test
 
-  #     - name: Print Coverage
-  #       run: npm run coverage:report
+      - name: Print Coverage
+        run: npm run coverage:report
 
-  #     - name: Upload coverage to Codecov
-  #       uses: codecov/codecov-action@v5
-  #       with:
-  #         token: ${{ secrets.CODECOV_TOKEN }}
-  #         files: coverage/lcov.info
-  #         flags: unittests
-  #         name: codecov-coverage
-  #         fail_ci_if_error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          flags: unittests
+          name: codecov-coverage
+          fail_ci_if_error: true
 
   publish-gpr:
-    # needs: test-and-coverage
+    needs: test-and-coverage
     runs-on: ubuntu-latest
     permissions:
       contents: read
