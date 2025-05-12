@@ -75,7 +75,10 @@
     "temp-dir": ".nyc_output",
     "report-dir": "coverage"
   },
-  "repository": "alecmestroni/npm-run-all-next",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alecmestroni/npm-run-all-next.git"
+  },
   "keywords": [
     "cli",
     "command",
