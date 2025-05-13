@@ -1,6 +1,6 @@
 {
   "name": "npm-run-all-next",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A CLI tool to run multiple npm-scripts in parallel or sequentially, with support for retrying failed tasks.",
   "bin": {
     "run-p": "bin/run-p/index.js",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@mysticatea/eslint-plugin": "^13.0.0",
-    "ansi-styles": "^6.2.1",
+    "ansi-styles": "5.2.0",
     "chalk": "^4.1.2",
     "cross-spawn": "^7.0.6",
     "memorystream": "^0.3.1",
