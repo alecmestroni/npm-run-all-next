@@ -51,7 +51,7 @@ const getTableRawElements = (results, string) => {
 // Test
 //------------------------------------------------------------------------------
 
-describe.only('[print-summary] npm-run-all', () => {
+describe('[print-summary] npm-run-all', () => {
   before(() => process.chdir('test-workspace'))
   after(() => process.chdir('..'))
   let stdout
