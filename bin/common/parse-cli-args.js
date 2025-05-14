@@ -118,7 +118,7 @@ function parseCLIArgsCore(set, args) {
         }
         break
 
-      case '--summary':
+      case '--print-summary':
         set.summary = true
         break
 
