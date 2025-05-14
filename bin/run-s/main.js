@@ -5,14 +5,14 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-"use strict"
+'use strict'
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const runAll = require("../../lib")
-const parseCLIArgs = require("../common/parse-cli-args")
+const runAll = require('../../lib')
+const parseCLIArgs = require('../common/parse-cli-args')
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -50,18 +50,19 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       silent: argv.silent,
       arguments: argv.rest,
       npmPath: argv.npmPath,
-      retry: argv.retry
+      retry: argv.retry,
+      summary: argv.summary
     })
 
     if (!argv.silent) {
       promise.catch((err) => {
-        console.error("\nERROR:", err.message)
+        console.error('\nERROR:', err.message)
       })
     }
 
     return promise
   } catch (err) {
-    console.error("\nERROR:", err.message)
+    console.error('\nERROR:', err.message)
 
     return Promise.reject(err)
   }
