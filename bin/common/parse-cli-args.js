@@ -110,6 +110,9 @@ function parseCLIArgsCore(set, args) {
       case '--race':
         set.race = true
         break
+      case '--kill-others-on-fail':
+        set.killOthersOnFail = true
+        break
 
       case '--retry':
         set.retry = parseInt(args[++i], 10)
