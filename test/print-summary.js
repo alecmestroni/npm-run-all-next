@@ -17,10 +17,7 @@ const printSummary = require('../lib/print-summary')
 const BufferStream = require('./lib/buffer-stream')
 const util = require('./lib/util')
 const nodeApi = require('../lib')
-const { get } = require('http')
 
-const delay = util.delay
-const result = util.result
 const removeResult = util.removeResult
 const runAll = util.runAll
 const runPar = util.runPar
@@ -61,26 +58,6 @@ describe('[print-summary] npm-run-all', () => {
   })
   describe('[printSummary]', () => {
     describe('core', () => {
-      it('prints only headers when results is empty', () => {
-        const lines = printSummary([])
-          .split('\n')
-          .filter((line) => line)
-
-        assert.strictEqual(lines.length, 6)
-        const [divider, summary, divider2, header, separator, divider3] = lines
-
-        const summaryInner = summary.slice(1, -1).trim()
-        assert.strictEqual(summaryInner, 'Summary')
-
-        assert.strictEqual(divider, divider2)
-        assert.strictEqual(divider2, divider3)
-
-        assert(header.includes('Task'))
-
-        const firstHeaderText = header.split('|')[1].trim()
-        assert(separator.includes('-'.repeat(firstHeaderText.length)))
-      })
-
       it('styles a successful (exit code 0) row in white', () => {
         const results = [{ name: 'successTask', code: 0, retries: 0, durationMs: 1500 }]
         const rowLine = printSummary(results)
@@ -142,6 +119,65 @@ describe('[print-summary] npm-run-all', () => {
             assert.strictEqual(cell.length, headerCols[i].length, `Colonna ${i} non allineata: expected ${headerCols[i].length}, got ${cell.length}`)
           })
         })
+      })
+
+      it('prints only headers when results is empty', () => {
+        const lines = printSummary([])
+          .split('\n')
+          .filter((l) => l)
+        assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
+        const [divider, summary, divider2, header, separator, divider3, est] = lines
+
+        const summaryInner = summary.slice(1, -1).trim()
+        assert.strictEqual(summaryInner, 'Summary')
+        assert.strictEqual(divider, divider2)
+        assert.strictEqual(divider2, divider3)
+        assert(header.includes('Task'))
+        assert(separator.includes('-'.repeat(header.split('|')[1].trim().length)))
+        assert.strictEqual(est, '| Estimated Total Time:              0.00 s|')
+      })
+
+      it('formats estimated total time in seconds when <60s', () => {
+        const results = [
+          { name: 'a', code: 0, retries: 0, durationMs: 1500 },
+          { name: 'b', code: 0, retries: 0, durationMs: 2500 }
+        ]
+        const lines = printSummary(results)
+          .split('\n')
+          .filter((l) => l)
+        const penult = lines[lines.length - 2]
+        assert.strictEqual(penult, '| Estimated Total Time:              4.00 s|')
+      })
+
+      it('converts estimated total time to minutes when ≥60s', () => {
+        const results = [{ name: 'long', code: 0, retries: 0, durationMs: 90000 }]
+        const lines = printSummary(results)
+          .split('\n')
+          .filter((l) => l)
+        const penult = lines[lines.length - 2]
+        assert.strictEqual(penult, '| Estimated Total Time:            1.50 min|')
+      })
+
+      it('prints actual total time when provided', () => {
+        const results = [{ name: 'x', code: 0, retries: 0, durationMs: 1000 }]
+        const lines = printSummary(results, 2000)
+          .split('\n')
+          .filter((l) => l)
+        const penult = lines[lines.length - 2]
+        const terzult = lines[lines.length - 3]
+        assert.strictEqual(penult, '| Actual Total Time:                 2.00 s|')
+        assert.strictEqual(terzult, '| Estimated Total Time:              1.00 s|')
+      })
+
+      it('converts actual total time to minutes when ≥60s', () => {
+        const results = [{ name: 'y', code: 0, retries: 0, durationMs: 1000 }]
+        const lines = printSummary(results, 120000)
+          .split('\n')
+          .filter((l) => l)
+        const penult = lines[lines.length - 2]
+        const terzult = lines[lines.length - 3]
+        assert.strictEqual(penult, '| Actual Total Time:               2.00 min|')
+        assert.strictEqual(terzult, '| Estimated Total Time:              1.00 s|')
       })
     })
   })
@@ -382,9 +418,8 @@ describe('[print-summary] npm-run-all', () => {
           try {
             await runFn()
           } catch (_) {
-            /* ignore */
+            assertFlakyFail()
           }
-          assertFlakyFail()
         })
       })
     })
