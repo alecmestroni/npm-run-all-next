@@ -44,6 +44,7 @@ describe('[retry] npm-run-all', () => {
       it('Node API', async () => {
         // even withretries:3, a successful task runs only once
         const results = await nodeApi(['test-task:append1 a'], { retry: retries })
+
         assert.strictEqual(results.length, 1)
         assert.strictEqual(results[0].name, 'test-task:append1 a')
         assert.strictEqual(results[0].code, 0)
@@ -449,7 +450,7 @@ describe('[retry] npm-run-all', () => {
     })
 
     describe('should combine retries with parallel execution (flaky + fail):', () => {
-      const retries = 4
+      const retries = 3
       const threshold = 2
       it('Node API', async () => {
         try {
@@ -524,7 +525,7 @@ describe('[retry] npm-run-all', () => {
         const results = await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1 a`, `test-task:append2 b`], {
           retry: retries,
           parallel: true,
-          maxParallel: maxParallel
+          maxParallel: maxParallel,
         })
         assert.strictEqual(results[0].code, 0)
         assert.strictEqual(results[1].code, 0)
@@ -547,7 +548,7 @@ describe('[retry] npm-run-all', () => {
           maxParallel,
           `test-task:flaky ${threshold}`,
           `test-task:append1 a`,
-          `test-task:append2 b`
+          `test-task:append2 b`,
         ])
         assert.ok(['fabfb', 'afbfb'].includes(result()), `Expected one of fabfb|afbfb but got "${result()}"`)
       })
@@ -560,7 +561,7 @@ describe('[retry] npm-run-all', () => {
           maxParallel,
           `test-task:flaky ${threshold}`,
           `test-task:append1 a`,
-          `test-task:append2 b`
+          `test-task:append2 b`,
         ])
         assert.ok(['fabfb', 'afbfb'].includes(result()), `Expected one of fabfb|afbfb but got "${result()}"`)
       })
@@ -573,7 +574,7 @@ describe('[retry] npm-run-all', () => {
       ...createExpectedOutput('second', retry),
       ...createExpectedOutput('third', retry),
       ...createExpectedOutput('first', retry),
-      ''
+      '',
     ].join('\n')
 
     let stdout
@@ -589,7 +590,7 @@ describe('[retry] npm-run-all', () => {
           retry: retry,
           parallel: true,
           silent: true,
-          aggregateOutput: true
+          aggregateOutput: true,
         })
         assert.strictEqual(stdout.value, EXPECTED)
       })
@@ -603,7 +604,7 @@ describe('[retry] npm-run-all', () => {
             '--silent',
             'test-task:delayed:flaky first 500',
             'test-task:delayed:flaky second 100',
-            'test-task:delayed:flaky third 300'
+            'test-task:delayed:flaky third 300',
           ],
           stdout
         )
@@ -618,7 +619,7 @@ describe('[retry] npm-run-all', () => {
             '--silent',
             'test-task:delayed:flaky first 500',
             'test-task:delayed:flaky second 100',
-            'test-task:delayed:flaky third 300'
+            'test-task:delayed:flaky third 300',
           ],
           stdout
         )

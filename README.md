@@ -1,92 +1,123 @@
-| index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
-| ----- | ------------- | ------- | ------- | ---------- |
-
-
-# npm-run-all
+# npm-run-all-next
 
 [![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)
 [![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/alecmestroni/npm-run-all-next/ci.yml?branch=main)
-![Release](https://img.shields.io/github/v/release/alecmestroni/npm-run-all-next?sort=semver)
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
-[![Known Vulnerabilities](https://snyk.io/test/npm/npm-run-all-next/badge.svg)](https://snyk.io/test/npm/npm-run-all-next)
 
-A CLI tool to run multiple npm-scripts in parallel or sequential.
+A CLI utility and programmatic API to execute multiple npm scripts **in sequence** or **in parallel**, now enhanced with **retry**, **kill-on-fail** and **race** features.
 
-## ⤴️ Motivation
+---
 
-- **Simplify.** The official `npm run-script` command cannot run multiple scripts, so if we want to run multiple scripts, it's redundant a bit. Let's shorten it by glob-like patterns.<br>
-  Before: `npm run clean && npm run build:css && npm run build:js && npm run build:html`<br>
-  After: `npm-run-all clean 'build:*'`
-- **Cross platform.** We sometimes use `&` to run multiple command in parallel, but `cmd.exe` (`npm run-script` uses it by default) does not support the `&`. Half of Node.js users are using it on Windows, so the use of `&` might block contributions. `npm-run-all --parallel` works well on Windows as well.
+## 📚 Table of Contents
 
-## 💿 Installation
+- [Features](#-features)
+- [Installation](#-installation)
+- [CLI Usage](#-cli-usage)
+- [Node API](#-node-api)
+- [Options](#-options)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
 
-```bash
-$ npm install npm-run-all-next --save-dev
-# or
-$ yarn add npm-run-all-next --dev
+---
+
+## 🌟 Features
+
+- **Sequential (`run-s`)** and **parallel (`run-p`)** execution of npm scripts
+- **Retries**: automatically retry failed tasks up to `--retry <count>` times
+- **Kill-on-fail**: abort all running tasks on first failure with `--kill-on-fail`
+- **Race mode**: stop remaining tasks on first success with `--race`
+- **Summary report**: display a table of results (`--summary`)
+- **Aggregate output**: buffer per-task logs and print at the end (`--aggregate-output`)
+- Full **Node.js API** for programmatic control
+
+---
+
+## 🔧 Installation
+
+```sh
+npm install --save-dev npm-run-all-next
 ```
 
-- It requires `Node@>=4`.
+---
 
-## 📖 Usage
+## 💻 CLI Usage
 
-### CLI Commands
+### Run in sequence
 
-This `npm-run-all` package provides 3 CLI commands.
+```sh
+npx npm-run-all-next run-s taskA taskB taskC
+```
 
-- [npm-run-all]
-- [run-s]
-- [run-p]
+### Run in parallel
 
-The main command is [npm-run-all].
-We can make complex plans with [npm-run-all] command.
+```sh
+npx npm-run-all-next run-p taskX taskY taskZ
+```
 
-Both [run-s] and [run-p] are shorthand commands.
-[run-s] is for sequential, [run-p] is for parallel.
-We can make simple plans with those commands.
+### Common flags
 
-#### Yarn Compatibility
+- `--retry <count>`: retry each task up to `<count>` times (default: `0`)
+- `--kill-on-fail`: abort all running tasks when one fails
+- `--race`: abort remaining tasks on first success
+- `--summary`: display summary table at completion
+- `--aggregate-output`: collect and print each task’s output after all finish
+- `--parallel, -p <num>`: max concurrent tasks (default: all)
+- `--continue-on-error`: continue other tasks even if one fails
 
-If a script is invoked with Yarn, `npm-run-all` will correctly use Yarn to execute the plan's child scripts.
+**Example**
 
-### Node API
+```sh
+npx npm-run-all-next run-p build test lint --retry 1 --kill-on-fail --summary
+```
 
-This `npm-run-all` package provides Node API.
+---
 
-- [Node API]
+## 📦 Node API
 
-## 📰 Changelog
+```js
+const { runTasks } = require('npm-run-all-next')
 
-- https://github.com/alecmestroni/npm-run-all-next/releases
+runTasks(['build', 'test'], {
+  parallel: 2,
+  retry: 1,
+  killOthersOnFail: true,
+  summary: true,
+})
+  .then((results) => {
+    console.log(results)
+  })
+  .catch((err) => {
+    console.error('Error running tasks:', err.results)
+  })
+```
 
-## 🍻 Contributing
+### API Options
 
-Welcome♡
+| Option             | Type    | Default        | Description                                   |
+| ------------------ | ------- | -------------- | --------------------------------------------- |
+| `parallel`         | Number  | `tasks.length` | Max number of concurrent tasks                |
+| `retry`            | Number  | `0`            | Number of retry attempts per task             |
+| `killOthersOnFail` | Boolean | `false`        | Abort all tasks on first failure              |
+| `race`             | Boolean | `false`        | Stop tasks on first successful completion     |
+| `summary`          | Boolean | `false`        | Print results table after execution           |
+| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end |
+| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure            |
 
-### Bug Reports or Feature Requests
+---
 
-Please use GitHub Issues.
+## 🚀 Roadmap
 
-### Correct Documents
+- **Orchestrator balancer**: distribute tasks based on historical timing (inspired by cypress-parallel)
+- Advanced reporting and custom hooks
+- Plugin system for community extensions
 
-Please use GitHub Pull Requests.
+---
 
-I'm not familiar with English, so I especially thank you for documents' corrections.
+## 🤝 Contributing
 
-### Implementing
+Contributions, issues and feature requests are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-Please use GitHub Pull Requests.
+---
 
-There are some npm-scripts to help developments.
-
-- **npm test** - Run tests and collect coverage.
-- **npm run clean** - Delete temporary files.
-- **npm run lint** - Run ESLint.
-- **npm run watch** - Run tests (not collect coverage) on every file change.
-
-[npm-run-all]: docs/npm-run-all.md
-[run-s]: docs/run-s.md
-[run-p]: docs/run-p.md
-[node api]: docs/node-api.md
+© 2025 Alec Mestroni. Maintained by the community.
