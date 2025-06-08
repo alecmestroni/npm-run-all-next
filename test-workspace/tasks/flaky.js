@@ -36,7 +36,7 @@ setTimeout(() => {
   } else {
     process.exit(0)
   }
-}, 1000)
+}, 1500)
 
 // SIGINT/SIGTERM Handling.
 process.on('SIGINT', () => {

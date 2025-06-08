@@ -50,7 +50,7 @@ describe('[aggregated-output] npm-run-all', () => {
         stdout,
         parallel: true,
         silent: true,
-        aggregateOutput: true
+        aggregateOutput: true,
       })
       assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT)
     })
@@ -61,7 +61,7 @@ describe('[aggregated-output] npm-run-all', () => {
           stdout,
           silent: true,
           aggregateOutput: true,
-          parallel: false
+          parallel: false,
         })
       } catch (err) {
         assert.ok(/Invalid options.aggregateOutput; It requires parallel/i.test(err.message))
@@ -78,7 +78,7 @@ describe('[aggregated-output] npm-run-all', () => {
           'test-task:delayed second 1000',
           'test-task:delayed third 3000',
           '--silent',
-          '--aggregate-output'
+          '--aggregate-output',
         ],
         stdout
       )

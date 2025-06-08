@@ -5,20 +5,20 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-"use strict"
+'use strict'
 
 module.exports = function bootstrap(name) {
   const argv = process.argv.slice(2)
 
   switch (argv[0]) {
     case undefined:
-    case "-h":
-    case "--help":
+    case '-h':
+    case '--help':
       return require(`../${name}/help`)(process.stdout)
 
-    case "-v":
-    case "--version":
-      return require("./version")(process.stdout)
+    case '-v':
+    case '--version':
+      return require('./version')(process.stdout)
 
     default:
       // Avoid MaxListenersExceededWarnings.
