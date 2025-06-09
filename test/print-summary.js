@@ -543,7 +543,7 @@ describe('[print-summary] npm-run-all', () => {
     })
 
     describe('should print summary table after execution with maxParallel limit (fail):', () => {
-      const retries = 4
+      const retries = 3
       const threshold = 1
       const maxParallel = 2
 
