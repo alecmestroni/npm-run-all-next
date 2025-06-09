@@ -542,7 +542,7 @@ describe('[print-summary] npm-run-all', () => {
       })
     })
 
-    describe.only('should print summary table after execution with maxParallel limit (fail):', () => {
+    describe('should print summary table after execution with maxParallel limit (fail):', () => {
       const retries = 3
       const threshold = 2
       const maxParallel = 2
