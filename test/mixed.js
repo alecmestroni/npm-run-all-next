@@ -27,7 +27,7 @@ describe('[mixed] npm-run-all', () => {
 
   beforeEach(removeResult)
 
-  it.only('should run a mix of sequential and parallel tasks (has the default group):', async () => {
+  it('should run a mix of sequential and parallel tasks (has the default group):', async () => {
     await runAll(['test-task:append a', '-p', 'test-task:append b', 'test-task:append c', '-s', 'test-task:append d', 'test-task:append e'])
     assert.ok(
       ['aabcbcddee', 'aabccbddee', 'aacbbcddee', 'aacbcbddee'].includes(result()),
