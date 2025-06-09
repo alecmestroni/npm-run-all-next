@@ -343,4 +343,44 @@ describe('[parallel]', () => {
       assert.fail('Expected an error about invalid maxParallel count')
     })
   })
+
+  describe('should kill other tasks when --kill-others-on-fail option was specified:', () => {
+    it('Node API', async () => {
+      try {
+        await nodeApi(['test-task:error', 'test-task:append2 a'], { parallel: true, killOthersOnFail: true })
+      } catch (err) {
+        // il primo fallisce, il secondo deve essere abortito (code 130)
+        assert.strictEqual(err.results[0].name, 'test-task:error')
+        assert.strictEqual(err.results[0].code, 1)
+        assert.strictEqual(err.results[1].name, 'test-task:append2 a')
+        assert.strictEqual(err.results[1].code, 130)
+        // output dovrebbe essere nullo o parziale
+        assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)
+        return
+      }
+      assert.fail('should fail')
+    })
+
+    it('npm-run-all command (--kill-others-on-fail)', async () => {
+      try {
+        await runAll(['--parallel', '--kill-others-on-fail', 'test-task:error', 'test-task:append2 a'])
+      } catch (_err) {
+        await delay(1500)
+        assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)
+        return
+      }
+      assert.fail('should fail')
+    })
+
+    it('run-p command (-k)', async () => {
+      try {
+        await runPar(['-k', 'test-task:error', 'test-task:append2 a'])
+      } catch (_err) {
+        await delay(1500)
+        assert.ok(result() == null || result() === 'a', `Expected result to be null or "a" but got "${result()}"`)
+        return
+      }
+      assert.fail('should fail')
+    })
+  })
 })

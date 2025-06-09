@@ -22,6 +22,7 @@ const runPar = util.runPar
 const runSeq = util.runSeq
 const path = require('path')
 const fs = require('fs')
+const ansiStyles = require('ansi-styles')
 
 //------------------------------------------------------------------------------
 // Test
@@ -123,6 +124,26 @@ describe('[print-name] npm-run-all', () => {
     it('should return task name when packageInfo is missing', () => {
       const header = createHeader('test-task:echo abc', undefined, false)
       assert.strictEqual(header, '\n> test-task:echo abc\n\n')
+    })
+  })
+
+  describe('createHeader – branch coverage', () => {
+    it('uses ANSI colors when isTTY = true', () => {
+      const header = createHeader('foo bar', packageInfo, true)
+      // you should see the gray open/close sequences
+      assert.ok(header.includes(ansiStyles.gray.open))
+      assert.ok(header.includes(ansiStyles.gray.close))
+    })
+
+    it('handles nameAndArgs without args (index === -1)', () => {
+      const scriptName = 'foo'
+      const header = createHeader(scriptName, packageInfo, false)
+      const expected = `
+> ${packageInfo.body.name}@${packageInfo.body.version} ${scriptName} ${packageInfo.path}
+> ${packageInfo.body.scripts[scriptName]} 
+
+`
+      assert.strictEqual(header, expected)
     })
   })
 })

@@ -544,7 +544,7 @@ describe('[print-summary] npm-run-all', () => {
 
     describe('should print summary table after execution with maxParallel limit (fail):', () => {
       const retries = 3
-      const threshold = 2
+      const threshold = 1
       const maxParallel = 2
 
       const runners = [
@@ -553,7 +553,13 @@ describe('[print-summary] npm-run-all', () => {
           async () => {
             try {
               await nodeApi(
-                ['test-task:fastError', `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:removeResult', `test-task:flaky ${threshold}`],
+                [
+                  'test-task:fastError',
+                  `test-task:flaky ${threshold}`,
+                  'test-task:fast a',
+                  'test-task:removeResult',
+                  `test-task:flaky ${threshold + 1}`,
+                ],
                 {
                   retry: retries,
                   parallel: true,
@@ -585,7 +591,7 @@ describe('[print-summary] npm-run-all', () => {
                   `test-task:flaky ${threshold}`,
                   'test-task:fast a',
                   'test-task:removeResult',
-                  `test-task:flaky ${threshold}`,
+                  `test-task:flaky ${threshold + 1}`,
                 ],
                 stdout
               )
@@ -610,7 +616,7 @@ describe('[print-summary] npm-run-all', () => {
                   `test-task:flaky ${threshold}`,
                   'test-task:fast a',
                   'test-task:removeResult',
-                  `test-task:flaky ${threshold}`,
+                  `test-task:flaky ${threshold + 1}`,
                 ],
                 stdout
               )
@@ -626,21 +632,25 @@ describe('[print-summary] npm-run-all', () => {
         const [, t2, e2, r2] = getTableRawElements(stdout.value, `test-task:flaky ${threshold}`)
         const [, t3, e3, r3] = getTableRawElements(stdout.value, 'test-task:fast a')
         const [, t4, e4, r4] = getTableRawElements(stdout.value, 'test-task:removeResult')
+        const [, t5, e5, r5] = getTableRawElements(stdout.value, `test-task:flaky ${threshold + 1}`)
 
         assert.strictEqual(t1, 'test-task:fastError')
         assert.strictEqual(t2, `test-task:flaky ${threshold}`)
         assert.strictEqual(t3, 'test-task:fast a')
         assert.strictEqual(t4, 'test-task:removeResult')
+        assert.strictEqual(t5, `test-task:flaky ${threshold + 1}`)
 
         assert.strictEqual(e1, '1')
         assert.strictEqual(e2, '0')
         assert.strictEqual(e3, '0')
         assert.strictEqual(e4, '0')
+        assert.strictEqual(e5, '0')
 
         assert.strictEqual(r1, `${retries}`)
         assert.strictEqual(r2, `${threshold}`)
         assert.strictEqual(r3, '0')
         assert.strictEqual(r4, '0')
+        assert.strictEqual(r5, `${threshold + 1}`)
       }
 
       runners.forEach(([name, runFn]) => {
