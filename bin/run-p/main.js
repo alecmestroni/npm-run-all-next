@@ -54,7 +54,8 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       npmPath: argv.npmPath,
       aggregateOutput: group.parallel && argv.aggregateOutput,
       retry: argv.retry,
-      summary: argv.summary
+      summary: argv.summary,
+      balancer: argv.balancer,
     })
 
     if (!argv.silent) {

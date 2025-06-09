@@ -60,6 +60,7 @@ class ArgumentSet {
     this.packageConfig = createPackageConfig()
     this.printLabel = false
     this.printName = false
+    this.balancer = false
     this.race = false
     this.rest = []
     this.silent = process.env.npm_config_loglevel === 'silent'
@@ -87,6 +88,11 @@ function parseCLIArgsCore(set, args) {
         set.rest = args.slice(i + 1)
         break LOOP
 
+      case '-b':
+      case '--balancer':
+        set.balancer = true
+        break
+
       case '--color':
       case '--no-color':
         break
@@ -110,6 +116,8 @@ function parseCLIArgsCore(set, args) {
       case '--race':
         set.race = true
         break
+
+      case '-k':
       case '--kill-others-on-fail':
         set.killOthersOnFail = true
         break
