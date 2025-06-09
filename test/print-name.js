@@ -32,8 +32,8 @@ describe('[print-name] npm-run-all', () => {
 
   before(() => {
     process.chdir('test-workspace')
-    return readPackageJson().then((info) => {
-      packageInfo = info.packageInfo
+    return readPackageJson().then((data) => {
+      packageInfo = data
     })
   })
   after(() => process.chdir('..'))
