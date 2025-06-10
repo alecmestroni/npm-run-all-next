@@ -172,6 +172,16 @@ run-p "start -- --port {1}" -- 8080
 
 ---
 
+**Brace expansion**
+
+If your shell doesn’t support brace expansion, `npm-run-all` will expand patterns like:
+
+```sh
+run-p build:{a,b,c} # ↔> run-p build:a build:b build:c
+```
+
+…so you can target multiple scripts in one pattern.
+
 ## 📦 Node API
 
 ```js
