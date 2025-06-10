@@ -449,7 +449,7 @@ describe('[retry] npm-run-all', () => {
     })
 
     describe('should combine retries with parallel execution (flaky + fail):', () => {
-      const retries = 3
+      const retries = 2
       const threshold = 2
       it('Node API', async () => {
         try {
