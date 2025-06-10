@@ -1,6 +1,7 @@
 | [index](../README.md) | [npm-run-all](npm-run-all.md) | [run-s](run-s.md) | run-p | [Node API](node-api.md) |
 | --------------------- | ----------------------------- | ----------------- | ----- | ----------------------- |
 
+
 # `run-p` command
 
 A CLI command to run given npm-scripts in parallel.
@@ -22,7 +23,7 @@ Options:
                                even if a task threw an error. 'run-p' itself
                                will exit with non-zero code if one or more tasks
                                threw error(s).
-    --max-parallel <number>  - Set the maximum number of parallelism. Default is
+    --jobs <number>  - Set the maximum number of parallelism. Default is
                                unlimited.
     --npm-path <string>  - - - Set the path to npm. Default is the value of
                                environment variable npm_execpath.

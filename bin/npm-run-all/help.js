@@ -5,7 +5,7 @@
  * @copyright 2025 Alec Mestroni
  * See LICENSE file in root directory for full license.
  */
-"use strict"
+'use strict'
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -35,7 +35,7 @@ Options:
                                other/subsequent tasks even if a task threw an
                                error. 'npm-run-all' itself will exit with
                                non-zero code if one or more tasks threw error(s)
-    --max-parallel <number>  - Set the maximum number of parallelism. Default is
+    --jobs <number>  - Set the maximum number of parallelism. Default is
                                unlimited.
     --npm-path <string>  - - - Set the path to npm. Default is the value of
                                environment variable npm_execpath.

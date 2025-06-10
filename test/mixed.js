@@ -43,6 +43,6 @@ describe('[mixed] npm-run-all', () => {
     )
   })
 
-  it('should not throw errors for --race and --max-parallel options if --parallel exists:', () =>
+  it('should not throw errors for --race and --jobs options if --parallel exists:', () =>
     runAll(['test-task:append a', '-p', 'test-task:append b', 'test-task:append c', '-s', 'test-task:append d', 'test-task:append e', '-r']))
 })

@@ -48,7 +48,7 @@ describe('[queue-balancer]', () => {
         )
       })
     })
-    describe('should be able to detect script sub-weight using --max-parallel:', () => {
+    describe('should be able to detect script sub-weight using --jobs:', () => {
       it('Node API', async () => {
         const results = await nodeApi(['test-task:nest-parallel:max'], { parallel: true, balancer: true })
         assert.strictEqual(results.length, 1)

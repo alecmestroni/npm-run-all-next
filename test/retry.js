@@ -516,15 +516,15 @@ describe('[retry] npm-run-all', () => {
       })
     })
 
-    describe('should combine retries with parallel execution and maxParallel:', () => {
+    describe('should combine retries with parallel execution and jobs:', () => {
       const retries = 4
       const threshold = 1
-      const maxParallel = 2
+      const jobs = 2
       it('Node API', async () => {
         const results = await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1 a`, `test-task:append2 b`], {
           retry: retries,
           parallel: true,
-          maxParallel: maxParallel,
+          jobs: jobs,
         })
         assert.strictEqual(results[0].code, 0)
         assert.strictEqual(results[1].code, 0)
@@ -539,29 +539,12 @@ describe('[retry] npm-run-all', () => {
       })
 
       it('npm-run-all command', async () => {
-        await runAll([
-          '--retry',
-          retries,
-          '--parallel',
-          '--max-parallel',
-          maxParallel,
-          `test-task:flaky ${threshold}`,
-          `test-task:append1 a`,
-          `test-task:append2 b`,
-        ])
+        await runAll(['--retry', retries, '--parallel', '--jobs', jobs, `test-task:flaky ${threshold}`, `test-task:append1 a`, `test-task:append2 b`])
         assert.ok(['fabfb', 'afbfb'].includes(result()), `Expected one of fabfb|afbfb but got "${result()}"`)
       })
 
       it('run-p command', async () => {
-        await runPar([
-          '--retry',
-          retries,
-          '--max-parallel',
-          maxParallel,
-          `test-task:flaky ${threshold}`,
-          `test-task:append1 a`,
-          `test-task:append2 b`,
-        ])
+        await runPar(['--retry', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, `test-task:append1 a`, `test-task:append2 b`])
         assert.ok(['fabfb', 'afbfb'].includes(result()), `Expected one of fabfb|afbfb but got "${result()}"`)
       })
     })

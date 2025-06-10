@@ -461,10 +461,10 @@ describe('[print-summary] npm-run-all', () => {
       })
     })
 
-    describe('should print summary table after execution with maxParallel limit (succeed):', () => {
+    describe('should print summary table after execution with jobs limit (succeed):', () => {
       const retries = 4
       const threshold = 1
-      const maxParallel = 2
+      const jobs = 2
 
       const runners = [
         [
@@ -473,7 +473,7 @@ describe('[print-summary] npm-run-all', () => {
             await nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'], {
               retry: retries,
               parallel: true,
-              maxParallel,
+              jobs,
               summary: true,
               stdout,
             })
@@ -488,8 +488,8 @@ describe('[print-summary] npm-run-all', () => {
                 '--retry',
                 retries,
                 '--parallel',
-                '--max-parallel',
-                maxParallel,
+                '--jobs',
+                jobs,
                 `test-task:flaky ${threshold}`,
                 'test-task:fast a',
                 'test-task:fast a',
@@ -502,23 +502,14 @@ describe('[print-summary] npm-run-all', () => {
           'run-p command',
           async () => {
             await runPar(
-              [
-                '--print-summary',
-                '--retry',
-                retries,
-                '--max-parallel',
-                maxParallel,
-                `test-task:flaky ${threshold}`,
-                'test-task:fast a',
-                'test-task:fast a',
-              ],
+              ['--print-summary', '--retry', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'],
               stdout
             )
           },
         ],
       ]
 
-      function assertMaxParallelSucceed() {
+      function assertjobsSucceed() {
         const [, task1, exit1, retries1] = getTableRawElements(stdout.value, `test-task:flaky ${threshold}`)
         const [, task2, exit2, retries2] = getTableRawElements(stdout.value, 'test-task:fast a')
         const [, task3, exit3, retries3] = getTableRawElements(stdout.value, 'test-task:fast a')
@@ -537,15 +528,15 @@ describe('[print-summary] npm-run-all', () => {
       runners.forEach(([name, runFn]) => {
         it(name, async () => {
           await runFn()
-          assertMaxParallelSucceed()
+          assertjobsSucceed()
         })
       })
     })
 
-    describe('should print summary table after execution with maxParallel limit (fail):', () => {
+    describe('should print summary table after execution with jobs limit (fail):', () => {
       const retries = 3
       const threshold = 1
-      const maxParallel = 2
+      const jobs = 2
 
       const runners = [
         [
@@ -563,7 +554,7 @@ describe('[print-summary] npm-run-all', () => {
                 {
                   retry: retries,
                   parallel: true,
-                  maxParallel: maxParallel,
+                  jobs: jobs,
                   summary: true,
                   continueOnError: true,
                   stdout,
@@ -584,8 +575,8 @@ describe('[print-summary] npm-run-all', () => {
                   '--retry',
                   retries,
                   '--parallel',
-                  '--max-parallel',
-                  maxParallel,
+                  '--jobs',
+                  jobs,
                   '--continue-on-error',
                   'test-task:fastError',
                   `test-task:flaky ${threshold}`,
@@ -609,8 +600,8 @@ describe('[print-summary] npm-run-all', () => {
                   '--print-summary',
                   '--retry',
                   retries,
-                  '--max-parallel',
-                  maxParallel,
+                  '--jobs',
+                  jobs,
                   '--continue-on-error',
                   'test-task:fastError',
                   `test-task:flaky ${threshold}`,
@@ -627,7 +618,7 @@ describe('[print-summary] npm-run-all', () => {
         ],
       ]
 
-      function assertMaxParallelFail() {
+      function assertjobsFail() {
         const [, t1, e1, r1] = getTableRawElements(stdout.value, 'test-task:fastError')
         const [, t2, e2, r2] = getTableRawElements(stdout.value, `test-task:flaky ${threshold}`)
         const [, t3, e3, r3] = getTableRawElements(stdout.value, 'test-task:fast a')
@@ -656,7 +647,7 @@ describe('[print-summary] npm-run-all', () => {
       runners.forEach(([name, runFn]) => {
         it(name, async () => {
           await runFn()
-          assertMaxParallelFail()
+          assertjobsFail()
         })
       })
     })

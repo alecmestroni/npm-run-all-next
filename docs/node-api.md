@@ -1,27 +1,28 @@
 | [index](../README.md) | [npm-run-all](npm-run-all.md) | [run-s](run-s.md) | [run-p](run-p.md) | Node API |
 | --------------------- | ----------------------------- | ----------------- | ----------------- | -------- |
 
+
 # Node API
 
 A Node module to run given npm-scripts in parallel or sequential.
 
 ```js
-const runAll = require("npm-run-all")
+const runAll = require('npm-run-all')
 
-runAll(["clean", "lint", "'build:*'"], { parallel: false })
+runAll(['clean', 'lint', "'build:*'"], { parallel: false })
   .then(() => {
-    console.log("done!")
+    console.log('done!')
   })
   .catch((err) => {
-    console.log("failed!")
+    console.log('failed!')
   })
 
 runAll(["'build:*' -- --watch"], { parallel: true })
   .then(() => {
-    console.log("done!")
+    console.log('done!')
   })
   .catch((err) => {
-    console.log("failed!")
+    console.log('failed!')
   })
 ```
 
@@ -49,7 +50,7 @@ Run npm-scripts.
   - **options.parallel** `boolean` --
     The flag to run scripts in parallel.
     Default is `false`.
-  - **options.maxParallel** `number` --
+  - **options.jobs** `number` --
     The maximum number of parallelism.
     This option is valid only with `options.parallel` option.
     Default is `Number.POSITIVE_INFINITY`.
@@ -102,7 +103,7 @@ The `name` property is the name of a npm-script.
 The `code` property is the exit code of the npm-script. If the npm-script was not executed, the `code` property is `undefined`.
 
 ```js
-runAll(["clean", "lint", "build"]).then((results) => {
+runAll(['clean', 'lint', 'build']).then((results) => {
   console.log(`${results[0].name}: ${results[0].code}`) // clean: 0
   console.log(`${results[1].name}: ${results[1].code}`) // lint: 0
   console.log(`${results[2].name}: ${results[2].code}`) // build: 0

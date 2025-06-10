@@ -62,8 +62,10 @@ npx npm-run-all-next run-p taskX taskY taskZ
 - `--race`: abort remaining tasks on first success
 - `--summary`: display summary table at completion
 - `--aggregate-output`: collect and print each task’s output after all finish
-- `--parallel, -p <num>`: max concurrent tasks (default: all)
+- `--parallel, -p`: run tasks in concurrently
+- `--jobs, -j <num>`: max concurrent tasks (default: all)
 - `--continue-on-error`: continue other tasks even if one fails
+- `--balancer`: distribute tasks based on historical runtime data and tasks weight
 
 **Example**
 
@@ -94,15 +96,17 @@ runTasks(['build', 'test'], {
 
 ### API Options
 
-| Option             | Type    | Default        | Description                                   |
-| ------------------ | ------- | -------------- | --------------------------------------------- |
-| `parallel`         | Number  | `tasks.length` | Max number of concurrent tasks                |
-| `retry`            | Number  | `0`            | Number of retry attempts per task             |
-| `killOthersOnFail` | Boolean | `false`        | Abort all tasks on first failure              |
-| `race`             | Boolean | `false`        | Stop tasks on first successful completion     |
-| `summary`          | Boolean | `false`        | Print results table after execution           |
-| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end |
-| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure            |
+| Option             | Type    | Default        | Description                                              |
+| ------------------ | ------- | -------------- | -------------------------------------------------------- |
+| `parallel`         | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `job`              | Number  | `tasks.length` | Max number of concurrent tasks                           |
+| `retry`            | Number  | `0`            | Number of retry attempts per task                        |
+| `killOthersOnFail` | Boolean | `false`        | Abort all tasks on first failure                         |
+| `race`             | Boolean | `false`        | Stop tasks on first successful completion                |
+| `summary`          | Boolean | `false`        | Print results table after execution                      |
+| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end            |
+| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure                       |
+| `balancer`         | Boolean | `false`        | Distribute tasks based on historical runtimes and weight |
 
 ---
 

@@ -1,6 +1,7 @@
 | [index](../README.md) | npm-run-all | [run-s](run-s.md) | [run-p](run-p.md) | [Node API](node-api.md) |
 | --------------------- | ----------- | ----------------- | ----------------- | ----------------------- |
 
+
 # `npm-run-all` command
 
 ```
@@ -19,7 +20,7 @@ Options:
                                other/subsequent tasks even if a task threw an
                                error. 'npm-run-all' itself will exit with
                                non-zero code if one or more tasks threw error(s)
-    --max-parallel <number>  - Set the maximum number of parallelism. Default is
+    --jobs <number>  - Set the maximum number of parallelism. Default is
                                unlimited.
     --npm-path <string>  - - - Set the path to npm. Default is the value of
                                environment variable npm_execpath.

@@ -55,7 +55,7 @@ class ArgumentSet {
     this.config = {}
     this.continueOnError = false
     this.groups = []
-    this.maxParallel = 0
+    this.jobs = 0
     this.npmPath = null
     this.packageConfig = createPackageConfig()
     this.printLabel = false
@@ -137,10 +137,11 @@ function parseCLIArgsCore(set, args) {
         set.silent = true
         break
 
-      case '--max-parallel':
-        set.maxParallel = parseInt(args[++i], 10)
-        if (!Number.isFinite(set.maxParallel) || set.maxParallel <= 0) {
-          throw new Error(`Invalid Option: --max-parallel ${args[i]}`)
+      case '-j':
+      case '--jobs':
+        set.jobs = parseInt(args[++i], 10)
+        if (!Number.isFinite(set.jobs) || set.jobs <= 0) {
+          throw new Error(`Invalid Option: --jobs ${args[i]}`)
         }
         break
 
@@ -203,8 +204,8 @@ function parseCLIArgsCore(set, args) {
     const flag = args.includes('--race') ? '--race' : '-r'
     throw new Error(`Invalid Option: ${flag} (without parallel)`)
   }
-  if (!set.parallel && set.maxParallel !== 0) {
-    throw new Error('Invalid Option: --max-parallel (without parallel)')
+  if (!set.parallel && set.jobs !== 0) {
+    throw new Error('Invalid Option: --jobs (without parallel)')
   }
 
   return set
