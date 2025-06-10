@@ -50,7 +50,7 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       silent: argv.silent,
       arguments: argv.rest,
       npmPath: argv.npmPath,
-      retry: argv.retry,
+      retries: argv.retries,
       summary: argv.summary,
       balancer: argv.balancer,
     })

@@ -53,7 +53,7 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       race: argv.race,
       npmPath: argv.npmPath,
       aggregateOutput: group.parallel && argv.aggregateOutput,
-      retry: argv.retry,
+      retries: argv.retries,
       summary: argv.summary,
       balancer: argv.balancer,
     })

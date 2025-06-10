@@ -5,7 +5,7 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/alecmestroni/npm-run-all-next/ci.yml?branch=main)
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
 
-A CLI utility and programmatic API to execute multiple npm scripts **in sequence** or **in parallel**, now enhanced with **retry**, **kill-on-fail** and **race** features.
+A CLI utility and programmatic API to execute multiple npm scripts **in sequence** or **in parallel**, now enhanced with **retries**, **kill-on-fail** and **race** features.
 
 ---
 
@@ -24,7 +24,7 @@ A CLI utility and programmatic API to execute multiple npm scripts **in sequence
 ## 🌟 Features
 
 - **Sequential (`run-s`)** and **parallel (`run-p`)** execution of npm scripts
-- **Retries**: automatically retry failed tasks up to `--retry <count>` times
+- **Retries**: automatically retries failed tasks up to `--retries <count>` times
 - **Kill-on-fail**: abort all running tasks on first failure with `--kill-on-fail`
 - **Race mode**: stop remaining tasks on first success with `--race`
 - **Summary report**: display a table of results (`--summary`)
@@ -57,20 +57,24 @@ npx npm-run-all-next run-p taskX taskY taskZ
 
 ### Common flags
 
-- `--retry <count>`: retry each task up to `<count>` times (default: `0`)
-- `--kill-on-fail`: abort all running tasks when one fails
-- `--race`: abort remaining tasks on first success
-- `--summary`: display summary table at completion
-- `--aggregate-output`: collect and print each task’s output after all finish
-- `--parallel, -p`: run tasks in concurrently
-- `--jobs, -j <num>`: max concurrent tasks (default: all)
-- `--continue-on-error`: continue other tasks even if one fails
-- `--balancer`: distribute tasks based on historical runtime data and tasks weight
+- `-a, --aggregate-output` : collect and print each task’s output after all finish (requires parallel)
+- `-b, --balancer` : distribute tasks based on historical runtime data and task weight
+- `-c, --continue-on-error` : continue other tasks even if one fails
+- `-k, --kill-others-on-fail` : abort all running tasks when one fails (requires parallel)
+- `-j, --jobs <num>` : max concurrent tasks (default: all, requires parallel)
+- `--npm-path <path>` : path to npm executable (default: `npm`)
+- `-p, --parallel` : run tasks concurrently (alias of `run-p`)
+- `-ps, --print-summary` : display summary table at completion
+- `-l, --print-label` : prefix each log line with the task label
+- `-n, --print-name` : prefix each log line with the task name
+- `-r, --race` : abort remaining tasks on first success (requires parallel)
+- `-rs, --retries <count>` : retries each failed task up to `<count>` times
+- `--silent` : suppress all logging (npm loglevel silent)
 
 **Example**
 
 ```sh
-npx npm-run-all-next run-p build test lint --retry 1 --kill-on-fail --summary
+npx npm-run-all-next run-p build test lint --retries 1 --kill-on-fail --summary
 ```
 
 ---
@@ -82,7 +86,7 @@ const { runTasks } = require('npm-run-all-next')
 
 runTasks(['build', 'test'], {
   parallel: 2,
-  retry: 1,
+  retries: 1,
   killOthersOnFail: true,
   summary: true,
 })
@@ -98,23 +102,18 @@ runTasks(['build', 'test'], {
 
 | Option             | Type    | Default        | Description                                              |
 | ------------------ | ------- | -------------- | -------------------------------------------------------- |
-| `parallel`         | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end            |
+| `balancer`         | Boolean | `false`        | Distribute tasks based on historical runtimes and weight |
+| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure                       |
 | `job`              | Number  | `tasks.length` | Max number of concurrent tasks                           |
-| `retry`            | Number  | `0`            | Number of retry attempts per task                        |
+| `parallel`         | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `summary`          | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `printName`        | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `printLabel`       | Boolean | `false`        | Run tasks in parallel jobs                               |
+| `retries`          | Number  | `0`            | Number of retries attempts per task                      |
 | `killOthersOnFail` | Boolean | `false`        | Abort all tasks on first failure                         |
 | `race`             | Boolean | `false`        | Stop tasks on first successful completion                |
 | `summary`          | Boolean | `false`        | Print results table after execution                      |
-| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end            |
-| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure                       |
-| `balancer`         | Boolean | `false`        | Distribute tasks based on historical runtimes and weight |
-
----
-
-## 🚀 Roadmap
-
-- **Orchestrator balancer**: distribute tasks based on historical timing (inspired by cypress-parallel)
-- Advanced reporting and custom hooks
-- Plugin system for community extensions
 
 ---
 

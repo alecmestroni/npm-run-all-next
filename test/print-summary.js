@@ -349,17 +349,17 @@ describe('[print-summary] npm-run-all', () => {
     })
   })
 
-  describe('[print-summary + retry + parallel]', () => {
+  describe('[print-summary + retries + parallel]', () => {
     describe('should print summary table after parallel execution (succeed):', () => {
       const retries = 1
 
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fast b'], { retry: retries, parallel: true, summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fast b'], { retries: retries, parallel: true, summary: true, stdout })],
         [
           'npm-run-all command',
-          async () => runAll(['--print-summary', '--retry', retries, '--parallel', 'test-task:fast a', 'test-task:fast b'], stdout),
+          async () => runAll(['--print-summary', '--retries', retries, '--parallel', 'test-task:fast a', 'test-task:fast b'], stdout),
         ],
-        ['run-p command', async () => runPar(['--print-summary', '--retry', retries, 'test-task:fast a', 'test-task:fast b'], stdout)],
+        ['run-p command', async () => runPar(['--print-summary', '--retries', retries, 'test-task:fast a', 'test-task:fast b'], stdout)],
       ]
 
       function assertParallelSuccess() {
@@ -390,16 +390,16 @@ describe('[print-summary] npm-run-all', () => {
         [
           'Node API',
           async () =>
-            nodeApi([`test-task:flaky ${threshold}`, 'test-task:append1Error b'], { retry: retries, parallel: true, summary: true, stdout }),
+            nodeApi([`test-task:flaky ${threshold}`, 'test-task:append1Error b'], { retries: retries, parallel: true, summary: true, stdout }),
         ],
         [
           'npm-run-all command',
           async () =>
-            runAll(['--print-summary', '--retry', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
+            runAll(['--print-summary', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
         ],
         [
           'run-p command',
-          async () => runPar(['--print-summary', '--retry', retries, `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
+          async () => runPar(['--print-summary', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
         ],
       ]
 
@@ -432,13 +432,13 @@ describe('[print-summary] npm-run-all', () => {
       const runners = [
         [
           'Node API',
-          async () => nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast b'], { retry: retries, parallel: true, summary: true, stdout }),
+          async () => nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast b'], { retries: retries, parallel: true, summary: true, stdout }),
         ],
         [
           'npm-run-all command',
-          async () => runAll(['--print-summary', '--retry', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout),
+          async () => runAll(['--print-summary', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout),
         ],
-        ['run-p command', async () => runPar(['--print-summary', '--retry', retries, `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout)],
+        ['run-p command', async () => runPar(['--print-summary', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout)],
       ]
 
       function assertFlakySucceed() {
@@ -471,7 +471,7 @@ describe('[print-summary] npm-run-all', () => {
           'Node API',
           async () => {
             await nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'], {
-              retry: retries,
+              retries: retries,
               parallel: true,
               jobs,
               summary: true,
@@ -485,7 +485,7 @@ describe('[print-summary] npm-run-all', () => {
             await runAll(
               [
                 '--print-summary',
-                '--retry',
+                '--retries',
                 retries,
                 '--parallel',
                 '--jobs',
@@ -502,7 +502,7 @@ describe('[print-summary] npm-run-all', () => {
           'run-p command',
           async () => {
             await runPar(
-              ['--print-summary', '--retry', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'],
+              ['--print-summary', '--retries', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'],
               stdout
             )
           },
@@ -552,7 +552,7 @@ describe('[print-summary] npm-run-all', () => {
                   `test-task:flaky ${threshold + 1}`,
                 ],
                 {
-                  retry: retries,
+                  retries: retries,
                   parallel: true,
                   jobs: jobs,
                   summary: true,
@@ -572,7 +572,7 @@ describe('[print-summary] npm-run-all', () => {
               await runAll(
                 [
                   '--print-summary',
-                  '--retry',
+                  '--retries',
                   retries,
                   '--parallel',
                   '--jobs',
@@ -598,7 +598,7 @@ describe('[print-summary] npm-run-all', () => {
               await runPar(
                 [
                   '--print-summary',
-                  '--retry',
+                  '--retries',
                   retries,
                   '--jobs',
                   jobs,

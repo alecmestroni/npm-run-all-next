@@ -65,7 +65,7 @@ class ArgumentSet {
     this.rest = []
     this.silent = process.env.npm_config_loglevel === 'silent'
     this.singleMode = Boolean(options && options.singleMode)
-    this.retry = (initialValues && initialValues.retry) || 0
+    this.retries = (initialValues && initialValues.retries) || 0
     this.summary = (initialValues && initialValues.summary) || false
 
     addGroup(this.groups, initialValues)
@@ -122,13 +122,15 @@ function parseCLIArgsCore(set, args) {
         set.killOthersOnFail = true
         break
 
-      case '--retry':
-        set.retry = parseInt(args[++i], 10)
-        if (!Number.isFinite(set.retry) || set.retry <= 0) {
-          throw new Error(`Invalid Option: --retry ${args[i]}`)
+      case '-rs':
+      case '--retries':
+        set.retries = parseInt(args[++i], 10)
+        if (!Number.isFinite(set.retries) || set.retries <= 0) {
+          throw new Error(`Invalid Option: --retries ${args[i]}`)
         }
         break
 
+      case '-ps':
       case '--print-summary':
         set.summary = true
         break
@@ -202,6 +204,10 @@ function parseCLIArgsCore(set, args) {
   }
   if (!set.parallel && set.race) {
     const flag = args.includes('--race') ? '--race' : '-r'
+    throw new Error(`Invalid Option: ${flag} (without parallel)`)
+  }
+  if (!set.parallel && set.killOthersOnFail) {
+    const flag = args.includes('--kill-others-on-fail') ? '--kill-others-on-fail' : '-k'
     throw new Error(`Invalid Option: ${flag} (without parallel)`)
   }
   if (!set.parallel && set.jobs !== 0) {
