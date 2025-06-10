@@ -1,4 +1,6 @@
-#!/bin/sh
+# filepath: .husky/pre-commit
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/h"
 
 set -e
 set -u
