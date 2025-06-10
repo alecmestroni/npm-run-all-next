@@ -48,7 +48,7 @@ const getTableRawElements = (results, string) => {
 // Test
 //------------------------------------------------------------------------------
 
-describe('[print-summary] npm-run-all', () => {
+describe.only('[print-summary] npm-run-all', () => {
   before(() => process.chdir('test-workspace'))
   after(() => process.chdir('..'))
   let stdout
@@ -126,9 +126,9 @@ describe('[print-summary] npm-run-all', () => {
           .split('\n')
           .filter((l) => l)
         assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
-        const [divider, summary, divider2, header, separator, divider3, est] = lines
+        const [divider, printSummaryTable, divider2, header, separator, divider3, est] = lines
 
-        const summaryInner = summary.slice(1, -1).trim()
+        const summaryInner = printSummaryTable.slice(1, -1).trim()
         assert.strictEqual(summaryInner, 'Summary')
         assert.strictEqual(divider, divider2)
         assert.strictEqual(divider2, divider3)
@@ -185,7 +185,7 @@ describe('[print-summary] npm-run-all', () => {
   describe('[print-summary]', () => {
     describe('should not print anything when no tasks are provided', () => {
       it('Node API ', async () => {
-        await nodeApi([], { summary: true })
+        await nodeApi([], { printSummaryTable: true })
         const lines = stdout.value.split('\n').filter((l) => l)
 
         assert.strictEqual(lines.length, 0)
@@ -212,7 +212,7 @@ describe('[print-summary] npm-run-all', () => {
 
     describe('styles a successful task row in white', () => {
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a'], { summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fast a'], { printSummaryTable: true, stdout })],
         ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary-table'], stdout)],
         ['run-p command', async () => runPar(['test-task:fast a', '--print-summary-table'], stdout)],
         ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary-table'], stdout)],
@@ -235,7 +235,7 @@ describe('[print-summary] npm-run-all', () => {
 
     describe('styles a failing task row in red', () => {
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fastError'], { summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fastError'], { printSummaryTable: true, stdout })],
         ['npm-run-all cmd', async () => runAll(['test-task:fastError', '--print-summary-table'], stdout)],
         ['run-p cmd', async () => runPar(['test-task:fastError', '--print-summary-table'], stdout)],
         ['run-s cmd', async () => runSeq(['test-task:fastError', '--print-summary-table'], stdout)],
@@ -261,7 +261,7 @@ describe('[print-summary] npm-run-all', () => {
 
     describe('styles a successful task row in white', () => {
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a'], { summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fast a'], { printSummaryTable: true, stdout })],
         ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary-table'], stdout)],
         ['run-p command', async () => runPar(['test-task:fast a', '--print-summary-table'], stdout)],
         ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary-table'], stdout)],
@@ -286,7 +286,7 @@ describe('[print-summary] npm-run-all', () => {
   describe('[print-summary + sequential]', () => {
     describe('should print lines based on script number', () => {
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { printSummaryTable: true, stdout })],
         ['npm-run-all', async () => runAll(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
         ['run-p', async () => runPar(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
         ['run-s', async () => runSeq(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
@@ -312,7 +312,7 @@ describe('[print-summary] npm-run-all', () => {
 
     describe('aligns columns correctly for mixed-length task names', () => {
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { summary: true, stdout })],
+        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { printSummaryTable: true, stdout })],
         ['npm-run-all command', async () => runAll(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
         ['run-p command', async () => runPar(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
         ['run-s command', async () => runSeq(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
@@ -354,7 +354,10 @@ describe('[print-summary] npm-run-all', () => {
       const retries = 1
 
       const runners = [
-        ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fast b'], { retries: retries, parallel: true, summary: true, stdout })],
+        [
+          'Node API',
+          async () => nodeApi(['test-task:fast a', 'test-task:fast b'], { retries: retries, parallel: true, printSummaryTable: true, stdout }),
+        ],
         [
           'npm-run-all command',
           async () => runAll(['--print-summary-table', '--retries', retries, '--parallel', 'test-task:fast a', 'test-task:fast b'], stdout),
@@ -390,7 +393,12 @@ describe('[print-summary] npm-run-all', () => {
         [
           'Node API',
           async () =>
-            nodeApi([`test-task:flaky ${threshold}`, 'test-task:append1Error b'], { retries: retries, parallel: true, summary: true, stdout }),
+            nodeApi([`test-task:flaky ${threshold}`, 'test-task:append1Error b'], {
+              retries: retries,
+              parallel: true,
+              printSummaryTable: true,
+              stdout,
+            }),
         ],
         [
           'npm-run-all command',
@@ -432,7 +440,8 @@ describe('[print-summary] npm-run-all', () => {
       const runners = [
         [
           'Node API',
-          async () => nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast b'], { retries: retries, parallel: true, summary: true, stdout }),
+          async () =>
+            nodeApi([`test-task:flaky ${threshold}`, 'test-task:fast b'], { retries: retries, parallel: true, printSummaryTable: true, stdout }),
         ],
         [
           'npm-run-all command',
@@ -478,7 +487,7 @@ describe('[print-summary] npm-run-all', () => {
               retries: retries,
               parallel: true,
               jobs,
-              summary: true,
+              printSummaryTable: true,
               stdout,
             })
           },
@@ -559,7 +568,7 @@ describe('[print-summary] npm-run-all', () => {
                   retries: retries,
                   parallel: true,
                   jobs: jobs,
-                  summary: true,
+                  printSummaryTable: true,
                   continueOnError: true,
                   stdout,
                 }
