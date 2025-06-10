@@ -66,7 +66,7 @@ class ArgumentSet {
     this.silent = process.env.npm_config_loglevel === 'silent'
     this.singleMode = Boolean(options && options.singleMode)
     this.retries = (initialValues && initialValues.retries) || 0
-    this.summary = (initialValues && initialValues.summary) || false
+    this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
 
     addGroup(this.groups, initialValues)
   }
@@ -87,6 +87,11 @@ function parseCLIArgsCore(set, args) {
       case '--':
         set.rest = args.slice(i + 1)
         break LOOP
+
+      case '-a':
+      case '--aggregate-output':
+        set.aggregateOutput = true
+        break
 
       case '-b':
       case '--balancer':
@@ -122,7 +127,6 @@ function parseCLIArgsCore(set, args) {
         set.killOthersOnFail = true
         break
 
-      case '-rs':
       case '--retries':
         set.retries = parseInt(args[++i], 10)
         if (!Number.isFinite(set.retries) || set.retries <= 0) {
@@ -130,9 +134,9 @@ function parseCLIArgsCore(set, args) {
         }
         break
 
-      case '-ps':
-      case '--print-summary':
-        set.summary = true
+      case '-t':
+      case '--print-summary-table':
+        set.printSummaryTable = true
         break
 
       case '--silent':
@@ -158,10 +162,6 @@ function parseCLIArgsCore(set, args) {
           throw new Error(`Invalid Option: ${arg}`)
         }
         addGroup(set.groups)
-        break
-
-      case '--aggregate-output':
-        set.aggregateOutput = true
         break
 
       case '-p':
@@ -199,20 +199,21 @@ function parseCLIArgsCore(set, args) {
     }
   }
 
-  if (!set.parallel && set.aggregateOutput) {
-    throw new Error('Invalid Option: --aggregate-output (without parallel)')
-  }
-  if (!set.parallel && set.race) {
-    const flag = args.includes('--race') ? '--race' : '-r'
-    throw new Error(`Invalid Option: ${flag} (without parallel)`)
-  }
-  if (!set.parallel && set.killOthersOnFail) {
-    const flag = args.includes('--kill-others-on-fail') ? '--kill-others-on-fail' : '-k'
-    throw new Error(`Invalid Option: ${flag} (without parallel)`)
-  }
-  if (!set.parallel && set.jobs !== 0) {
-    throw new Error('Invalid Option: --jobs (without parallel)')
-  }
+  const invalidWithoutParallel = [
+    { prop: 'aggregateOutput', long: '--aggregate-output', short: '-a' },
+    { prop: 'race', long: '--race', short: '-r' },
+    { prop: 'killOthersOnFail', long: '--kill-others-on-fail', short: '-k' },
+    { prop: 'balancer', long: '--balancer', short: '-b' },
+    { prop: 'jobs', long: '--jobs', short: '-j', zeroCheck: true },
+  ]
+
+  invalidWithoutParallel.forEach(({ prop, long, short, zeroCheck }) => {
+    const isSet = zeroCheck ? set[prop] !== 0 : Boolean(set[prop])
+    if (!set.parallel && isSet) {
+      const flag = args.includes(long) ? long : short
+      throw new Error(`Invalid Option: ${flag} (without parallel)`)
+    }
+  })
 
   return set
 }

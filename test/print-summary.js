@@ -191,19 +191,19 @@ describe('[print-summary] npm-run-all', () => {
         assert.strictEqual(lines.length, 0)
       })
       it('npm-run-all command ', async () => {
-        await runAll('--print-summary')
+        await runAll('--print-summary-table')
         const lines = stdout.value.split('\n').filter((l) => l)
 
         assert.strictEqual(lines.length, 0)
       })
       it('run-p command ', async () => {
-        await runPar('--print-summary')
+        await runPar('--print-summary-table')
         const lines = stdout.value.split('\n').filter((l) => l)
 
         assert.strictEqual(lines.length, 0)
       })
       it('run-s command ', async () => {
-        await runSeq('--print-summary')
+        await runSeq('--print-summary-table')
         const lines = stdout.value.split('\n').filter((l) => l)
 
         assert.strictEqual(lines.length, 0)
@@ -213,9 +213,9 @@ describe('[print-summary] npm-run-all', () => {
     describe('styles a successful task row in white', () => {
       const runners = [
         ['Node API', async () => nodeApi(['test-task:fast a'], { summary: true, stdout })],
-        ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary'], stdout)],
-        ['run-p command', async () => runPar(['test-task:fast a', '--print-summary'], stdout)],
-        ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary'], stdout)],
+        ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary-table'], stdout)],
+        ['run-p command', async () => runPar(['test-task:fast a', '--print-summary-table'], stdout)],
+        ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary-table'], stdout)],
       ]
 
       function assertSuccessRow() {
@@ -236,9 +236,9 @@ describe('[print-summary] npm-run-all', () => {
     describe('styles a failing task row in red', () => {
       const runners = [
         ['Node API', async () => nodeApi(['test-task:fastError'], { summary: true, stdout })],
-        ['npm-run-all cmd', async () => runAll(['test-task:fastError', '--print-summary'], stdout)],
-        ['run-p cmd', async () => runPar(['test-task:fastError', '--print-summary'], stdout)],
-        ['run-s cmd', async () => runSeq(['test-task:fastError', '--print-summary'], stdout)],
+        ['npm-run-all cmd', async () => runAll(['test-task:fastError', '--print-summary-table'], stdout)],
+        ['run-p cmd', async () => runPar(['test-task:fastError', '--print-summary-table'], stdout)],
+        ['run-s cmd', async () => runSeq(['test-task:fastError', '--print-summary-table'], stdout)],
       ]
 
       function assertFailRow() {
@@ -262,9 +262,9 @@ describe('[print-summary] npm-run-all', () => {
     describe('styles a successful task row in white', () => {
       const runners = [
         ['Node API', async () => nodeApi(['test-task:fast a'], { summary: true, stdout })],
-        ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary'], stdout)],
-        ['run-p command', async () => runPar(['test-task:fast a', '--print-summary'], stdout)],
-        ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary'], stdout)],
+        ['npm-run-all command', async () => runAll(['test-task:fast a', '--print-summary-table'], stdout)],
+        ['run-p command', async () => runPar(['test-task:fast a', '--print-summary-table'], stdout)],
+        ['run-s command', async () => runSeq(['test-task:fast a', '--print-summary-table'], stdout)],
       ]
 
       function assertSuccessRow() {
@@ -287,9 +287,9 @@ describe('[print-summary] npm-run-all', () => {
     describe('should print lines based on script number', () => {
       const runners = [
         ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { summary: true, stdout })],
-        ['npm-run-all', async () => runAll(['--print-summary', 'test-task:fast a', 'test-task:fastError'], stdout)],
-        ['run-p', async () => runPar(['--print-summary', 'test-task:fast a', 'test-task:fastError'], stdout)],
-        ['run-s', async () => runSeq(['--print-summary', 'test-task:fast a', 'test-task:fastError'], stdout)],
+        ['npm-run-all', async () => runAll(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
+        ['run-p', async () => runPar(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
+        ['run-s', async () => runSeq(['--print-summary-table', 'test-task:fast a', 'test-task:fastError'], stdout)],
       ]
 
       function assertSummaryRows() {
@@ -313,9 +313,9 @@ describe('[print-summary] npm-run-all', () => {
     describe('aligns columns correctly for mixed-length task names', () => {
       const runners = [
         ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fastError'], { summary: true, stdout })],
-        ['npm-run-all command', async () => runAll(['test-task:fast a', 'test-task:fastError', '--print-summary'], stdout)],
-        ['run-p command', async () => runPar(['test-task:fast a', 'test-task:fastError', '--print-summary'], stdout)],
-        ['run-s command', async () => runSeq(['test-task:fast a', 'test-task:fastError', '--print-summary'], stdout)],
+        ['npm-run-all command', async () => runAll(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
+        ['run-p command', async () => runPar(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
+        ['run-s command', async () => runSeq(['test-task:fast a', 'test-task:fastError', '--print-summary-table'], stdout)],
       ]
 
       const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, '')
@@ -357,9 +357,9 @@ describe('[print-summary] npm-run-all', () => {
         ['Node API', async () => nodeApi(['test-task:fast a', 'test-task:fast b'], { retries: retries, parallel: true, summary: true, stdout })],
         [
           'npm-run-all command',
-          async () => runAll(['--print-summary', '--retries', retries, '--parallel', 'test-task:fast a', 'test-task:fast b'], stdout),
+          async () => runAll(['--print-summary-table', '--retries', retries, '--parallel', 'test-task:fast a', 'test-task:fast b'], stdout),
         ],
-        ['run-p command', async () => runPar(['--print-summary', '--retries', retries, 'test-task:fast a', 'test-task:fast b'], stdout)],
+        ['run-p command', async () => runPar(['--print-summary-table', '--retries', retries, 'test-task:fast a', 'test-task:fast b'], stdout)],
       ]
 
       function assertParallelSuccess() {
@@ -395,11 +395,11 @@ describe('[print-summary] npm-run-all', () => {
         [
           'npm-run-all command',
           async () =>
-            runAll(['--print-summary', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
+            runAll(['--print-summary-table', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
         ],
         [
           'run-p command',
-          async () => runPar(['--print-summary', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
+          async () => runPar(['--print-summary-table', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:append1Error b'], stdout),
         ],
       ]
 
@@ -436,9 +436,13 @@ describe('[print-summary] npm-run-all', () => {
         ],
         [
           'npm-run-all command',
-          async () => runAll(['--print-summary', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout),
+          async () =>
+            runAll(['--print-summary-table', '--retries', retries, '--parallel', `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout),
         ],
-        ['run-p command', async () => runPar(['--print-summary', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout)],
+        [
+          'run-p command',
+          async () => runPar(['--print-summary-table', '--retries', retries, `test-task:flaky ${threshold}`, 'test-task:fast b'], stdout),
+        ],
       ]
 
       function assertFlakySucceed() {
@@ -484,7 +488,7 @@ describe('[print-summary] npm-run-all', () => {
           async () => {
             await runAll(
               [
-                '--print-summary',
+                '--print-summary-table',
                 '--retries',
                 retries,
                 '--parallel',
@@ -502,7 +506,7 @@ describe('[print-summary] npm-run-all', () => {
           'run-p command',
           async () => {
             await runPar(
-              ['--print-summary', '--retries', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'],
+              ['--print-summary-table', '--retries', retries, '--jobs', jobs, `test-task:flaky ${threshold}`, 'test-task:fast a', 'test-task:fast a'],
               stdout
             )
           },
@@ -571,7 +575,7 @@ describe('[print-summary] npm-run-all', () => {
             try {
               await runAll(
                 [
-                  '--print-summary',
+                  '--print-summary-table',
                   '--retries',
                   retries,
                   '--parallel',
@@ -597,7 +601,7 @@ describe('[print-summary] npm-run-all', () => {
             try {
               await runPar(
                 [
-                  '--print-summary',
+                  '--print-summary-table',
                   '--retries',
                   retries,
                   '--jobs',

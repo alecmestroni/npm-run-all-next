@@ -54,6 +54,13 @@ describe('[fail] it should fail', () => {
     it('run-p command', () => shouldFail(runPar(['--sequential'])))
 
     it('npm-run-all command with --race without --parallel', () => shouldFail(runAll(['--race'])))
+    it('npm-run-all command with -r without --parallel', () => shouldFail(runAll(['-r'])))
+    it('npm-run-all command with --kill-others-on-fail without --parallel', () => shouldFail(runAll(['--kill-others-on-fail'])))
+    it('npm-run-all command with -k without --parallel', () => shouldFail(runAll(['--kill-others-on-fail'])))
+    it('npm-run-all command with --balancer without --parallel', () => shouldFail(runAll(['--balancer'])))
+    it('npm-run-all command with -b without --parallel', () => shouldFail(runAll(['-b'])))
+    it('npm-run-all command with --jobs without --parallel', () => shouldFail(runAll(['--jobs', '2'])))
+    it('npm-run-all command with -j without --parallel', () => shouldFail(runAll(['-j', '2'])))
     it('npm-run-all command with --r without --parallel', () => shouldFail(runAll(['--r'])))
     it('run-s command with --race', () => shouldFail(runSeq(['--race'])))
     it('run-s command with --r', () => shouldFail(runSeq(['--r'])))
