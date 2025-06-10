@@ -36,11 +36,23 @@ describe('[queue-balancer]', () => {
 
     beforeEach(() => delay(1000).then(removeResult))
 
-    describe('should run tasks on parallel when was given --parallel option:', () => {
+    describe('should be able to detect script sub-weight using tasks.length:', () => {
       it('Node API', async () => {
-        const results = await nodeApi(['test-task:parallel'], { parallel: true, balancer: true })
+        const results = await nodeApi(['test-task:nest-parallel'], { parallel: true, balancer: true })
         assert.strictEqual(results.length, 1)
-        assert.strictEqual(results[0].name, 'test-task:parallel')
+        assert.strictEqual(results[0].name, 'test-task:nest-parallel')
+        assert.strictEqual(results[0].code, 0)
+        assert.ok(
+          ['acadacad', 'acadadac', 'adacacad', 'adacadac'].includes(result()),
+          `Expected result to be one of 'acadacad', 'adacacad', 'adacadac', 'acadadac' but got "${result()}"`
+        )
+      })
+    })
+    describe('should be able to detect script sub-weight using --max-parallel:', () => {
+      it('Node API', async () => {
+        const results = await nodeApi(['test-task:nest-parallel:max'], { parallel: true, balancer: true })
+        assert.strictEqual(results.length, 1)
+        assert.strictEqual(results[0].name, 'test-task:nest-parallel:max')
         assert.strictEqual(results[0].code, 0)
         assert.ok(
           ['acadacad', 'acadadac', 'adacacad', 'adacadac'].includes(result()),

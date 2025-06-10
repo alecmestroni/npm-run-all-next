@@ -154,6 +154,22 @@ describe('[common]', () => {
     })
   })
 
+  describe('should handle signals correctly', () => {
+    const convertSignal = require('../lib/signals')
+
+    it('should return the correct code for known signals', () => {
+      assert.strictEqual(convertSignal('SIGINT'), 2)
+      assert.strictEqual(convertSignal('SIGKILL'), 9)
+      assert.strictEqual(convertSignal('SIGUSR1'), 30)
+    })
+
+    it('should return 0 for unknown signals or missing argument', () => {
+      assert.strictEqual(convertSignal('SIGTERM'), 0) // non definito nella mappa
+      assert.strictEqual(convertSignal('NON_EXISTENT'), 0)
+      assert.strictEqual(convertSignal(), 0)
+    })
+  })
+
   describe('should run a task by npm (check an environment variable):', () => {
     it('Node API', async () => {
       await nodeApi('test-task:package-config')
