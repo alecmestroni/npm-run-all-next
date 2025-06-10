@@ -26,7 +26,8 @@
     "postversion": "git push && git push --tags",
     "test": "nyc --reporter=lcov --reporter=text --reporter=text-summary --require @babel/register npm run _mocha",
     "coverage:report": "nyc report --reporter=text --reporter=text-summary",
-    "watch": "npm run _mocha -- --require @babel/register --watch"
+    "watch": "npm run _mocha -- --require @babel/register --watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "@mysticatea/eslint-plugin": "^13.0.0",
@@ -35,7 +36,6 @@
     "cross-spawn": "^7.0.6",
     "memorystream": "^0.3.1",
     "minimatch": "^10.0.1",
-    "npm-check-updates": "^18.0.1",
     "pidtree": "^0.6.0",
     "read-pkg": "^5.2.0",
     "shell-quote": "^1.8.2",
@@ -43,6 +43,8 @@
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
+    "npm-check-updates": "^18.0.1",
+    "husky": "^9.1.7",
     "@babel/cli": "^7.27.0",
     "@babel/core": "^7.26.10",
     "@babel/node": "^7.26.0",

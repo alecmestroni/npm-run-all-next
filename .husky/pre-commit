@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -e
+set -u
+set -o pipefail
+
+# Debug to inspect context
+echo "[husky.precommit] Running ESLint --fix and checking for .only()]"
+echo "Staged files ready for commit:"
+git diff --cached --name-only --diff-filter=ACMR
+
+# Get modified, added or copied files
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# Filter out ignored files and keep only .js
+files_to_lint=""
+for file in $files; do
+    if [ -f "$file" ] && ! git check-ignore -q "$file"; then
+        case "$file" in
+        *.js)
+            files_to_lint="$files_to_lint $file"
+            ;;
+        esac
+    fi
+done
+
+# Debug: show files to lint
+echo "Files to process with ESLint:"
+for file in $files_to_lint; do
+    echo "$file"
+done
+
+# Check for .only()
+for file in $files_to_lint; do
+    if grep -q ".only(" "$file"; then
+        echo "Error: $file contains .only() on line $(grep -n ".only()" "$file" | cut -d: -f1)"
+        exit 1
+    fi
+done
+
+# Run ESLint with --fix on staged files
+if [ -n "$files_to_lint" ]; then
+    echo "Running ESLint --fix on staged files..."
+    npx eslint --fix $files_to_lint
+    if [ $? -ne 0 ]; then
+        echo "ESLint found errors that cannot be fixed automatically!"
+        exit 1
+    fi
+    git add $files_to_lint
+else
+    echo "No .js files to process."
+fi
+
+echo "Pre-commit script complete"
+exit 0
