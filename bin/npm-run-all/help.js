@@ -19,7 +19,17 @@
  * @private
  */
 module.exports = function printHelp(output) {
-  output.write(`
+  // Read the documentation file
+  const doc = fs.readFileSync(path.join(__dirname, '../../docs/npm-run-all.md'), 'utf8')
+
+  // Extract the Options section up to Examples:
+  const optionsBlock = doc.match(/Options:[\s\S]*?(?=\nExamples:|\n```)/m)
+  if (!optionsBlock) {
+    throw new Error('Impossibile trovare la sezione Options in npm-run-all.md')
+  }
+
+  // Build the complete help text
+  const helpText = `
 Usage:
     $ npm-run-all [--help | -h | --version | -v]
     $ npm-run-all [tasks] [OPTIONS]
@@ -28,36 +38,7 @@ Usage:
 
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
-Options:
-    --aggregate-output   - - - Avoid interleaving output by delaying printing of
-                               each command's output until it has finished.
-    -c, --continue-on-error  - Set the flag to continue executing
-                               other/subsequent tasks even if a task threw an
-                               error. 'npm-run-all' itself will exit with
-                               non-zero code if one or more tasks threw error(s)
-    --jobs <number>  - Set the maximum number of parallelism. Default is
-                               unlimited.
-    --npm-path <string>  - - - Set the path to npm. Default is the value of
-                               environment variable npm_execpath.
-                               If the variable is not defined, then it's "npm".
-                               In this case, the "npm" command must be found in
-                               environment variable PATH.
-    -l, --print-label  - - - - Set the flag to print the task name as a prefix
-                               on each line of output. Tools in tasks may stop
-                               coloring their output if this option was given.
-    -n, --print-name   - - - - Set the flag to print the task name before
-                               running each task.
-    -p, --parallel <tasks>   - Run a group of tasks in parallel.
-                               e.g. 'npm-run-all -p foo bar' is similar to
-                                    'npm run foo & npm run bar'.
-    -r, --race   - - - - - - - Set the flag to kill all tasks when a task
-                               finished with zero. This option is valid only
-                               with 'parallel' option.
-    -s, --sequential <tasks> - Run a group of tasks sequentially.
-        --serial <tasks>       e.g. 'npm-run-all -s foo bar' is similar to
-                                    'npm run foo && npm run bar'.
-                               '--serial' is a synonym of '--sequential'.
-    --silent   - - - - - - - - Set 'silent' to the log level of npm.
+${optionsBlock[0]}
 
 Examples:
     $ npm-run-all --serial clean lint 'build:*'*
@@ -67,7 +48,8 @@ Examples:
 
 See Also:
     https://github.com/alecmestroni/npm-run-all-next#readme
-`)
+`
 
+  output.write(helpText)
   return Promise.resolve(null)
 }

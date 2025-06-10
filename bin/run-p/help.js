@@ -19,7 +19,17 @@
  * @private
  */
 module.exports = function printHelp(output) {
-  output.write(`
+  // Read the documentation file
+  const doc = fs.readFileSync(path.join(__dirname, '../../docs/run-p.md'), 'utf8')
+
+  // Extract the Options section up to Examples:
+  const optionsBlock = doc.match(/Options:[\s\S]*?(?=\nExamples:|\n```)/m)
+  if (!optionsBlock) {
+    throw new Error('Unable to find the Options section in run-p.md')
+  }
+
+  // Build the complete help text
+  const helpText = `
 Usage:
     $ run-p [--help | -h | --version | -v]
     $ run-p [OPTIONS] <tasks>
@@ -28,31 +38,7 @@ Usage:
 
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
-Options:
-    --aggregate-output   - - - Avoid interleaving output by delaying printing of
-                               each command's output until it has finished.
-    -c, --continue-on-error  - Set the flag to continue executing other tasks
-                               even if a task threw an error. 'run-p' itself
-                               will exit with non-zero code if one or more tasks
-                               threw error(s).
-    --jobs <number>  - Set the maximum number of parallelism. Default is
-                               unlimited.
-    --npm-path <string>  - - - Set the path to npm. Default is the value of
-                               environment variable npm_execpath.
-                               If the variable is not defined, then it's "npm."
-                               In this case, the "npm" command must be found in
-                               environment variable PATH.
-    -l, --print-label  - - - - Set the flag to print the task name as a prefix
-                               on each line of output. Tools in tasks may stop
-                               coloring their output if this option was given.
-    -n, --print-name   - - - - Set the flag to print the task name before
-                               running each task.
-    -r, --race   - - - - - - - Set the flag to kill all tasks when a task
-                               finished with zero.
-    -s, --silent   - - - - - - Set 'silent' to the log level of npm.
-
-    Shorthand aliases can be combined.
-    For example, '-clns' equals to '-c -l -n -s'.
+${optionsBlock[0]}
 
 Examples:
     $ run-p 'watch:*'*
@@ -62,7 +48,8 @@ Examples:
 
 See Also:
     https://github.com/alecmestroni/npm-run-all-next#readme
-`)
+`
 
+  output.write(helpText)
   return Promise.resolve(null)
 }
