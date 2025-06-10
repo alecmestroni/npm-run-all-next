@@ -48,7 +48,7 @@ const getTableRawElements = (results, string) => {
 // Test
 //------------------------------------------------------------------------------
 
-describe.only('[print-summary] npm-run-all', () => {
+describe('[print-summary] npm-run-all', () => {
   before(() => process.chdir('test-workspace'))
   after(() => process.chdir('..'))
   let stdout
@@ -56,7 +56,7 @@ describe.only('[print-summary] npm-run-all', () => {
     stdout = new BufferStream()
     removeResult()
   })
-  describe('[printSummary]', () => {
+  describe.only('[printSummary]', () => {
     describe('core', () => {
       it('styles a successful (exit code 0) row in white', () => {
         const results = [{ name: 'successTask', code: 0, retries: 0, durationMs: 1500 }]
