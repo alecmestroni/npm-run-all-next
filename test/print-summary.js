@@ -56,7 +56,7 @@ describe('[print-summary] npm-run-all', () => {
     stdout = new BufferStream()
     removeResult()
   })
-  describe.only('[printSummary]', () => {
+  describe('[printSummary]', () => {
     describe('core', () => {
       it('styles a successful (exit code 0) row in white', () => {
         const results = [{ name: 'successTask', code: 0, retries: 0, durationMs: 1500 }]
