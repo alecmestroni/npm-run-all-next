@@ -1,81 +1,174 @@
-# npm-run-all-next
+# 🚀 npm-run-all-next 🚀
 
-[![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)
-[![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)
-![Build Status](https://img.shields.io/github/actions/workflow/status/alecmestroni/npm-run-all-next/ci.yml?branch=main)
+[![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)  
+[![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)  
+![Build Status](https://img.shields.io/github/actions/workflow/status/alecmestroni/npm-run-all-next/ci.yml?branch=main)  
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
 
-A CLI utility and programmatic API to execute multiple npm scripts **in sequence** or **in parallel**, now enhanced with **retries**, **kill-on-fail** and **race** features.
+A CLI and programmatic API to run multiple npm scripts **sequentially** or **in parallel**, with built-in support for **retries**, **kill-on-fail**, **race**, summary reporting, and more.
 
 ---
 
-## 📚 Table of Contents
+## 📚 Main docs
 
-- [Features](#-features)
-- [Installation](#-installation)
-- [CLI Usage](#-cli-usage)
-- [Node API](#-node-api)
-- [Options](#-options)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
+| index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
+| ----- | ------------- | ------- | ------- | ---------- |
 
----
 
-## 🌟 Features
-
-- **Sequential (`run-s`)** and **parallel (`run-p`)** execution of npm scripts
-- **Retries**: automatically retries failed tasks up to `--retries <count>` times
-- **Kill-on-fail**: abort all running tasks on first failure with `--kill-on-fail`
-- **Race mode**: stop remaining tasks on first success with `--race`
-- **Summary report**: display a table of results (`--summary`)
-- **Aggregate output**: buffer per-task logs and print at the end (`--aggregate-output`)
-- Full **Node.js API** for programmatic control
+[npm-run-all]: docs/npm-run-all.md
+[run-s]: docs/run-s.md
+[run-p]: docs/run-p.md
+[node api]: docs/node-api.md
 
 ---
 
-## 🔧 Installation
+## 📖 Table of Contents
+
+- 📦 [Installation](#-installation)
+- 🛠️ [CLI Usage](#-cli-usage)
+  - ⚙️ [npm-run-all-next](#npm-run-all-next)
+  - ▶️ [run-s (sequential)](#run-s-sequential)
+  - 🔀 [run-p (parallel)](#run-p-parallel)
+  - 🛡️ [Common Options](#common-options)
+- 🔍 [Patterns & Placeholders](#patterns--placeholders)
+- 📦 [Node API](#node-api)
+- 🤝 [Contributing](#contributing)
+- 📄 [License](#license)
+
+---
+
+## 📦 Installation
+
+Install as a development dependency:
 
 ```sh
 npm install --save-dev npm-run-all-next
 ```
 
+All commands are exposed in `node_modules/.bin`:
+
+- ✔️ `npm-run-all-next`
+- ✔️ `run-s`
+- ✔️ `run-p`
+
+You can also add them to your `package.json` scripts:
+
+```jsonc
+{
+  "scripts": {
+    "build:js": "…",
+    "build:css": "…",
+    "lint": "…",
+    "clean": "…",
+    "test": "…",
+    "serial": "run-s clean lint build:*",
+    "parallel": "run-p test watch serve"
+  }
+}
+```
+
 ---
 
-## 💻 CLI Usage
+## 🛠️ CLI Usage
 
-### Run in sequence
+### ⚙️ npm-run-all-next
 
-```sh
-npx npm-run-all-next run-s taskA taskB taskC
-```
-
-### Run in parallel
+Mix sequential and parallel groups in one command:
 
 ```sh
-npx npm-run-all-next run-p taskX taskY taskZ
+npm-run-all-next clean lint \
+  --parallel build:* \
+  --sequential test:* \
+  --parallel deploy
 ```
 
-### Common flags
+This runs:
 
-- `-a, --aggregate-output` : collect and print each task’s output after all finish (requires parallel)
-- `-b, --balancer` : distribute tasks based on historical runtime data and task weight
-- `-c, --continue-on-error` : continue other tasks even if one fails
-- `-k, --kill-others-on-fail` : abort all running tasks when one fails (requires parallel)
-- `-j, --jobs <num>` : max concurrent tasks (default: all, requires parallel)
-- `--npm-path <path>` : path to npm executable (default: `npm`)
-- `-p, --parallel` : run tasks concurrently (alias of `run-p`)
-- `-ps, --print-summary` : display summary table at completion
-- `-l, --print-label` : prefix each log line with the task label
-- `-n, --print-name` : prefix each log line with the task name
-- `-r, --race` : abort remaining tasks on first success (requires parallel)
-- `-rs, --retries <count>` : retries each failed task up to `<count>` times
-- `--silent` : suppress all logging (npm loglevel silent)
+1. **clean** then **lint** (serial)
+2. **build:\*** tasks (parallel)
+3. **test:\*** tasks (serial)
+4. **deploy** (parallel with a single task)
 
-**Example**
+---
+
+### ▶️ run-s (sequential)
+
+Shortcut for `npm-run-all-next --sequential`:
 
 ```sh
-npx npm-run-all-next run-p build test lint --retries 1 --kill-on-fail --summary
+run-s clean lint build:js build:css
 ```
+
+Equivalent to:
+
+```sh
+npm run clean && npm run lint && npm run build:js && npm run build:css
+```
+
+---
+
+### 🔀 run-p (parallel)
+
+Shortcut for `npm-run-all-next --parallel`:
+
+```sh
+run-p test watch serve
+```
+
+Equivalent to (Unix shells):
+
+```sh
+npm run test & npm run watch & npm run serve
+```
+
+> Windows `cmd.exe` does not group `&` well—use `run-p` instead.
+
+---
+
+## 🛡️ Common Options
+
+| Flag                      | Description                                                                |
+| ------------------------- | -------------------------------------------------------------------------- |
+| -a, --aggregate-output    | 🗃️ Buffer each task’s output and print when all finish (requires parallel) |
+| -b, --balancer            | ⚖️ Balance tasks based on historical runtimes                              |
+| -c, --continue-on-error   | 🚧 Don’t stop other tasks when one fails                                   |
+| -k, --kill-others-on-fail | 💥 Kill remaining tasks on first failure (requires parallel)               |
+| -r, --race                | 🏁 Stop remaining tasks when one succeeds (requires parallel)              |
+| -j, --jobs `<number>`     | 🔢 Max concurrent tasks (default: unlimited; requires parallel)            |
+| -t, --print-summary-table | 📊 Show a summary table of results at the end                              |
+| -l, --print-label         | 🏷️ Prefix each output line with the task label                             |
+| -n, --print-name          | 📝 Print the task name before running                                      |
+| --retries `<count>`       | 🔁 Retry each failed task up to `<count>` times                            |
+| --npm-path `<path>`       | 📍 Path to a custom npm executable                                         |
+| --silent                  | 🤫 Suppress all output (sets `npm_config_loglevel` to `silent`)            |
+| -h, --help                | ❓ Show help                                                               |
+| -v, --version             | 🔖 Show version                                                            |
+
+Short flags can be combined (e.g. `-crs` ⇔ `-c -r -s`).
+
+---
+
+## 🔍 Patterns & Placeholders
+
+Use glob-like patterns on script names (separator `:`, globstar `**` supported):
+
+```sh
+run-p 'build:*'      # matches build:js, build:css
+run-s 'test:**'      # matches test:unit, test:unit:api, etc.
+```
+
+Forward arguments to scripts:
+
+```sh
+run-p "start -- --port {1}" -- 8080
+# 👉 expands to: npm run start -- --port 8080
+```
+
+**Placeholders**:
+
+- `{1}`, `{2}`, … — 1st, 2nd, … argument
+- `{@}` — all args as an array
+- `{*}` — all args joined
 
 ---
 
@@ -84,43 +177,54 @@ npx npm-run-all-next run-p build test lint --retries 1 --kill-on-fail --summary
 ```js
 const { runTasks } = require('npm-run-all-next')
 
-runTasks(['build', 'test'], {
-  parallel: 2,
-  retries: 1,
+runTasks(['clean', 'lint', 'build:*'], {
+  parallel: true,
+  retries: 2,
   killOthersOnFail: true,
-  summary: true,
+  printSummaryTable: true,
 })
   .then((results) => {
-    console.log(results)
+    // results: [{ name: 'clean', code: 0 }, …]
+    console.log('✅ Done:', results)
   })
   .catch((err) => {
-    console.error('Error running tasks:', err.results)
+    console.error('❌ Failed:', err.results)
   })
 ```
 
-### API Options
+Options mirror CLI flags:
 
-| Option             | Type    | Default        | Description                                              |
-| ------------------ | ------- | -------------- | -------------------------------------------------------- |
-| `aggregateOutput`  | Boolean | `false`        | Buffer and emit each task’s output at the end            |
-| `balancer`         | Boolean | `false`        | Distribute tasks based on historical runtimes and weight |
-| `continueOnError`  | Boolean | `false`        | Don’t abort other tasks on failure                       |
-| `job`              | Number  | `tasks.length` | Max number of concurrent tasks                           |
-| `parallel`         | Boolean | `false`        | Run tasks in parallel jobs                               |
-| `summary`          | Boolean | `false`        | Run tasks in parallel jobs                               |
-| `printName`        | Boolean | `false`        | Run tasks in parallel jobs                               |
-| `printLabel`       | Boolean | `false`        | Run tasks in parallel jobs                               |
-| `retries`          | Number  | `0`            | Number of retries attempts per task                      |
-| `killOthersOnFail` | Boolean | `false`        | Abort all tasks on first failure                         |
-| `race`             | Boolean | `false`        | Stop tasks on first successful completion                |
-| `summary`          | Boolean | `false`        | Print results table after execution                      |
+```ts
+interface RunOptions {
+  parallel?: boolean
+  aggregateOutput?: boolean
+  balancer?: boolean
+  continueOnError?: boolean
+  killOthersOnFail?: boolean
+  race?: boolean
+  jobs?: number
+  retries?: number
+  printSummaryTable?: boolean
+  printLabel?: boolean
+  printName?: boolean
+  npmPath?: string
+  silent?: boolean
+  stdin?: Stream
+  stdout?: Stream
+  stderr?: Stream
+  taskList?: string[]
+}
+```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
+Contributions, issues, and feature requests are welcome!  
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
-© 2025 Alec Mestroni. Maintained by the community.
+## 📄 License
+
+MIT © 2025 Alec Mestroni

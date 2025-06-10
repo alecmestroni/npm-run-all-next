@@ -17,27 +17,28 @@ Usage:
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
 Options:
-    --aggregate-output   - - - Avoid interleaving output by delaying printing of
-                               each command's output until it has finished.
-    -c, --continue-on-error  - Set the flag to continue executing other tasks
-                               even if a task threw an error. 'run-p' itself
-                               will exit with non-zero code if one or more tasks
-                               threw error(s).
-    --jobs <number>  - Set the maximum number of parallelism. Default is
-                               unlimited.
-    --npm-path <string>  - - - Set the path to npm. Default is the value of
-                               environment variable npm_execpath.
-                               If the variable is not defined, then it's "npm."
-                               In this case, the "npm" command must be found in
-                               environment variable PATH.
-    -l, --print-label  - - - - Set the flag to print the task name as a prefix
-                               on each line of output. Tools in tasks may stop
-                               coloring their output if this option was given.
-    -n, --print-name   - - - - Set the flag to print the task name before
-                               running each task.
-    -r, --race   - - - - - - - Set the flag to kill all tasks when a task
-                               finished with zero.
-    -s, --silent   - - - - - - Set 'silent' to the log level of npm.
+Options:
+    -a, --aggregate-output      Avoid interleaving output by delaying printing of
+                                each command's output until it has finished.
+    -c, --continue-on-error     Continue executing other tasks even if a task
+                                threw an error. `run-p` itself will exit with
+                                non-zero code if one or more tasks failed.
+    -b, --balancer              Distribute tasks based on historical runtimes
+                                and task weight.
+    -k, --kill-others-on-fail   Abort all running tasks (and their children)
+                                as soon as one task fails.
+    --retries <count>  Retry each failed task up to `<count>` times.
+    -t, --print-summary-table   Display a summary report of all tasks at the end.
+    -j, --jobs <number>         Set the maximum number of parallel tasks.
+                                Default is unlimited.
+    --npm-path <string>         Set the path to npm. Default is the value of
+                                the `npm_execpath` env var, or `"npm"` if unset.
+                                In this case `npm` must be on your PATH.
+    -l, --print-label           Prefix each output line with the task label.
+    -n, --print-name            Print the task name before running each task.
+    -r, --race                  Kill all other tasks when one task exits
+                                successfully (zero exit code).
+    -s, --silent                Suppress npm output (`loglevel: silent`).
 
     Shorthand aliases can be combined.
     For example, '-clns' equals to '-c -l -n -s'.

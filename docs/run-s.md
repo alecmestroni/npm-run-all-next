@@ -1,6 +1,7 @@
 | [index](../README.md) | [npm-run-all](npm-run-all.md) | run-s | [run-p](run-p.md) | [Node API](node-api.md) |
 | --------------------- | ----------------------------- | ----- | ----------------- | ----------------------- |
 
+
 # `run-s` command
 
 A CLI command to run given npm-scripts sequentially.
@@ -16,24 +17,24 @@ Usage:
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
 Options:
-    -c, --continue-on-error  - Set the flag to continue executing subsequent
-                               tasks even if a task threw an error. 'run-s'
-                               itself will exit with non-zero code if one or
-                               more tasks threw error(s).
-    --npm-path <string>  - - - Set the path to npm. Default is the value of
-                               environment variable npm_execpath.
-                               If the variable is not defined, then it's "npm."
-                               In this case, the "npm" command must be found in
-                               environment variable PATH.
-    -l, --print-label  - - - - Set the flag to print the task name as a prefix
-                               on each line of output. Tools in tasks may stop
-                               coloring their output if this option was given.
-    -n, --print-name   - - - - Set the flag to print the task name before
-                               running each task.
-    -s, --silent   - - - - - - Set 'silent' to the log level of npm.
+    -c, --continue-on-error     Set the flag to continue executing subsequent
+                                tasks even if a task threw an error. `run-s`
+                                itself will exit with non-zero code if one or
+                                more tasks threw error(s).
+    --npm-path <string>         Set the path to npm. Default is the value of
+                                environment variable npm_execpath.
+    -l, --print-label           Set the flag to print the task name as a prefix
+                                on each line of output. Tools in tasks may stop
+                                coloring their output if this option was given.
+    -n, --print-name            Set the flag to print the task name before
+                                running each task.
+    --retries <count>  Retry each failed task up to `<count>` times.
+    -t, --print-summary-table   Display a summary table of all tasks at
+                                completion.
+    -s, --silent                Set 'silent' to the log level of npm.
 
     Shorthand aliases can be combined.
-    For example, '-clns' equals to '-c -l -n -s'.
+    For example, '-crs' equals to '-c -r -s'.
 
 Examples:
     $ run-s 'build:*'*

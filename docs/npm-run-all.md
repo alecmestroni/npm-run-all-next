@@ -14,35 +14,42 @@ Usage:
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
 Options:
-    --aggregate-output   - - - Avoid interleaving output by delaying printing of
-                               each command's output until it has finished.
-    -c, --continue-on-error  - Set the flag to continue executing
-                               other/subsequent tasks even if a task threw an
-                               error. 'npm-run-all' itself will exit with
-                               non-zero code if one or more tasks threw error(s)
-    --jobs <number>  - Set the maximum number of parallelism. Default is
-                               unlimited.
-    --npm-path <string>  - - - Set the path to npm. Default is the value of
-                               environment variable npm_execpath.
-                               If the variable is not defined, then it's "npm."
-                               In this case, the "npm" command must be found in
-                               environment variable PATH.
-    -l, --print-label  - - - - Set the flag to print the task name as a prefix
-                               on each line of output. Tools in tasks may stop
-                               coloring their output if this option was given.
-    -n, --print-name   - - - - Set the flag to print the task name before
-                               running each task.
-    -p, --parallel <tasks>   - Run a group of tasks in parallel.
-                               e.g. 'npm-run-all -p foo bar' is similar to
-                                    'npm run foo & npm run bar'.
-    -r, --race   - - - - - - - Set the flag to kill all tasks when a task
-                               finished with zero. This option is valid only
-                               with 'parallel' option.
-    -s, --sequential <tasks> - Run a group of tasks sequentially.
-        --serial <tasks>       e.g. 'npm-run-all -s foo bar' is similar to
-                                    'npm run foo && npm run bar'.
-                               '--serial' is a synonym of '--sequential'.
-    --silent   - - - - - - - - Set 'silent' to the log level of npm.
+    -a, --aggregate-output       Avoid interleaving output by delaying printing of
+                                 each command's output until it has finished.
+    -b, --balancer               Distribute tasks based on historical runtimes
+    -c, --continue-on-error      Set the flag to continue executing
+                                 other/subsequent tasks even if a task threw an
+                                 error. 'npm-run-all' itself will exit with
+                                 non-zero code if one or more tasks threw error(s)
+    -j, --jobs <number>          Set the maximum number of parallelism. Default is
+                                 unlimited.
+                                 and task weight.
+    --npm-path <string>          Set the path to npm. Default is the value of
+                                 environment variable npm_execpath.
+                                 If the variable is not defined, then it's "npm."
+                                 In this case, the "npm" command must be found in
+                                 environment variable PATH.
+    -t, --print-summary-table    Display a summary report of all tasks at the end.
+    -l, --print-label            Set the flag to print the task name as a prefix
+                                 on each line of output. Tools in tasks may stop
+                                 coloring their output if this option was given.
+    -n, --print-name             Set the flag to print the task name before
+                                 running each task.
+    -p, --parallel <tasks>       Run a group of tasks in parallel.
+                                 e.g. 'npm-run-all -p foo bar' is similar to
+                                      'npm run foo & npm run bar'.
+    -r, --race                   Set the flag to kill all tasks when a task
+                                 finished with zero. This option is valid only
+                                 with 'parallel' option.
+    --retries <count>   Retry each failed task up to `<count>` times.
+    -s, --sequential <tasks>     Run a group of tasks sequentially.
+    --serial <tasks>             e.g. 'npm-run-all -s foo bar' is similar to
+                                      'npm run foo && npm run bar'.
+                                 '--serial' is a synonym of '--sequential'.
+    --silent                     Set 'silent' to the log level of npm.
+
+    Shorthand aliases can be combined.
+    For example, '-crs' equals to '-c -r -s'.
 
 Examples:
     $ npm-run-all --serial clean lint 'build:*'*
