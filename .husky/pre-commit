@@ -5,7 +5,7 @@ set -u
 set -o pipefail
 
 # Debug to inspect context
-echo "[husky.precommit] Running ESLint --fix and checking for .only()]"
+echo "[husky.precommit] Running ESLint --fix and checking for .only(]"
 echo "Staged files ready for commit:"
 git diff --cached --name-only --diff-filter=ACMR
 
@@ -13,12 +13,12 @@ git diff --cached --name-only --diff-filter=ACMR
 files=$(git diff --cached --name-only --diff-filter=ACMR)
 
 # Filter out ignored files and keep only .js
-files_to_lint=""
+files_to_lint=()
 for file in $files; do
     if [ -f "$file" ] && ! git check-ignore -q "$file"; then
         case "$file" in
-        *.js)
-            files_to_lint="$files_to_lint $file"
+        *.js | *.sh | *.json)
+            files_to_lint+=("$file")
             ;;
         esac
     fi
@@ -33,7 +33,7 @@ done
 # Check for .only()
 for file in $files_to_lint; do
     if grep -q ".only(" "$file"; then
-        echo "Error: $file contains .only() on line $(grep -n ".only()" "$file" | cut -d: -f1)"
+        echo "Error: $file contains .only( on line $(grep -n ".only(" "$file" | cut -d: -f1)"
         exit 1
     fi
 done
