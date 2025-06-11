@@ -20,7 +20,10 @@ const removeResult = util.removeResult
 const runAll = util.runAll
 const runPar = util.runPar
 const runSeq = util.runSeq
-
+const fs = require('fs') // added
+const printHelpAll = require('../bin/npm-run-all/help.js')
+const printHelpPar = require('../bin/run-p/help.js')
+const printHelpSeq = require('../bin/run-s/help.js')
 //------------------------------------------------------------------------------
 // Test
 //------------------------------------------------------------------------------
@@ -30,6 +33,34 @@ describe('[common]', () => {
   after(() => process.chdir('..'))
 
   beforeEach(removeResult)
+
+  const helpArray = [
+    { name: 'npm-run-all', fn: printHelpAll, doc: 'npm-run-all.md' },
+    { name: 'run-p', fn: printHelpPar, doc: 'run-p.md' },
+    { name: 'run-s', fn: printHelpSeq, doc: 'run-s.md' },
+  ]
+
+  helpArray.forEach(({ name, fn, doc }) => {
+    describe.only(`when the Options section is missing in ${doc}`, () => {
+      let origRead
+      before(() => {
+        // mock readFileSync so docs have no "Options:" section
+        origRead = fs.readFileSync
+        fs.readFileSync = () => 'This file does not contain the required section'
+      })
+      after(() => {
+        fs.readFileSync = origRead
+      })
+      it(`should throw an error in ${name}.help() with correct message`, () => {
+        const out = new BufferStream()
+        assert.throws(
+          () => fn(out),
+          // match either Italian or English message, plus the doc filename
+          new RegExp(`(Unable to find|Impossibile trovare).+Options.+${doc}`)
+        )
+      })
+    })
+  })
 
   describe('should print a help text if arguments are nothing.', () => {
     it('npm-run-all command', async () => {
