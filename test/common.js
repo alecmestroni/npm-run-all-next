@@ -41,7 +41,7 @@ describe('[common]', () => {
   ]
 
   helpArray.forEach(({ name, fn, doc }) => {
-    describe.only(`when the Options section is missing in ${doc}`, () => {
+    describe(`when the Options section is missing in ${doc}`, () => {
       let origRead
       before(() => {
         // mock readFileSync so docs have no "Options:" section
