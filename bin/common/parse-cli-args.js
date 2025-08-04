@@ -67,6 +67,7 @@ class ArgumentSet {
     this.singleMode = Boolean(options && options.singleMode)
     this.retries = (initialValues && initialValues.retries) || 0
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
+    this.runtimeFile = (initialValues && initialValues.runtimeFile) || null
 
     addGroup(this.groups, initialValues)
   }
@@ -174,6 +175,10 @@ function parseCLIArgsCore(set, args) {
 
       case '--npm-path':
         set.npmPath = args[++i] || null
+        break
+
+      case '--runtime-file':
+        set.runtimeFile = args[++i] || null
         break
 
       default: {

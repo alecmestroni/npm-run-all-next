@@ -29,6 +29,9 @@ Options:
     -n, --print-name            Set the flag to print the task name before
                                 running each task.
     --retries <count>  Retry each failed task up to `<count>` times.
+    --runtime-file <path>       Specify a custom file to store runtime statistics
+                                for the balancer. Default is
+                                '.npm-run-all-next-runtimes.json'.
     -t, --print-summary-table   Display a summary table of all tasks at
                                 completion.
     -s, --silent                Set 'silent' to the log level of npm.

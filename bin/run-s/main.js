@@ -53,6 +53,7 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       retries: argv.retries,
       printSummaryTable: argv.printSummaryTable,
       balancer: argv.balancer,
+      runtimeFile: argv.runtimeFile,
     })
 
     if (!argv.silent) {

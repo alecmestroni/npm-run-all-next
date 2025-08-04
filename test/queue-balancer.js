@@ -95,10 +95,28 @@ describe('[queue-balancer]', () => {
       })
 
       it('reads valid JSON correctly', () => {
-        const data = { foo: { count: 3, avgRuntime: 1.23 } }
+        const data = { foo: { measurements: [1.23], avgRuntime: 1.23, count: 1 } }
         fs.writeFileSync(HISTORY_FILE, JSON.stringify(data), 'utf8')
         const result = readRuntimes()
         assert.deepStrictEqual(result, data)
+      })
+
+      it('reads from custom file when specified', () => {
+        const customFile = '.test-custom-read.json'
+        const data = { bar: { measurements: [4.56], avgRuntime: 4.56, count: 1 } }
+        fs.writeFileSync(customFile, JSON.stringify(data), 'utf8')
+        const result = readRuntimes(customFile)
+        assert.deepStrictEqual(result, data)
+        // Clean up
+        fs.unlinkSync(customFile)
+      })
+
+      it('converts old format to new format', () => {
+        const oldData = { foo: { count: 3, avgRuntime: 1.23 } }
+        fs.writeFileSync(HISTORY_FILE, JSON.stringify(oldData), 'utf8')
+        const result = readRuntimes()
+        const expected = { foo: { measurements: [1.23], avgRuntime: 1.23, count: 1 } }
+        assert.deepStrictEqual(result, expected)
       })
     })
 
@@ -108,28 +126,63 @@ describe('[queue-balancer]', () => {
         const measurements = { a: [1, 2, 3] }
         updateRuntimesFile(oldMap, measurements)
         const out = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'))
-        // avg = 2, count = 3
-        assert.deepStrictEqual(out, { a: { count: 3, avgRuntime: 2 } })
+        // avg = (1+2+3)/3 = 2, count = 1 (one execution with avg 2)
+        assert.deepStrictEqual(out, { 
+          a: { measurements: [2], avgRuntime: 2, count: 1 } 
+        })
       })
 
       it('merges into existing history correctly', () => {
-        const old = { a: { count: 2, avgRuntime: 2 }, b: { count: 1, avgRuntime: 5 } }
+        const old = { 
+          a: { measurements: [2], avgRuntime: 2, count: 1 }, 
+          b: { measurements: [5], avgRuntime: 5, count: 1 } 
+        }
         const meas = { a: [2, 4], c: [3] }
         updateRuntimesFile(old, meas)
         const out = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'))
-        // a: ((2*2)+(2+4))/(2+2)=2,5, count=4
-        assert.deepStrictEqual(out.a, { count: 4, avgRuntime: 2.5 })
+        // a: add new measurement 3 (avg of [2,4]), then avg of [2,3] = 2.5, count=2
+        assert.deepStrictEqual(out.a, { measurements: [2, 3], avgRuntime: 2.5, count: 2 })
         // b untouched
         assert.deepStrictEqual(out.b, old.b)
-        // c added
-        assert.deepStrictEqual(out.c, { count: 1, avgRuntime: 3 })
+        // c added: measurements=[3], avg=3, count=1
+        assert.deepStrictEqual(out.c, { measurements: [3], avgRuntime: 3, count: 1 })
+      })
+
+      it('maintains sliding window with max measurements', () => {
+        // Create history with MAX_MEASUREMENTS entries
+        const measurements = Array.from({ length: 14 }, (_, i) => i + 1) // [1,2,3,...,14]
+        const old = { a: { measurements, avgRuntime: 7.5, count: 14 } }
+        
+        // Add new measurement
+        const newMeas = { a: [15] }
+        updateRuntimesFile(old, newMeas)
+        const out = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'))
+        
+        // Should keep last 14 measurements: [2,3,4,...,14,15]
+        const expectedMeasurements = Array.from({ length: 14 }, (_, i) => i + 2) // [2,3,4,...,15]
+        assert.deepStrictEqual(out.a.measurements, expectedMeasurements)
+        assert.strictEqual(out.a.count, 14)
+        assert.strictEqual(out.a.avgRuntime, 8.5) // avg of [2,3,4,...,15]
+      })
+
+      it('writes to custom file when specified', () => {
+        const customFile = '.test-custom-runtimes.json'
+        const oldMap = {}
+        const measurements = { custom: [5] }
+        updateRuntimesFile(oldMap, measurements, customFile)
+        const out = JSON.parse(fs.readFileSync(customFile, 'utf8'))
+        assert.deepStrictEqual(out, { 
+          custom: { measurements: [5], avgRuntime: 5, count: 1 } 
+        })
+        // Clean up
+        fs.unlinkSync(customFile)
       })
     })
 
     describe('updateHistoryFromResults()', () => {
       it('records only successful runs and merges with existing file', () => {
-        // prepare existing
-        const initial = { x: { count: 1, avgRuntime: 1 } }
+        // prepare existing in new format
+        const initial = { x: { measurements: [1], avgRuntime: 1, count: 1 } }
         fs.writeFileSync(HISTORY_FILE, JSON.stringify(initial), 'utf8')
         // call with mixed results
         const results = [
@@ -140,10 +193,10 @@ describe('[queue-balancer]', () => {
         ]
         updateHistoryFromResults(results)
         const out = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'))
-        // x: ((1*1)+2)/(1+1)=1.5, count=2
-        assert.deepStrictEqual(out.x, { count: 2, avgRuntime: 1.5 })
-        // y added: count=1, avg=3
-        assert.deepStrictEqual(out.y, { count: 1, avgRuntime: 3 })
+        // x: add 2s measurement, now measurements=[1,2], avg=1.5, count=2
+        assert.deepStrictEqual(out.x, { measurements: [1, 2], avgRuntime: 1.5, count: 2 })
+        // y added: measurements=[3], avg=3, count=1
+        assert.deepStrictEqual(out.y, { measurements: [3], avgRuntime: 3, count: 1 })
         // z,w ignored
         assert.ok(!out.z && !out.w)
       })
@@ -151,8 +204,11 @@ describe('[queue-balancer]', () => {
 
     describe('queueReorganizer()', () => {
       it('attaches estimatedRuntime and sorts descending', () => {
-        // write history file
-        const history = { slow: { avgRuntime: 5 }, fast: { avgRuntime: 1 } }
+        // write history file in new format
+        const history = { 
+          slow: { measurements: [5], avgRuntime: 5, count: 1 }, 
+          fast: { measurements: [1], avgRuntime: 1, count: 1 } 
+        }
         fs.writeFileSync(HISTORY_FILE, JSON.stringify(history), 'utf8')
         const tasks = [{ name: 'fast', foo: 10 }, { name: 'none' }, { name: 'slow' }]
         const out = queueReorganizer(tasks)

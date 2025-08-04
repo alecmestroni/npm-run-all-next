@@ -42,6 +42,9 @@ Options:
                                  finished with zero. This option is valid only
                                  with 'parallel' option.
     --retries <count>   Retry each failed task up to `<count>` times.
+    --runtime-file <path>        Specify a custom file to store runtime statistics
+                                 for the balancer. Default is
+                                 '.npm-run-all-next-runtimes.json'.
     -s, --sequential <tasks>     Run a group of tasks sequentially.
     --serial <tasks>             e.g. 'npm-run-all -s foo bar' is similar to
                                       'npm run foo && npm run bar'.

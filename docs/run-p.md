@@ -28,6 +28,9 @@ Options:
     -k, --kill-others-on-fail   Abort all running tasks (and their children)
                                 as soon as one task fails.
     --retries <count>  Retry each failed task up to `<count>` times.
+    --runtime-file <path>       Specify a custom file to store runtime statistics
+                                for the balancer. Default is
+                                '.npm-run-all-next-runtimes.json'.
     -t, --print-summary-table   Display a summary report of all tasks at the end.
     -j, --jobs <number>         Set the maximum number of parallel tasks.
                                 Default is unlimited.
