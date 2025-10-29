@@ -17,7 +17,6 @@ Usage:
     <tasks> : A list of npm-scripts' names and Glob-like patterns.
 
 Options:
-Options:
     -a, --aggregate-output      Avoid interleaving output by delaying printing of
                                 each command's output until it has finished.
     -c, --continue-on-error     Continue executing other tasks even if a task

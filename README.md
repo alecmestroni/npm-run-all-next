@@ -2,25 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)  
 [![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)  
-![Build Status](https://img.shields.io/github/actions/workflow/status/alecmestroni/npm-run-all-next/ci.yml?branch=main)  
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
 
 A CLI and programmatic API to run multiple npm scripts **sequentially** or **in parallel**, with built-in support for **retries**, **kill-on-fail**, **race**, summary reporting, and more.
-
----
-
-## 📚 Main docs
-
-| index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
-| ----- | ------------- | ------- | ------- | ---------- |
-
-
-[npm-run-all]: docs/npm-run-all.md
-[run-s]: docs/run-s.md
-[run-p]: docs/run-p.md
-[node api]: docs/node-api.md
-
----
 
 ## 📖 Table of Contents
 
@@ -62,7 +46,7 @@ You can also add them to your `package.json` scripts:
     "clean": "…",
     "test": "…",
     "serial": "run-s clean lint build:*",
-    "parallel": "run-p test watch serve"
+    "parallel": "run-p lint test clean"
   }
 }
 ```
@@ -76,7 +60,7 @@ You can also add them to your `package.json` scripts:
 Mix sequential and parallel groups in one command:
 
 ```sh
-npm-run-all-next clean lint \
+npm-run-all clean lint \
   --parallel build:* \
   --sequential test:* \
   --parallel deploy
@@ -93,7 +77,7 @@ This runs:
 
 ### ▶️ run-s (sequential)
 
-Shortcut for `npm-run-all-next --sequential`:
+Shortcut for `npm-run-all --sequential`:
 
 ```sh
 run-s clean lint build:js build:css
@@ -109,7 +93,7 @@ npm run clean && npm run lint && npm run build:js && npm run build:css
 
 ### 🔀 run-p (parallel)
 
-Shortcut for `npm-run-all-next --parallel`:
+Shortcut for `npm-run-all --parallel`:
 
 ```sh
 run-p test watch serve
@@ -143,6 +127,7 @@ npm run test & npm run watch & npm run serve
 | --silent                  | 🤫 Suppress all output (sets `npm_config_loglevel` to `silent`)            |
 | -h, --help                | ❓ Show help                                                               |
 | -v, --version             | 🔖 Show version                                                            |
+| --tasks-file <file>       | 📂 Load tasks from a JSON file (overrides patterns and <tasks> args)       |
 
 Short flags can be combined (e.g. `-crs` ⇔ `-c -r -s`).
 
@@ -232,6 +217,21 @@ interface RunOptions {
 
 Contributions, issues, and feature requests are welcome!  
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+---
+
+---
+
+## 📚 Main docs
+
+| index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
+| ----- | ------------- | ------- | ------- | ---------- |
+
+
+[npm-run-all]: docs/npm-run-all.md
+[run-s]: docs/run-s.md
+[run-p]: docs/run-p.md
+[node api]: docs/node-api.md
 
 ---
 
