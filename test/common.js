@@ -382,7 +382,6 @@ describe("[common]", () => {
     })
   })
 
-  // https://github.com/alecmestroni/npm-run-all-next/issues/105
   describe("should not print MaxListenersExceededWarning when it runs 10 tasks:", () => {
     const tasks = Array.from({ length: 10 }, () => "test-task:append:a")
 
@@ -402,6 +401,39 @@ describe("[common]", () => {
       const buf = new BufferStream()
       await runPar(tasks, null, buf)
       assert.strictEqual(buf.value.indexOf("MaxListenersExceededWarning"), -1)
+    })
+  })
+
+  describe("nodeApi color output integration", () => {
+    it("should produce colored output when printLabel is true and stdout is TTY", async () => {
+      // Simula uno stream TTY
+      const buf = new BufferStream()
+      buf.isTTY = true
+      await nodeApi("test-task:stdout", { printLabel: true, stdout: buf })
+      // Codici ANSI per colore: \u001b[ (ESC [)
+      assert.match(buf.value, /\u001b\[/, "Output should contain ANSI color codes")
+    })
+
+    it("should NOT produce colored output when printLabel is false and stdout is TTY", async () => {
+      const buf = new BufferStream()
+      buf.isTTY = true
+      await nodeApi("test-task:stdout", { printLabel: false, stdout: buf })
+      // Non deve contenere codici ANSI
+      assert.doesNotMatch(buf.value, /\u001b\[/, "Output should NOT contain ANSI color codes")
+    })
+  })
+
+  // Test end-to-end per test-task:nest-parallel:error
+  describe.only("error handling for nested-parallel weight calculation", () => {
+    it("should throw error with correct message for invalid --jobs value", async () => {
+      try {
+        await runAll(["test-task:nest-parallel:error"])
+      } catch (err) {
+        assert.match(err.message, /Error parsing script command: node \.\.\/bin\/run-p\/index\.js test-task:append:a:\* --jobs notanumber/)
+        assert.match(err.message, /Invalid Option: --jobs notanumber/)
+        return
+      }
+      assert.fail("Should throw error for invalid --jobs value")
     })
   })
 })

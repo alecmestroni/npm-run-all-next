@@ -18,7 +18,7 @@ const runSeq = util.runSeq
 const removeResult = util.removeResult
 const result = util.result
 
-const TASKS_FILE = path.join(__dirname, "tasks-list.json")
+const TASKS_FILE = "tasks-list.json"
 
 function writeTasksFile(tasks) {
   fs.writeFileSync(TASKS_FILE, JSON.stringify(tasks), "utf8")
@@ -85,6 +85,17 @@ describe("[tasks-file] npm-run-all", () => {
       return
     }
     assert.fail("Expected error for invalid file format")
+  })
+
+  it("should error if file contains invalid JSON", async () => {
+    fs.writeFileSync(TASKS_FILE, '["task1", "task2"', "utf8") // missing closing bracket
+    try {
+      await runAll(["--tasks-file", TASKS_FILE])
+    } catch (err) {
+      assert.ok(/Tasks file is not valid JSON/i.test(err.message))
+      return
+    }
+    assert.fail("Expected error for invalid JSON syntax")
   })
 
   it("should ignore patterns if tasks-file is set", async () => {
