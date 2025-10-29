@@ -1,10 +1,10 @@
 # 🚀 npm-run-all-next 🚀
 
-[![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)  
-[![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)  
+[![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)
+[![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
 
-A CLI and programmatic API to run multiple npm scripts **sequentially** or **in parallel**, with built-in support for **retries**, **kill-on-fail**, **race**, summary reporting, and more.
+A CLI and programmatic API to run multiple npm scripts **sequentially** or **in parallel**, with built-in support for **retries**, **kill-on-fail**, **race**, **summary reporting**, **parallel balancer** and more.
 
 ## 📖 Table of Contents
 
