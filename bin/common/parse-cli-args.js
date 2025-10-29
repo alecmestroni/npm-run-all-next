@@ -181,6 +181,11 @@ function parseCLIArgsCore(set, args) {
         set.runtimeFile = args[++i] || null
         break
 
+      case "--tasks-file":
+        set.tasksFile = args[++i]
+        if (!set.tasksFile) throw new Error("Missing value for --tasks-file")
+        break
+
       default: {
         let m = null
         if ((m = OVERWRITE_OPTION.exec(arg))) {

@@ -50,6 +50,7 @@ Options:
                                       'npm run foo && npm run bar'.
                                  '--serial' is a synonym of '--sequential'.
     --silent                     Set 'silent' to the log level of npm.
+  --tasks-file <file>          Load tasks from a JSON file containing an array of strings. Overrides patterns and <tasks> arguments. See below for usage.
 
     Shorthand aliases can be combined.
     For example, '-crs' equals to '-c -r -s'.
@@ -59,6 +60,7 @@ Examples:
     $ npm-run-all --parallel 'watch:*'*
     $ npm-run-all clean lint --parallel "'build:*'* -- --watch"
     $ npm-run-all -l -p start-server start-browser start-electron
+  $ npm-run-all --tasks-file ./tasks.json
 ```
 
 ### npm-scripts

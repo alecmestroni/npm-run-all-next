@@ -13,6 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const loadTasksFile = require("../common/load-tasks-file")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -33,11 +34,20 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     const argv = parseCLIArgs(args, { parallel: true }, { singleMode: true })
     const group = argv.lastGroup
 
-    if (group.patterns.length === 0) {
+    // If --tasks-file is set, load tasks and override patterns
+    let tasksFromFile = null
+    if (argv.tasksFile) {
+      tasksFromFile = loadTasksFile(argv.tasksFile)
+    }
+    const patterns = tasksFromFile ? [] : group.patterns
+    const taskList = tasksFromFile || null
+
+    if (patterns.length === 0 && !taskList) {
       return Promise.resolve(null)
     }
 
-    const promise = runAll(group.patterns, {
+    const promise = runAll(patterns, {
+      taskList,
       stdout,
       stderr,
       stdin,

@@ -36,6 +36,7 @@ Run npm-scripts.
 
 - **patterns** `string|string[]` -- Glob-like patterns for script names.
 - **options** `object`
+
   - **options.aggregateOutput** `boolean` --
     The flag to avoid interleaving output by delaying printing of each command's output until it has finished.
     This option is valid only with `options.parallel` option.
@@ -90,9 +91,19 @@ Run npm-scripts.
     Default is nothing.
     Set `process.stderr` in order to print to stderr.
   - **options.taskList** `string[]|null` --
-    The string array of all script names.
-    If this is `null`, it reads from `package.json` in the current directory.
+    Directly specify the list of npm scripts to run, as an array of strings. If provided, this overrides patterns and glob matching, and scripts are taken only from this list. Useful for loading tasks from a file or generating them programmatically.
+    If this is `null`, it reads from `package.json` in the current directory and applies patterns as usual.
     Default is `null`.
+
+    Example:
+
+    ```js
+    runAll([], { taskList: ["clean", "lint", "build:js"] })
+    ```
+
+    This will run only the specified tasks, ignoring patterns and package.json script discovery.
+
+    You can also use the CLI option `--tasks-file <file>` to load the list from a JSON file containing an array of strings. See the main README and docs/tasks-file.md for details.
 
 `runAll` returns a promise that will becomes _fulfilled_ when all scripts are completed.
 The promise will become _rejected_ when any of the scripts exit with a non-zero code.

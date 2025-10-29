@@ -35,6 +35,7 @@ Options:
     -t, --print-summary-table   Display a summary table of all tasks at
                                 completion.
     -s, --silent                Set 'silent' to the log level of npm.
+  --tasks-file <file>         Load tasks from a JSON file containing an array of strings. Overrides patterns and <tasks> arguments. See below for usage.
 
     Shorthand aliases can be combined.
     For example, '-crs' equals to '-c -r -s'.
@@ -44,6 +45,7 @@ Examples:
     $ run-s lint clean 'build:*'*
     $ run-s --silent --print-name lint clean 'build:*'*
     $ run-s -sn lint clean 'build:*'*
+  $ run-s --tasks-file ./tasks.json
 ```
 
 ### npm-scripts

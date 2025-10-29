@@ -42,6 +42,7 @@ Options:
     -r, --race                  Kill all other tasks when one task exits
                                 successfully (zero exit code).
     -s, --silent                Suppress npm output (`loglevel: silent`).
+  --tasks-file <file>         Load tasks from a JSON file containing an array of strings. Overrides patterns and <tasks> arguments. See below for usage.
 
     Shorthand aliases can be combined.
     For example, '-clns' equals to '-c -l -n -s'.
@@ -51,6 +52,7 @@ Examples:
     $ run-p --print-label "'build:*'* -- --watch"
     $ run-p -l "'build:*'* -- --watch"
     $ run-p start-server start-browser start-electron
+  $ run-p --tasks-file ./tasks.json
 ```
 
 ### npm-scripts
