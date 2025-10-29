@@ -5,7 +5,7 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-'use strict'
+"use strict"
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -63,7 +63,7 @@ class ArgumentSet {
     this.balancer = false
     this.race = false
     this.rest = []
-    this.silent = process.env.npm_config_loglevel === 'silent'
+    this.silent = process.env.npm_config_loglevel === "silent"
     this.singleMode = Boolean(options && options.singleMode)
     this.retries = (initialValues && initialValues.retries) || 0
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
@@ -85,77 +85,77 @@ function parseCLIArgsCore(set, args) {
   LOOP: for (let i = 0; i < args.length; ++i) {
     const arg = args[i]
     switch (arg) {
-      case '--':
+      case "--":
         set.rest = args.slice(i + 1)
         break LOOP
 
-      case '-a':
-      case '--aggregate-output':
+      case "-a":
+      case "--aggregate-output":
         set.aggregateOutput = true
         break
 
-      case '-b':
-      case '--balancer':
+      case "-b":
+      case "--balancer":
         set.balancer = true
         break
 
-      case '--color':
-      case '--no-color':
+      case "--color":
+      case "--no-color":
         break
 
-      case '-c':
-      case '--continue-on-error':
+      case "-c":
+      case "--continue-on-error":
         set.continueOnError = true
         break
 
-      case '-l':
-      case '--print-label':
+      case "-l":
+      case "--print-label":
         set.printLabel = true
         break
 
-      case '-n':
-      case '--print-name':
+      case "-n":
+      case "--print-name":
         set.printName = true
         break
 
-      case '-r':
-      case '--race':
+      case "-r":
+      case "--race":
         set.race = true
         break
 
-      case '-k':
-      case '--kill-others-on-fail':
+      case "-k":
+      case "--kill-others-on-fail":
         set.killOthersOnFail = true
         break
 
-      case '--retries':
+      case "--retries":
         set.retries = parseInt(args[++i], 10)
         if (!Number.isFinite(set.retries) || set.retries <= 0) {
           throw new Error(`Invalid Option: --retries ${args[i]}`)
         }
         break
 
-      case '-t':
-      case '--print-summary-table':
+      case "-t":
+      case "--print-summary-table":
         set.printSummaryTable = true
         break
 
-      case '--silent':
+      case "--silent":
         set.silent = true
         break
 
-      case '-j':
-      case '--jobs':
+      case "-j":
+      case "--jobs":
         set.jobs = parseInt(args[++i], 10)
         if (!Number.isFinite(set.jobs) || set.jobs <= 0) {
           throw new Error(`Invalid Option: --jobs ${args[i]}`)
         }
         break
 
-      case '-s':
-      case '--sequential':
-      case '--serial':
-        if (set.singleMode && arg === '-s') {
+      case "-s":
+      case "--sequential":
+      case "--serial":
+        if (set.singleMode && arg === "-s") {
           set.silent = true
           break
         }
@@ -165,19 +165,19 @@ function parseCLIArgsCore(set, args) {
         addGroup(set.groups)
         break
 
-      case '-p':
-      case '--parallel':
+      case "-p":
+      case "--parallel":
         if (set.singleMode) {
           throw new Error(`Invalid Option: ${arg}`)
         }
         addGroup(set.groups, { parallel: true })
         break
 
-      case '--npm-path':
+      case "--npm-path":
         set.npmPath = args[++i] || null
         break
 
-      case '--runtime-file':
+      case "--runtime-file":
         set.runtimeFile = args[++i] || null
         break
 
@@ -192,10 +192,10 @@ function parseCLIArgsCore(set, args) {
             set,
             arg
               .slice(1)
-              .split('')
+              .split("")
               .map((c) => `-${c}`)
           )
-        } else if (arg[0] === '-') {
+        } else if (arg[0] === "-") {
           throw new Error(`Invalid Option: ${arg}`)
         } else {
           set.lastGroup.patterns.push(arg)
@@ -205,11 +205,11 @@ function parseCLIArgsCore(set, args) {
   }
 
   const invalidWithoutParallel = [
-    { prop: 'aggregateOutput', long: '--aggregate-output', short: '-a' },
-    { prop: 'race', long: '--race', short: '-r' },
-    { prop: 'killOthersOnFail', long: '--kill-others-on-fail', short: '-k' },
-    { prop: 'balancer', long: '--balancer', short: '-b' },
-    { prop: 'jobs', long: '--jobs', short: '-j', zeroCheck: true },
+    { prop: "aggregateOutput", long: "--aggregate-output", short: "-a" },
+    { prop: "race", long: "--race", short: "-r" },
+    { prop: "killOthersOnFail", long: "--kill-others-on-fail", short: "-k" },
+    { prop: "balancer", long: "--balancer", short: "-b" },
+    { prop: "jobs", long: "--jobs", short: "-j", zeroCheck: true },
   ]
 
   invalidWithoutParallel.forEach(({ prop, long, short, zeroCheck }) => {

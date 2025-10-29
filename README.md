@@ -185,9 +185,9 @@ run-p build:{a,b,c} # ↔> run-p build:a build:b build:c
 ## 📦 Node API
 
 ```js
-const { runTasks } = require('npm-run-all-next')
+const { runTasks } = require("npm-run-all-next")
 
-runTasks(['clean', 'lint', 'build:*'], {
+runTasks(["clean", "lint", "build:*"], {
   parallel: true,
   retries: 2,
   killOthersOnFail: true,
@@ -195,10 +195,10 @@ runTasks(['clean', 'lint', 'build:*'], {
 })
   .then((results) => {
     // results: [{ name: 'clean', code: 0 }, …]
-    console.log('✅ Done:', results)
+    console.log("✅ Done:", results)
   })
   .catch((err) => {
-    console.error('❌ Failed:', err.results)
+    console.error("❌ Failed:", err.results)
   })
 ```
 
