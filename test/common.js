@@ -404,8 +404,15 @@ describe("[common]", () => {
     })
   })
 
-  describe("nodeApi color output integration", () => {
-    it.only("should produce colored output when printLabel is true and stdout is TTY", async () => {
+  describe.only("nodeApi color output integration", () => {
+    before(() => {
+      const prevForceColor = process.env.FORCE_COLOR
+      process.env.FORCE_COLOR = "1"
+    })
+    after(() => {
+      delete process.env.FORCE_COLOR
+    })
+    it("should produce colored output when printLabel is true and stdout is TTY", async () => {
       // Simula uno stream TTY
       const buf = new BufferStream()
       buf.isTTY = true
