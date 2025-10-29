@@ -1,10 +1,44 @@
-# 🚀 npm-run-all-next 🚀
+# npm-run-all-next
 
 [![npm version](https://img.shields.io/npm/v/npm-run-all-next.svg)](https://www.npmjs.com/package/npm-run-all-next)
 [![Downloads/month](https://img.shields.io/npm/dm/npm-run-all-next.svg)](http://www.npmtrends.com/npm-run-all-next)
 [![Coverage](https://codecov.io/gh/alecmestroni/npm-run-all-next/graph/badge.svg?token=RFNGO6EIMF)](https://codecov.io/gh/alecmestroni/npm-run-all-next)
 
-A CLI and programmatic API to run multiple npm scripts **sequentially** or **in parallel**, with built-in support for **retries**, **kill-on-fail**, **race**, **summary reporting**, **parallel balancer** and more.
+A modern, drop-in task runner for `npm`, `pnpm`, and `yarn`.
+
+It lets you run multiple npm scripts in series or in parallel, with smart features for real-world CI/CD and monorepos:
+
+- robust retries for flaky tasks
+- intelligent parallelization / load balancing
+- human-friendly summary tables
+- cross-platform behavior (Windows / macOS / Linux)
+- usable both as CLI (`run-s`, `run-p`, `npm-run-all`) and as a Node API
+
+## Why NEXT? 🚀
+
+`npm-run-all-next` is a modern evolution of `npm-run-all`, built for today’s workflows:
+
+- 🔁 `--retries`  
+  Automatically retry flaky tasks without rewriting scripts.
+
+- ⚖️ `--balancer`  
+  Parallel tasks are scheduled using historical runtime data, so long-running tasks are started earlier and total build time goes down.
+
+- 📊 `--print-summary-table`  
+  Get a final report with exit code, retries, and duration for each task.
+
+- 📂 `--tasks-file`  
+  Load task lists from an external file (JSON/JS), so your `package.json` doesn’t become unreadable.
+
+- 🧵 Familiar commands  
+  `run-s`, `run-p`, and `npm-run-all` are included and cross-platform.
+
+- 🧪 First-class Node API  
+  Run tasks programmatically with `runTasks([...])`.
+
+This tool is designed for CI pipelines, monorepos, and multi-step local dev workflows — not just simple "run two scripts at once."
+
+---
 
 ## 📖 Table of Contents
 
