@@ -61,7 +61,7 @@ describe("[fail] it should fail", () => {
     it("npm-run-all command with -b without --parallel", () => shouldFail(runAll(["-b"])))
     it("npm-run-all command with --jobs without --parallel", () => shouldFail(runAll(["--jobs", "2"])))
 
-    it.only("npm-run-all command with --retries 0", () => shouldFail(runAll(["--retries", "0"])))
+    it("npm-run-all command with --retries 0", () => shouldFail(runAll(["--retries", "0"])))
     it("npm-run-all command with -j without --parallel", () => shouldFail(runAll(["-j", "2"])))
     it("npm-run-all command with --r without --parallel", () => shouldFail(runAll(["--r"])))
     it("run-s command with --race", () => shouldFail(runSeq(["--race"])))

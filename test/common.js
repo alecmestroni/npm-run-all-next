@@ -424,7 +424,7 @@ describe("[common]", () => {
   })
 
   // Test end-to-end per test-task:nest-parallel:error
-  describe.only("error handling for nested-parallel weight calculation", () => {
+  describe("error handling for nested-parallel weight calculation", () => {
     it("should throw error with correct message for invalid --jobs value", async () => {
       try {
         await runAll(["test-task:nest-parallel:error"])
