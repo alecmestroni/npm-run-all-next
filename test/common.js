@@ -405,12 +405,13 @@ describe("[common]", () => {
   })
 
   describe("nodeApi color output integration", () => {
-    it("should produce colored output when printLabel is true and stdout is TTY", async () => {
+    it.only("should produce colored output when printLabel is true and stdout is TTY", async () => {
       // Simula uno stream TTY
       const buf = new BufferStream()
       buf.isTTY = true
       await nodeApi("test-task:stdout", { printLabel: true, stdout: buf })
       // Codici ANSI per colore: \u001b[ (ESC [)
+      console.log("[DEBUG]Buffer value:", buf.value) // Debug output
       assert.match(buf.value, /\u001b\[/, "Output should contain ANSI color codes")
     })
 
