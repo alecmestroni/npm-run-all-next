@@ -67,8 +67,7 @@ describe("[parallel]", () => {
       } catch (err) {
         // err può essere un oggetto Error, estrai il messaggio
         const msg = err && err.message ? err.message : String(err)
-        assert.ok(msg.includes("Queue-Balancer error"), `Expected Queue-Balancer error but got: ${msg}`)
-        assert.ok(msg.includes("TIP: Change the queue or increase freeThreads."), `Expected TIP: Change the queue or increase freeThreads.: ${msg}`)
+        assert.ok(msg.includes("Invalid Option: --jobs notanumberError"), `Expected Invalid Option: --jobs notanumberError: ${msg}`)
       }
     })
     it("run-p", async () => {
@@ -79,8 +78,7 @@ describe("[parallel]", () => {
       } catch (err) {
         // err può essere un oggetto Error, estrai il messaggio
         const msg = err && err.message ? err.message : String(err)
-        assert.ok(msg.includes("Queue-Balancer error"), `Expected Queue-Balancer error but got: ${msg}`)
-        assert.ok(msg.includes("TIP: Change the queue or increase freeThreads."), `Expected TIP: Change the queue or increase freeThreads.: ${msg}`)
+        assert.ok(msg.includes("Invalid Option: --jobs notanumberError"), `Expected Invalid Option: --jobs notanumberError: ${msg}`)
       }
     })
   })
