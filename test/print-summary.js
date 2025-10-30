@@ -71,19 +71,19 @@ describe("[print-summary] npm-run-all", () => {
         assert(rowLine.includes("1.50"))
       })
 
-      it('styles a forced kill (exit code 130) row in gray and shows "(Killed)"', () => {
-        const results = [{ name: "forcedTask", code: 130, retries: 1, durationMs: 123 }]
+      it('styles a forced kill (exit code 137) row in gray and shows "(Killed)"', () => {
+        const results = [{ name: "forcedTask", code: 137, retries: 1, durationMs: 123 }]
         const rowLine = printSummary(results)
           .split("\n")
           .find((l) => l.includes("forcedTask"))
         assert(rowLine.startsWith(ansiStyles.gray.open))
         assert(rowLine.endsWith(ansiStyles.gray.close))
-        assert(rowLine.includes("130 (Killed)"))
+        assert(rowLine.includes("137 (Killed)"))
         assert(rowLine.includes("1"))
         assert(rowLine.includes("0.12"))
       })
 
-      it("styles a failing (non-zero, non-130) row in red", () => {
+      it("styles a failing (non-zero, non-137) row in red", () => {
         const results = [{ name: "failTask", code: 2, retries: 3, durationMs: 900 }]
         const rowLine = printSummary(results)
           .split("\n")
@@ -415,7 +415,7 @@ describe("[print-summary] npm-run-all", () => {
         const [open1, task1, exit1, retries1, duration1, close1] = getTableRawElements(stdout.value, `test-task:flaky ${threshold}`)
         const [open2, task2, exit2, retries2, duration2, close2] = getTableRawElements(stdout.value, "test-task:append1Error b")
 
-        assert.strictEqual(exit1, "130 (Killed)")
+        assert.strictEqual(exit1, "137 (Killed)")
         assert.strictEqual(exit2, "1")
         assert.strictEqual(task1, `test-task:flaky ${threshold}`)
         assert.strictEqual(task2, "test-task:append1Error b")

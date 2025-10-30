@@ -122,7 +122,7 @@ describe("[parallel]", () => {
         await delay(5000)
         assert.strictEqual(err.results.length, 2)
         assert.strictEqual(err.results[0].name, "test-task:append2 a")
-        assert.strictEqual(err.results[0].code, 130)
+        assert.strictEqual(err.results[0].code, 137)
         assert.strictEqual(err.results[1].name, "test-task:error")
         assert.strictEqual(err.results[1].code, 1)
         assert.ok(result() == null || result() === "a", `Expected result to be null or "a" but got "${result()}"`)
@@ -401,11 +401,11 @@ describe("[parallel]", () => {
       try {
         await nodeApi(["test-task:error", "test-task:append2 a"], { parallel: true, killOthersOnFail: true })
       } catch (err) {
-        // il primo fallisce, il secondo deve essere abortito (code 130)
+        // il primo fallisce, il secondo deve essere abortito (code 137)
         assert.strictEqual(err.results[0].name, "test-task:error")
         assert.strictEqual(err.results[0].code, 1)
         assert.strictEqual(err.results[1].name, "test-task:append2 a")
-        assert.strictEqual(err.results[1].code, 130)
+        assert.strictEqual(err.results[1].code, 137)
         // output dovrebbe essere nullo o parziale
         assert.ok(result() == null || result() === "a", `Expected result to be null or "a" but got "${result()}"`)
         return

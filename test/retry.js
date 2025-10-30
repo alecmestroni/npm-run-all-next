@@ -201,7 +201,7 @@ describe("[retries] npm-run-all", () => {
       const threshold = 2
       it("Node API", async () => {
         const results = await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1 b`], { retries: retries, parallel: true, race: true })
-        assert.strictEqual(results[0].code, 130)
+        assert.strictEqual(results[0].code, 137)
         assert.strictEqual(results[1].code, 0)
         assert.strictEqual(results[0].name, `test-task:flaky ${threshold}`)
         assert.strictEqual(results[1].name, "test-task:append1 b")
@@ -231,7 +231,7 @@ describe("[retries] npm-run-all", () => {
           assert.strictEqual(err.results[0].name, "test-task:append1Error a")
           assert.strictEqual(err.results[1].name, "test-task:append2Error b")
           assert.ok(
-            (err.results[0].code === 1 && err.results[1].code === 130) || (err.results[0].code === 130 && err.results[1].code === 1),
+            (err.results[0].code === 1 && err.results[1].code === 137) || (err.results[0].code === 137 && err.results[1].code === 1),
             "One of the tasks should have failed, and the other should have been aborted. (1: " +
               err.results[0].code +
               ", 2: " +
@@ -281,7 +281,7 @@ describe("[retries] npm-run-all", () => {
           assert.strictEqual(err.results[0].name, "test-task:append1Error a")
           assert.strictEqual(err.results[1].name, "test-task:append2Error b")
           assert.ok(
-            (err.results[0].code === 1 && err.results[1].code === 130) || (err.results[0].code === 130 && err.results[1].code === 1),
+            (err.results[0].code === 1 && err.results[1].code === 137) || (err.results[0].code === 137 && err.results[1].code === 1),
             "One of the tasks should have failed, and the other should have been aborted. (1: " +
               err.results[0].code +
               ", 2: " +
@@ -459,7 +459,7 @@ describe("[retries] npm-run-all", () => {
           assert.strictEqual(err.results[0].name, `test-task:flaky ${threshold}`)
           assert.strictEqual(err.results[1].name, "test-task:append1Error b")
           assert.ok(
-            err.results[0].code === 130 && err.results[1].code === 1,
+            err.results[0].code === 137 && err.results[1].code === 1,
             "First task should be aborted, and second one failed. (1: " + err.results[0].code + ", 2: " + err.results[1].code + ")"
           )
           assert.ok(err.results[0].retries <= 1, "First task should be retried max one time. Retries: " + err.results[0].retries)
