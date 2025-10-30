@@ -87,13 +87,25 @@ describe("[argument-placeholders]", () => {
   })
 
   describe("Every '{1}', '{2}', '{@}' and '{*}' should be replaced by the arguments preceded by '--':", () => {
-    it("Node API", () => nodeApi("test-task:dump {1} {2} {3} {@} {*}", { arguments: ["1st", "2nd"] }).then(() => assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')))
+    it("Node API", () =>
+      nodeApi("test-task:dump {1} {2} {3} {@} {*}", { arguments: ["1st", "2nd"] }).then(() =>
+        assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')
+      ))
 
-    it("npm-run-all command", () => runAll(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() => assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')))
+    it("npm-run-all command", () =>
+      runAll(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() =>
+        assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')
+      ))
 
-    it("run-s command", () => runSeq(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() => assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')))
+    it("run-s command", () =>
+      runSeq(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() =>
+        assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')
+      ))
 
-    it("run-p command", () => runPar(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() => assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')))
+    it("run-p command", () =>
+      runPar(["test-task:dump {1} {2} {3} {@} {*}", "--", "1st", "2nd"]).then(() =>
+        assert.strictEqual(result(), '["1st","2nd","1st","2nd","1st 2nd"]')
+      ))
   })
 
   describe("'{1:-foo}' should be replaced by 'foo' if arguments are nothing:", () => {

@@ -5,16 +5,16 @@
  * @copyright 2025 Alec Mestroni.
  * See LICENSE file in root directory for full license.
  */
-'use strict'
+"use strict"
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-const assert = require('assert')
-const nodeApi = require('../lib')
-const BufferStream = require('./lib/buffer-stream')
-const util = require('./lib/util')
+const assert = require("assert")
+const nodeApi = require("../lib")
+const BufferStream = require("./lib/buffer-stream")
+const util = require("./lib/util")
 const runAll = util.runAll
 const runPar = util.runPar
 const runSeq = util.runSeq
@@ -23,9 +23,9 @@ const runSeq = util.runSeq
 // Test
 //------------------------------------------------------------------------------
 
-describe('[aggregated-output] npm-run-all', () => {
-  before(() => process.chdir('test-workspace'))
-  after(() => process.chdir('..'))
+describe("[aggregated-output] npm-run-all", () => {
+  before(() => process.chdir("test-workspace"))
+  after(() => process.chdir(".."))
 
   /**
    * create expected text
@@ -36,8 +36,8 @@ describe('[aggregated-output] npm-run-all', () => {
     return `[${term}]__[${term}]`
   }
 
-  describe('should not intermingle output of various commands', () => {
-    const EXPECTED_PARALLELIZED_TEXT = [createExpectedOutput('second'), createExpectedOutput('third'), createExpectedOutput('first'), ''].join('\n')
+  describe("should not intermingle output of various commands", () => {
+    const EXPECTED_PARALLELIZED_TEXT = [createExpectedOutput("second"), createExpectedOutput("third"), createExpectedOutput("first"), ""].join("\n")
 
     let stdout = null
 
@@ -45,8 +45,8 @@ describe('[aggregated-output] npm-run-all', () => {
       stdout = new BufferStream()
     })
 
-    it('Node API with parallel', async () => {
-      await nodeApi(['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000'], {
+    it("Node API with parallel", async () => {
+      await nodeApi(["test-task:delayed first 5000", "test-task:delayed second 1000", "test-task:delayed third 3000"], {
         stdout,
         parallel: true,
         silent: true,
@@ -55,9 +55,9 @@ describe('[aggregated-output] npm-run-all', () => {
       assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT)
     })
 
-    it('Node API without parallel should fail', async () => {
+    it("Node API without parallel should fail", async () => {
       try {
-        await nodeApi(['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000'], {
+        await nodeApi(["test-task:delayed first 5000", "test-task:delayed second 1000", "test-task:delayed third 3000"], {
           stdout,
           silent: true,
           aggregateOutput: true,
@@ -67,51 +67,51 @@ describe('[aggregated-output] npm-run-all', () => {
         assert.ok(/Invalid options.aggregateOutput; It requires parallel/i.test(err.message))
         return
       }
-      assert.fail('should fail')
+      assert.fail("should fail")
     })
 
-    it('npm-run-all command with parallel', async () => {
+    it("npm-run-all command with parallel", async () => {
       await runAll(
         [
-          '--parallel',
-          'test-task:delayed first 5000',
-          'test-task:delayed second 1000',
-          'test-task:delayed third 3000',
-          '--silent',
-          '--aggregate-output',
+          "--parallel",
+          "test-task:delayed first 5000",
+          "test-task:delayed second 1000",
+          "test-task:delayed third 3000",
+          "--silent",
+          "--aggregate-output",
         ],
         stdout
       )
       assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT)
     })
 
-    it('npm-run-all command without parallel should fail', async () => {
+    it("npm-run-all command without parallel should fail", async () => {
       try {
         await runAll(
-          ['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000', '--silent', '--aggregate-output'],
+          ["test-task:delayed first 5000", "test-task:delayed second 1000", "test-task:delayed third 3000", "--silent", "--aggregate-output"],
           stdout
         )
       } catch (_err) {
         return
       }
-      assert.fail('should fail')
+      assert.fail("should fail")
     })
 
-    it('run-s command should fail', async () => {
+    it("run-s command should fail", async () => {
       try {
         await runSeq(
-          ['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000', '--silent', '--aggregate-output'],
+          ["test-task:delayed first 5000", "test-task:delayed second 1000", "test-task:delayed third 3000", "--silent", "--aggregate-output"],
           stdout
         )
       } catch (_err) {
         return
       }
-      assert.fail('should fail')
+      assert.fail("should fail")
     })
 
-    it('run-p command', async () => {
+    it("run-p command", async () => {
       await runPar(
-        ['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000', '--silent', '--aggregate-output'],
+        ["test-task:delayed first 5000", "test-task:delayed second 1000", "test-task:delayed third 3000", "--silent", "--aggregate-output"],
         stdout
       )
       assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT)
