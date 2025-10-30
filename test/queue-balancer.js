@@ -28,7 +28,7 @@ const { readRuntimes, updateRuntimesFile, updateHistoryFromResults, queueReorgan
 //------------------------------------------------------------------------------
 
 describe('[queue-balancer]', () => {
-  const HISTORY_FILE = '.npm-run-all-next-runtimes.json'
+  const HISTORY_FILE = "./runtimes/file.json" 
 
   describe('[parallel]', () => {
     before(() => process.chdir('test-workspace'))
