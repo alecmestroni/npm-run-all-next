@@ -28,7 +28,7 @@ const { readRuntimes, updateRuntimesFile, updateHistoryFromResults, queueReorgan
 //------------------------------------------------------------------------------
 
 describe('[queue-balancer]', () => {
-  const HISTORY_FILE = "./runtimes/file.json" 
+  const HISTORY_FILE = '.npm-run-all-next-runtimes.json'
 
   describe('[parallel]', () => {
     before(() => process.chdir('test-workspace'))
@@ -167,6 +167,18 @@ describe('[queue-balancer]', () => {
 
       it('writes to custom file when specified', () => {
         const customFile = '.test-custom-runtimes.json'
+        const oldMap = {}
+        const measurements = { custom: [5] }
+        updateRuntimesFile(oldMap, measurements, customFile)
+        const out = JSON.parse(fs.readFileSync(customFile, 'utf8'))
+        assert.deepStrictEqual(out, { 
+          custom: { measurements: [5], avgRuntime: 5, count: 1 } 
+        })
+        // Clean up
+        fs.unlinkSync(customFile)
+      })
+      it('writes to custom folder when specified', () => {
+        const customFile = './folder/test-custom-runtimes.json'
         const oldMap = {}
         const measurements = { custom: [5] }
         updateRuntimesFile(oldMap, measurements, customFile)
