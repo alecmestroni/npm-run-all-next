@@ -48,7 +48,7 @@ const getTableRawElements = (results, string) => {
 // Test
 //------------------------------------------------------------------------------
 
-describe("[print-summary] npm-run-all", () => {
+describe("[print-summary] ", () => {
   before(() => process.chdir("test-workspace"))
   after(() => process.chdir(".."))
   let stdout
@@ -56,133 +56,131 @@ describe("[print-summary] npm-run-all", () => {
     stdout = new BufferStream()
     removeResult()
   })
-  describe("[printSummary]", () => {
-    describe("core", () => {
-      it("styles a successful (exit code 0) row in white", () => {
-        const results = [{ name: "successTask", code: 0, retries: 0, durationMs: 1500 }]
-        const rowLine = printSummary(results)
-          .split("\n")
-          .find((l) => l.includes("successTask"))
-        assert(rowLine.startsWith(ansiStyles.white.open))
-        assert(rowLine.endsWith(ansiStyles.white.close))
-        assert(rowLine.includes("successTask"))
-        assert(rowLine.includes("0"))
-        assert(rowLine.includes("0"))
-        assert(rowLine.includes("1.50"))
-      })
+  describe("core", () => {
+    it("styles a successful (exit code 0) row in white", () => {
+      const results = [{ name: "successTask", code: 0, retries: 0, durationMs: 1500 }]
+      const rowLine = printSummary(results)
+        .split("\n")
+        .find((l) => l.includes("successTask"))
+      assert(rowLine.startsWith(ansiStyles.white.open))
+      assert(rowLine.endsWith(ansiStyles.white.close))
+      assert(rowLine.includes("successTask"))
+      assert(rowLine.includes("0"))
+      assert(rowLine.includes("0"))
+      assert(rowLine.includes("1.50"))
+    })
 
-      it('styles a forced kill (exit code 137) row in gray and shows "(Killed)"', () => {
-        const results = [{ name: "forcedTask", code: 137, retries: 1, durationMs: 123 }]
-        const rowLine = printSummary(results)
-          .split("\n")
-          .find((l) => l.includes("forcedTask"))
-        assert(rowLine.startsWith(ansiStyles.gray.open))
-        assert(rowLine.endsWith(ansiStyles.gray.close))
-        assert(rowLine.includes("137 (Killed)"))
-        assert(rowLine.includes("1"))
-        assert(rowLine.includes("0.12"))
-      })
+    it('styles a forced kill (exit code 137) row in gray and shows "(Killed)"', () => {
+      const results = [{ name: "forcedTask", code: 137, retries: 1, durationMs: 123 }]
+      const rowLine = printSummary(results)
+        .split("\n")
+        .find((l) => l.includes("forcedTask"))
+      assert(rowLine.startsWith(ansiStyles.gray.open))
+      assert(rowLine.endsWith(ansiStyles.gray.close))
+      assert(rowLine.includes("137 (Killed)"))
+      assert(rowLine.includes("1"))
+      assert(rowLine.includes("0.12"))
+    })
 
-      it("styles a failing (non-zero, non-137) row in red", () => {
-        const results = [{ name: "failTask", code: 2, retries: 3, durationMs: 900 }]
-        const rowLine = printSummary(results)
-          .split("\n")
-          .find((l) => l.includes("failTask"))
-        assert(rowLine.startsWith(ansiStyles.red.open))
-        assert(rowLine.endsWith(ansiStyles.red.close))
-        assert(rowLine.includes("2"))
-        assert(rowLine.includes("3"))
-        assert(rowLine.includes("0.90"))
-      })
+    it("styles a failing (non-zero, non-137) row in red", () => {
+      const results = [{ name: "failTask", code: 2, retries: 3, durationMs: 900 }]
+      const rowLine = printSummary(results)
+        .split("\n")
+        .find((l) => l.includes("failTask"))
+      assert(rowLine.startsWith(ansiStyles.red.open))
+      assert(rowLine.endsWith(ansiStyles.red.close))
+      assert(rowLine.includes("2"))
+      assert(rowLine.includes("3"))
+      assert(rowLine.includes("0.90"))
+    })
 
-      it("aligns columns correctly for mixed-length entries", () => {
-        const results = [
-          { name: "short", code: 0, retries: 0, durationMs: 1000 },
-          { name: "muchLongerTaskName", code: 1, retries: 2, durationMs: 2000 },
-        ]
-        const rawLines = printSummary(results)
-          .split("\n")
-          .filter((l) => l)
+    it("aligns columns correctly for mixed-length entries", () => {
+      const results = [
+        { name: "short", code: 0, retries: 0, durationMs: 1000 },
+        { name: "muchLongerTaskName", code: 1, retries: 2, durationMs: 2000 },
+      ]
+      const rawLines = printSummary(results)
+        .split("\n")
+        .filter((l) => l)
 
-        const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
+      const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
 
-        const lines = rawLines.map(stripAnsi)
+      const lines = rawLines.map(stripAnsi)
 
-        const headerLine = lines.find((l) => l.includes("Task") && l.includes("FinalExitCode"))
-        const headerCols = headerLine.split("|").slice(1, -1)
+      const headerLine = lines.find((l) => l.includes("Task") && l.includes("FinalExitCode"))
+      const headerCols = headerLine.split("|").slice(1, -1)
 
-        const dataLines = lines.filter((l) => /short|muchLongerTaskName/.test(l))
+      const dataLines = lines.filter((l) => /short|muchLongerTaskName/.test(l))
 
-        dataLines.forEach((line) => {
-          const cols = line.split("|").slice(1, -1)
-          cols.forEach((cell, i) => {
-            assert.strictEqual(cell.length, headerCols[i].length, `Colonna ${i} non allineata: expected ${headerCols[i].length}, got ${cell.length}`)
-          })
+      dataLines.forEach((line) => {
+        const cols = line.split("|").slice(1, -1)
+        cols.forEach((cell, i) => {
+          assert.strictEqual(cell.length, headerCols[i].length, `Colonna ${i} non allineata: expected ${headerCols[i].length}, got ${cell.length}`)
         })
       })
+    })
 
-      it("prints only headers when results is empty", () => {
-        const lines = printSummary([])
-          .split("\n")
-          .filter((l) => l)
-        assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
-        const [divider, printSummaryTable, divider2, header, separator, divider3, est] = lines
+    it("prints only headers when results is empty", () => {
+      const lines = printSummary([])
+        .split("\n")
+        .filter((l) => l)
+      assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
+      const [divider, printSummaryTable, divider2, header, separator, divider3, est] = lines
 
-        const summaryInner = printSummaryTable.slice(1, -1).trim()
-        assert.strictEqual(summaryInner, "Summary")
-        assert.strictEqual(divider, divider2)
-        assert.strictEqual(divider2, divider3)
-        assert(header.includes("Task"))
-        assert(separator.includes("-".repeat(header.split("|")[1].trim().length)))
-        assert.strictEqual(est, "| Estimated Total Time:              0.00 s|")
-      })
+      const summaryInner = printSummaryTable.slice(1, -1).trim()
+      assert.strictEqual(summaryInner, "Summary")
+      assert.strictEqual(divider, divider2)
+      assert.strictEqual(divider2, divider3)
+      assert(header.includes("Task"))
+      assert(separator.includes("-".repeat(header.split("|")[1].trim().length)))
+      assert.strictEqual(est, "| Estimated Total Time:              0.00 s|")
+    })
 
-      it("formats estimated total time in seconds when <60s", () => {
-        const results = [
-          { name: "a", code: 0, retries: 0, durationMs: 1500 },
-          { name: "b", code: 0, retries: 0, durationMs: 2500 },
-        ]
-        const lines = printSummary(results)
-          .split("\n")
-          .filter((l) => l)
-        const penult = lines[lines.length - 2]
-        assert.strictEqual(penult, "| Estimated Total Time:              4.00 s|")
-      })
+    it("formats estimated total time in seconds when <60s", () => {
+      const results = [
+        { name: "a", code: 0, retries: 0, durationMs: 1500 },
+        { name: "b", code: 0, retries: 0, durationMs: 2500 },
+      ]
+      const lines = printSummary(results)
+        .split("\n")
+        .filter((l) => l)
+      const penult = lines[lines.length - 2]
+      assert.strictEqual(penult, "| Estimated Total Time:              4.00 s|")
+    })
 
-      it("converts estimated total time to minutes when ≥60s", () => {
-        const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
-        const lines = printSummary(results)
-          .split("\n")
-          .filter((l) => l)
-        const penult = lines[lines.length - 2]
-        assert.strictEqual(penult, "| Estimated Total Time:            1.50 min|")
-      })
+    it("converts estimated total time to minutes when ≥60s", () => {
+      const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
+      const lines = printSummary(results)
+        .split("\n")
+        .filter((l) => l)
+      const penult = lines[lines.length - 2]
+      assert.strictEqual(penult, "| Estimated Total Time:            1.50 min|")
+    })
 
-      it("prints actual total time when provided", () => {
-        const results = [{ name: "x", code: 0, retries: 0, durationMs: 1000 }]
-        const lines = printSummary(results, 2000)
-          .split("\n")
-          .filter((l) => l)
-        const penult = lines[lines.length - 2]
-        const terzult = lines[lines.length - 3]
-        assert.strictEqual(penult, "| Actual Total Time:                 2.00 s|")
-        assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
-      })
+    it("prints actual total time when provided", () => {
+      const results = [{ name: "x", code: 0, retries: 0, durationMs: 1000 }]
+      const lines = printSummary(results, 2000)
+        .split("\n")
+        .filter((l) => l)
+      const penult = lines[lines.length - 2]
+      const terzult = lines[lines.length - 3]
+      assert.strictEqual(penult, "| Actual Total Time:                 2.00 s|")
+      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
+    })
 
-      it("converts actual total time to minutes when ≥60s", () => {
-        const results = [{ name: "y", code: 0, retries: 0, durationMs: 1000 }]
-        const lines = printSummary(results, 120000)
-          .split("\n")
-          .filter((l) => l)
-        const penult = lines[lines.length - 2]
-        const terzult = lines[lines.length - 3]
-        assert.strictEqual(penult, "| Actual Total Time:               2.00 min|")
-        assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
-      })
+    it("converts actual total time to minutes when ≥60s", () => {
+      const results = [{ name: "y", code: 0, retries: 0, durationMs: 1000 }]
+      const lines = printSummary(results, 120000)
+        .split("\n")
+        .filter((l) => l)
+      const penult = lines[lines.length - 2]
+      const terzult = lines[lines.length - 3]
+      assert.strictEqual(penult, "| Actual Total Time:               2.00 min|")
+      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
     })
   })
 
-  describe("[print-summary]", () => {
+  describe("npm-run-all", () => {
     describe("should not print anything when no tasks are provided", () => {
       it("Node API ", async () => {
         await nodeApi([], { printSummaryTable: true })
@@ -281,9 +279,35 @@ describe("[print-summary] npm-run-all", () => {
         })
       })
     })
+    describe("should print summary table correctly when running in parallel", () => {
+      it("Node API", async () => {
+        await nodeApi(["test-task:append a", "test-task:append b"], { parallel: 2, printSummaryTable: true, stdout })
+        const [, taskName1, exitCode1, retries1] = getTableRawElements(stdout.value, "test-task:append a")
+        const [, taskName2, exitCode2, retries2] = getTableRawElements(stdout.value, "test-task:append b")
+        assert.strictEqual(taskName1, "test-task:append a")
+        assert.strictEqual(exitCode1, "0")
+        assert.strictEqual(retries1, "0")
+        assert.strictEqual(taskName2, "test-task:append b")
+        assert.strictEqual(exitCode2, "0")
+        assert.strictEqual(retries2, "0")
+      })
+    })
+    describe("should print summary table correctly when running in sequential", () => {
+      it("Node API", async () => {
+        await nodeApi(["test-task:append a", "test-task:append b"], { singleMode: true, printSummaryTable: true, stdout })
+        const [, taskName1, exitCode1, retries1] = getTableRawElements(stdout.value, "test-task:append a")
+        const [, taskName2, exitCode2, retries2] = getTableRawElements(stdout.value, "test-task:append b")
+        assert.strictEqual(taskName1, "test-task:append a")
+        assert.strictEqual(exitCode1, "0")
+        assert.strictEqual(retries1, "0")
+        assert.strictEqual(taskName2, "test-task:append b")
+        assert.strictEqual(exitCode2, "0")
+        assert.strictEqual(retries2, "0")
+      })
+    })
   })
 
-  describe("[print-summary + sequential]", () => {
+  describe("npm-run-all + sequential", () => {
     describe("should print lines based on script number", () => {
       const runners = [
         ["Node API", async () => nodeApi(["test-task:fast a", "test-task:fastError"], { printSummaryTable: true, stdout })],
@@ -349,7 +373,7 @@ describe("[print-summary] npm-run-all", () => {
     })
   })
 
-  describe("[print-summary + retries + parallel]", () => {
+  describe("npm-run-all + retries + parallel", () => {
     describe("should print summary table after parallel execution (succeed):", () => {
       const retries = 1
 
@@ -663,32 +687,6 @@ describe("[print-summary] npm-run-all", () => {
           assertjobsFail()
         })
       })
-    })
-  })
-  describe("should print summary table correctly when running in parallel", () => {
-    it("Node API", async () => {
-      await nodeApi(["test-task:append a", "test-task:append b"], { parallel: 2, printSummaryTable: true, stdout })
-      const [, taskName1, exitCode1, retries1] = getTableRawElements(stdout.value, "test-task:append a")
-      const [, taskName2, exitCode2, retries2] = getTableRawElements(stdout.value, "test-task:append b")
-      assert.strictEqual(taskName1, "test-task:append a")
-      assert.strictEqual(exitCode1, "0")
-      assert.strictEqual(retries1, "0")
-      assert.strictEqual(taskName2, "test-task:append b")
-      assert.strictEqual(exitCode2, "0")
-      assert.strictEqual(retries2, "0")
-    })
-  })
-  describe("should print summary table correctly when running in sequential", () => {
-    it("Node API", async () => {
-      await nodeApi(["test-task:append a", "test-task:append b"], { singleMode: true, printSummaryTable: true, stdout })
-      const [, taskName1, exitCode1, retries1] = getTableRawElements(stdout.value, "test-task:append a")
-      const [, taskName2, exitCode2, retries2] = getTableRawElements(stdout.value, "test-task:append b")
-      assert.strictEqual(taskName1, "test-task:append a")
-      assert.strictEqual(exitCode1, "0")
-      assert.strictEqual(retries1, "0")
-      assert.strictEqual(taskName2, "test-task:append b")
-      assert.strictEqual(exitCode2, "0")
-      assert.strictEqual(retries2, "0")
     })
   })
 })

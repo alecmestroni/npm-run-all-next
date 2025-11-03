@@ -34,18 +34,11 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     const argv = parseCLIArgs(args, { parallel: true }, { singleMode: true })
     const group = argv.lastGroup
 
-    // If --tasks-file is set, load tasks and override patterns
-    let tasksFromFile = null
-    if (argv.tasksFile) {
-      tasksFromFile = loadTasksFile(argv.tasksFile)
-    }
-    const patterns = tasksFromFile ?? group?.patterns ?? []
-
-    if (patterns.length === 0) {
+    if (!group || !group.patterns || group.patterns.length === 0) {
       return Promise.resolve(null)
     }
 
-    const promise = runAll(patterns, {
+    const promise = runAll(group.patterns, {
       stdout,
       stderr,
       stdin,

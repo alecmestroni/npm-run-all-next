@@ -1,5 +1,6 @@
 /.nyc_output
 /coverage
+/coverage-old
 /jsdoc
 /node_modules
 /test-workspace/tasks/lib

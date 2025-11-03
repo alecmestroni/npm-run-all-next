@@ -64,6 +64,16 @@ describe("[tasks-file] npm-run-all", () => {
     }
     assert.fail("Expected task to fail after retries")
   })
+  it("runAll should support balancer with tasks-file", async () => {
+    writeTasksFile(["test-task:append1 a"])
+    await runAll(["--parallel", "--tasks-file", TASKS_FILE, "--retries", "2", "--balancer"])
+    assert.strictEqual((result().match(/a/g) || []).length, 1)
+  })
+  it("runPar should support balancer with tasks-file", async () => {
+    writeTasksFile(["test-task:append1 a"])
+    await runPar(["--tasks-file", TASKS_FILE, "--retries", "2", "--balancer"])
+    assert.strictEqual((result().match(/a/g) || []).length, 1)
+  })
 
   it("should error if file is not found", async () => {
     removeTasksFile()
@@ -98,10 +108,10 @@ describe("[tasks-file] npm-run-all", () => {
     assert.fail("Expected error for invalid JSON syntax")
   })
 
-  it("should ignore patterns if tasks-file is set", async () => {
+  it("should add patterns if specified after tasks-file", async () => {
     writeTasksFile(["test-task:append1 a"])
     await runAll(["--tasks-file", TASKS_FILE, "test-task:append2 b"])
-    assert.strictEqual(result(), "a")
+    assert.strictEqual(result(), "abb")
   })
 
   it("should run nothing if tasks-file is an empty array", async () => {

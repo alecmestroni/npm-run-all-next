@@ -7,6 +7,8 @@
  */
 "use strict"
 
+const loadTasksFile = require("./load-tasks-file")
+
 //------------------------------------------------------------------------------
 // Helpers
 //------------------------------------------------------------------------------
@@ -48,6 +50,15 @@ function addGroup(groups, initialValues) {
 }
 
 /**
+ * Init a new group into `groups`.
+ */
+function initGroups(set) {
+  if (set.groups.length === 0) {
+    addGroup(set.groups, set.initialValues)
+  }
+}
+
+/**
  * Holds parsed CLI arguments.
  */
 class ArgumentSet {
@@ -68,8 +79,7 @@ class ArgumentSet {
     this.retries = (initialValues && initialValues.retries) || 0
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
     this.runtimeFile = (initialValues && initialValues.runtimeFile) || null
-
-    addGroup(this.groups, initialValues)
+    this.initialValues = initialValues
   }
 
   get lastGroup() {
@@ -182,8 +192,11 @@ function parseCLIArgsCore(set, args) {
         break
 
       case "--tasks-file":
-        set.tasksFile = args[++i]
-        if (!set.tasksFile) throw new Error("Missing value for --tasks-file")
+        initGroups(set)
+        const tasksFromFile = loadTasksFile(args[++i])
+        set.lastGroup.patterns.push(...tasksFromFile)
+
+        if (!tasksFromFile) throw new Error("Missing tasks file for --tasks-file")
         break
 
       default: {
@@ -203,6 +216,7 @@ function parseCLIArgsCore(set, args) {
         } else if (arg[0] === "-") {
           throw new Error(`Invalid Option: ${arg}`)
         } else {
+          initGroups(set)
           set.lastGroup.patterns.push(arg)
         }
       }

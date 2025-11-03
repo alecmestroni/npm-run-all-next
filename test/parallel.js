@@ -154,6 +154,13 @@ describe("[parallel]", () => {
     })
   })
 
+  describe("should support parallel as a number via NodeAPI", () => {
+    it("Node API", async () => {
+      await nodeApi(["test-task:*:a", "*:append:a"], { parallel: 2 })
+      assert.strictEqual(result(), "aa")
+    })
+  })
+
   describe("should remove intersected tasks from two or more patterns:", () => {
     it("Node API", async () => {
       await nodeApi(["test-task:*:a", "*:append:a"], { parallel: true })
