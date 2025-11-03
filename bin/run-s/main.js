@@ -39,15 +39,13 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     if (argv.tasksFile) {
       tasksFromFile = loadTasksFile(argv.tasksFile)
     }
-    const patterns = tasksFromFile ? [] : group.patterns
-    const taskList = tasksFromFile || null
+    const patterns = tasksFromFile ?? group?.patterns ?? []
 
-    if (patterns.length === 0 && !taskList) {
+    if (patterns.length === 0) {
       return Promise.resolve(null)
     }
 
     const promise = runAll(patterns, {
-      taskList,
       stdout,
       stderr,
       stdin,

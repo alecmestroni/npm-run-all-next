@@ -33,22 +33,20 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     const stdin = process.stdin
     const argv = parseCLIArgs(args)
 
-    // If --tasks-file is set, load tasks and override patterns for all groups
-    let tasksFromFile = null
-    if (argv.tasksFile) {
-      tasksFromFile = loadTasksFile(argv.tasksFile)
-    }
-
     const promise = argv.groups.reduce((prev, group) => {
+      // If --tasks-file is set, load tasks and override patterns for all groups
+      let tasksFromFile = null
+      if (argv.tasksFile) {
+        tasksFromFile = loadTasksFile(argv.tasksFile)
+      }
       // If tasksFile is set, ignore patterns and use tasksFromFile
-      const patterns = tasksFromFile ? [] : group.patterns
-      const taskList = tasksFromFile || null
-      if (patterns.length === 0 && !taskList) {
+      const patterns = tasksFromFile ?? group?.patterns ?? []
+
+      if (patterns.length === 0) {
         return prev
       }
       return prev.then(() =>
         runAll(patterns, {
-          taskList,
           stdout,
           stderr,
           stdin,
