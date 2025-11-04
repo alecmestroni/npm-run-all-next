@@ -62,5 +62,18 @@ const nodeVersion = Number(process.versions.node.split(".")[0])
       await exec("yarn", ["run", "test-task:yarn"])
       assert.strictEqual(result(), "aabb")
     })
+
+    it("should pass --silent flag to yarn when using --silent option", async () => {
+      // Test per la riga 154 di run-task.js: spawnArgs.push("--silent")
+      // Verifica che quando si usa --silent con yarn, il flag viene correttamente passato
+      await exec("node", ["../bin/npm-run-all/index.js", "test-task:append:a", "--npm-path", "yarn", "--silent"])
+      assert.strictEqual(result(), "a")
+    })
+
+    it("should work with yarn without --silent flag", async () => {
+      // Test di controllo: senza --silent dovrebbe funzionare comunque
+      await exec("node", ["../bin/npm-run-all/index.js", "test-task:append:b", "--npm-path", "yarn"])
+      assert.strictEqual(result(), "b")
+    })
   })
 })
