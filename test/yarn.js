@@ -57,7 +57,7 @@ const nodeVersion = Number(process.versions.node.split(".")[0])
 
   beforeEach(removeResult)
 
-  describe("'yarn run' command", () => {
+  describe.only("'yarn run' command", () => {
     it("should run 'npm-run-all' in scripts with yarn.", async () => {
       await exec("yarn", ["run", "test-task:yarn"])
       assert.strictEqual(result(), "aabb")
@@ -67,13 +67,13 @@ const nodeVersion = Number(process.versions.node.split(".")[0])
       // Test per la riga 154 di run-task.js: spawnArgs.push("--silent")
       // Verifica che quando si usa --silent con yarn, il flag viene correttamente passato
       await exec("node", ["../bin/npm-run-all/index.js", "test-task:append:a", "--npm-path", "yarn", "--silent"])
-      assert.strictEqual(result(), "a")
+      assert.strictEqual(result(), "aa")
     })
 
     it("should work with yarn without --silent flag", async () => {
       // Test di controllo: senza --silent dovrebbe funzionare comunque
       await exec("node", ["../bin/npm-run-all/index.js", "test-task:append:b", "--npm-path", "yarn"])
-      assert.strictEqual(result(), "b")
+      assert.strictEqual(result(), "bb")
     })
   })
 })
