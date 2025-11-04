@@ -195,7 +195,7 @@ describe("[common]", () => {
     })
 
     it("should return 0 for unknown signals or missing argument", () => {
-      assert.strictEqual(convertSignal("SIGTERM"), 0) // non definito nella mappa
+      assert.strictEqual(convertSignal("SIGTERM"), 0)
       assert.strictEqual(convertSignal("NON_EXISTENT"), 0)
       assert.strictEqual(convertSignal(), 0)
     })
@@ -410,7 +410,6 @@ describe("[common]", () => {
       const buf = new BufferStream()
       buf.isTTY = true
       await nodeApi("test-task:stdout", { printLabel: true, stdout: buf })
-      // Codici ANSI per colore: \u001b[ (ESC [)
       assert.match(buf.value, /\u001b\[/, "Output should contain ANSI color codes")
     })
 
@@ -422,7 +421,6 @@ describe("[common]", () => {
     })
   })
 
-  // Test end-to-end per test-task:nest-parallel:error
   describe("error handling for nested-parallel weight calculation", () => {
     it("should throw error with correct message for invalid --jobs value", async () => {
       try {
