@@ -13,7 +13,6 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
-const loadTasksFile = require("../common/load-tasks-file")
 
 //------------------------------------------------------------------------------
 // Public Interface
