@@ -204,44 +204,44 @@ run-p build:{a,b,c} # ↔> run-p build:a build:b build:c
 ## 📦 Node API
 
 ```js
-const { runTasks } = require("npm-run-all-next")
+const { runTasks } = require('npm-run-all-next');
 
-runTasks(["clean", "lint", "build:*"], {
+runTasks(['clean', 'lint', 'build:*'], {
   parallel: true,
   retries: 2,
   killOthersOnFail: true,
   printSummaryTable: true,
 })
-  .then((results) => {
+  .then(results => {
     // results: [{ name: 'clean', code: 0 }, …]
-    console.log("✅ Done:", results)
+    console.log('✅ Done:', results);
   })
-  .catch((err) => {
-    console.error("❌ Failed:", err.results)
-  })
+  .catch(err => {
+    console.error('❌ Failed:', err.results);
+  });
 ```
 
 Options mirror CLI flags:
 
 ```ts
 interface RunOptions {
-  parallel?: boolean
-  aggregateOutput?: boolean
-  balancer?: boolean
-  continueOnError?: boolean
-  killOthersOnFail?: boolean
-  race?: boolean
-  jobs?: number
-  retries?: number
-  printSummaryTable?: boolean
-  printLabel?: boolean
-  printName?: boolean
-  npmPath?: string
-  silent?: boolean
-  stdin?: Stream
-  stdout?: Stream
-  stderr?: Stream
-  taskList?: string[]
+  parallel?: boolean;
+  aggregateOutput?: boolean;
+  balancer?: boolean;
+  continueOnError?: boolean;
+  killOthersOnFail?: boolean;
+  race?: boolean;
+  jobs?: number;
+  retries?: number;
+  printSummaryTable?: boolean;
+  printLabel?: boolean;
+  printName?: boolean;
+  npmPath?: string;
+  silent?: boolean;
+  stdin?: Stream;
+  stdout?: Stream;
+  stderr?: Stream;
+  taskList?: string[];
 }
 ```
 
@@ -261,7 +261,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 | index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
 | ----- | ------------- | ------- | ------- | ---------- |
 
-
 [npm-run-all]: docs/npm-run-all.md
 [run-s]: docs/run-s.md
 [run-p]: docs/run-p.md
@@ -272,3 +271,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 ## 📄 License
 
 MIT © 2025 Alec Mestroni
+
+test commit
