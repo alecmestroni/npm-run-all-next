@@ -1,6 +1,6 @@
 {
   "name": "npm-run-all-next",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A CLI tool to run multiple npm-scripts in parallel or sequentially, with support for retrying failed tasks.",
   "bin": {
     "run-p": "bin/run-p/index.js",
@@ -38,6 +38,7 @@
     "pidtree": "^0.6.0",
     "read-pkg": "^5.2.0",
     "shell-quote": "^1.8.2",
+    "string.prototype.padend": "^3.1.6",
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
