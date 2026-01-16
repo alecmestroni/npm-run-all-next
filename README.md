@@ -271,5 +271,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 ## 📄 License
 
 MIT © 2025 Alec Mestroni
-
-test commit
