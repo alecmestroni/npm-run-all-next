@@ -4,9 +4,17 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      runTest:
+        description: 'Run tests before publishing'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   test-and-coverage:
+    if: ${{ inputs.runTest != false }}
     name: Test & Coverage
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +51,7 @@ jobs:
 
   publish-gpr:
     needs: test-and-coverage
+    if: ${{ always() && (needs.test-and-coverage.result == 'success' || needs.test-and-coverage.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
