@@ -1,20 +1,28 @@
 name: CI, Coverage & Publish
 
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
   workflow_dispatch:
     inputs:
       runTest:
-        description: 'Run tests before publishing'
+        description: 'Run tests'
         required: false
-        default: true
+        default: false
+        type: boolean
+      runPublish:
+        description: 'Run publish'
+        required: false
+        default: false
         type: boolean
 
 jobs:
   test-and-coverage:
-    if: ${{ github.event_name == 'push' || inputs.runTest == true }}
+    if: ${{ github.event_name == 'pull_request' || inputs.runTest == true }}
     name: Test & Coverage
     runs-on: ubuntu-latest
     steps:
@@ -50,18 +58,66 @@ jobs:
           fail_ci_if_error: true
 
   publish-gpr:
-    needs: test-and-coverage
-    if: ${{ always() && (needs.test-and-coverage.result == 'success' || needs.test-and-coverage.result == 'skipped') }}
+    if: ${{ github.event_name == 'push' || inputs.runPublish == true }}
+    name: Publish to npm
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get PR number
+        id: pr
+        if: github.event_name == 'push'
+        run: |
+          PR_NUMBER=$(gh pr list --search "${{ github.sha }}" --state merged --json number --jq '.[0].number')
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+      
       - run: npm ci
-      - run: npm publish
+      
+      - name: Publish package
+        id: publish
+        run: |
+          npm publish
+          echo "success=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Comment on PR - Success
+        if: steps.pr.outputs.number && steps.publish.outputs.success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }},
+              body: '🎉 Package published successfully to npm!\n\nPublished version: `' + require('./package.json').version + '`\n\n✅ Available at: https://www.npmjs.com/package/npm-run-all-next'
+            })
+      
+      - name: Comment on PR - Failure
+        if: steps.pr.outputs.number && steps.publish.outputs.success != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }},
+              body: '❌ Package publication to npm failed.\n\nCheck the action logs for more details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            })
+      
+      - name: Fail if publish failed
+        if: steps.publish.outputs.success != 'true'
+        run: exit 1
 
