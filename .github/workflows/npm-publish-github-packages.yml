@@ -14,7 +14,7 @@ on:
 
 jobs:
   test-and-coverage:
-    if: ${{ inputs.runTest != false }}
+    if: ${{ github.event_name == 'push' || inputs.runTest == true }}
     name: Test & Coverage
     runs-on: ubuntu-latest
     steps:
