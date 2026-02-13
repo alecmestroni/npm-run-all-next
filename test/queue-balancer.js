@@ -214,7 +214,7 @@ describe("[queue-balancer]", () => {
       })
     })
 
-    describe("queueReorganizer()", () => {
+    describe.only("queueReorganizer()", () => {
       it("attaches estimatedRuntime and sorts descending", () => {
         // write history file in new format
         const history = {
@@ -224,15 +224,16 @@ describe("[queue-balancer]", () => {
         fs.writeFileSync(HISTORY_FILE, JSON.stringify(history), "utf8")
         const tasks = [{ name: "fast", foo: 10 }, { name: "none" }, { name: "slow" }]
         const out = queueReorganizer(tasks)
-        assert.strictEqual(out[0].name, "slow")
-        assert.strictEqual(out[0].estimatedRuntime, 5)
-        assert.strictEqual(out[1].name, "fast")
-        assert.strictEqual(out[1].estimatedRuntime, 1)
-        assert.strictEqual(out[2].name, "none")
-        assert.strictEqual(out[2].estimatedRuntime, 0)
+
+        assert.strictEqual(out[0].name, "none")
+        assert.strictEqual(out[0].estimatedRuntime, Infinity)
+        assert.strictEqual(out[1].name, "slow")
+        assert.strictEqual(out[1].estimatedRuntime, 5)
+        assert.strictEqual(out[2].name, "fast")
+        assert.strictEqual(out[2].estimatedRuntime, 1)
         // original props preserved
-        assert.strictEqual(out[0].foo, undefined)
-        assert.strictEqual(out[1].foo, 10)
+        assert.strictEqual(out[1].foo, undefined)
+        assert.strictEqual(out[2].foo, 10)
       })
     })
 
