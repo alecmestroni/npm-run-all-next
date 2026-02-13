@@ -21,10 +21,37 @@ on:
         type: boolean
 
 jobs:
+  check-version:
+    if: ${{ github.event_name == 'pull_request' || inputs.runTest == true }}
+    name: Check Version Publishable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check if version is already published
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          echo "Checking if $PACKAGE_NAME@$PACKAGE_VERSION is already published..."
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "❌ Error: Version $PACKAGE_VERSION is already published on npm!"
+            echo "Please bump the version in package.json before merging."
+            exit 1
+          else
+            echo "✅ Version $PACKAGE_VERSION is available for publishing"
+          fi
+
   test-and-coverage:
     if: ${{ github.event_name == 'pull_request' || inputs.runTest == true }}
     name: Test & Coverage
     runs-on: ubuntu-latest
+    needs: check-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
