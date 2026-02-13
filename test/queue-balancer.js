@@ -214,7 +214,7 @@ describe("[queue-balancer]", () => {
       })
     })
 
-    describe.only("queueReorganizer()", () => {
+    describe("queueReorganizer()", () => {
       it("attaches estimatedRuntime and sorts descending", () => {
         // write history file in new format
         const history = {
