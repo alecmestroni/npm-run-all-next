@@ -54,7 +54,7 @@ describe("[runtime-file] npm-run-all", () => {
     assert.ok(possible.includes(result()), `Expected one of ${JSON.stringify(possible)}, received ${JSON.stringify(result())}`)
   })
 
-  it.only("should run tasks with runtime config (run-p) and respect balancer order", async () => {
+  it("should run tasks with runtime config (run-p) and respect balancer order", async () => {
     writeFakeRuntimes({
       'test-task:append1 a': { measurements: [0.1], avgRuntime: 0.1, count: 1 },
       'test-task:append2 b': { measurements: [2], avgRuntime: 2, count: 1 },
