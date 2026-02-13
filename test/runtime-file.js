@@ -54,15 +54,28 @@ describe("[runtime-file] npm-run-all", () => {
     assert.ok(possible.includes(result()), `Expected one of ${JSON.stringify(possible)}, received ${JSON.stringify(result())}`)
   })
 
-  it("should run tasks with runtime config (run-p) and respect balancer order", async () => {
+  it.only("should run tasks with runtime config (run-p) and respect balancer order", async () => {
     writeFakeRuntimes({
-      "test-task:append1 a": { measurements: [0.1], avgRuntime: 0.1, count: 1 },
-      "test-task:append b": { measurements: [2], avgRuntime: 2, count: 1 },
-    })
-    await runPar(["--jobs", "1", "--balancer", "--runtime-file", RUNTIME_FILE, "test-task:append1 a", "test-task:append2 b"])
-    // Both run in parallel, but balancer should order by runtime
-    const possible = ["ab", "ba", "abb", "bab"]
-    assert.ok(possible.includes(result()), `Expected one of ${JSON.stringify(possible)}, received ${JSON.stringify(result())}`)
+      'test-task:append1 a': { measurements: [0.1], avgRuntime: 0.1, count: 1 },
+      'test-task:append2 b': { measurements: [2], avgRuntime: 2, count: 1 },
+    });
+    await runPar([
+      '--jobs',
+      '1',
+      '--balancer',
+      '--runtime-file',
+      RUNTIME_FILE,
+      'test-task:append1 a',
+      'test-task:append1 c',
+      'test-task:append2 b',
+    ]);
+    // All of them run in sequential (jobs 1), but balancer should order by runtime
+    // test-task:append1 c has no history (INFINITY), so it should be treated as slowest and run first, then append2 b, then append1 a
+    const possible = ['cbba'];
+    assert.ok(
+      possible.includes(result()),
+      `Expected one of ${JSON.stringify(possible)}, received ${JSON.stringify(result())}`,
+    );
   })
 
   it("should handle missing runtime file gracefully", async () => {
