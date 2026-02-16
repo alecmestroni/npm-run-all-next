@@ -145,7 +145,7 @@ describe('[aggregated] output', () => {
   });
 });
 
-describe.only('[aggregate] table', () => {
+describe('[aggregate] table', () => {
   before(() => process.chdir('test-workspace'));
   after(() => process.chdir('..'));
 
