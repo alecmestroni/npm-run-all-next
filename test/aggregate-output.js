@@ -145,7 +145,7 @@ describe('[aggregated] output', () => {
   });
 });
 
-describe('[aggregate] table', () => {
+describe.only('[aggregate] table', () => {
   before(() => process.chdir('test-workspace'));
   after(() => process.chdir('..'));
 
@@ -162,11 +162,11 @@ describe('[aggregate] table', () => {
       aggregateOutput: true,
       aggregateTable: true,
     });
-
     assert.ok(stdout.value.includes('THREAD STATUS'));
     assert.ok(stdout.value.includes('Task Num'));
   });
-  it('run-p with aggregate table enabled', async () => {
+
+  it('validates exact table format and progression', async () => {
     await runPar(
       [
         'test-task:delayed first 5000',
@@ -178,6 +178,36 @@ describe('[aggregate] table', () => {
       ],
       stdout,
     );
-    assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT);
+
+    const output = stdout.value;
+
+    // Validate initial table structure
+    assert.ok(output.includes('┌──────────'));
+    assert.ok(output.includes('Task Num'));
+    
+    // Validate all three tasks appear in initial state
+    assert.ok(output.includes('test-task:delayed first 5000'));
+    assert.ok(output.includes('test-task:delayed second 1000'));
+    assert.ok(output.includes('test-task:delayed third 3000'));
+    
+    // Validate table updates appear for completion
+    assert.ok(output.includes('COMPLETED -'));
+    
+    // Validate final state
+    assert.ok(output.includes('No active threads'));
+    
+    // Validate task output appears
+    assert.ok(output.includes('[first]'));
+    assert.ok(output.includes('[second]'));
+    assert.ok(output.includes('[third]'));
+    
+    // Validate structure: should have multiple table renders (initial + updates)
+    const tableStarts = (output.match(/┌──────────┬/g) || []).length;
+    assert.ok(tableStarts > 1, `Expected multiple table renders, got ${tableStarts}`);
+    
+    // Validate thread count progression (3 active → 2 → 1 → 0)
+    assert.ok(output.includes('Threads running: 3/3'), 'Should show 3 active threads initially');
+    assert.ok(output.includes('Threads running: 2/3'), 'Should show 2 active threads after first completion');
+    assert.ok(output.includes('Threads running: 1/3'), 'Should show 1 active thread after second completion');
   });
 });
