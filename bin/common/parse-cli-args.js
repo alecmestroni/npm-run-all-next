@@ -78,6 +78,7 @@ class ArgumentSet {
     this.singleMode = Boolean(options && options.singleMode)
     this.retries = (initialValues && initialValues.retries) || 0
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
+    this.aggregateTable = (initialValues && initialValues.aggregateTable) || false
     this.runtimeFile = (initialValues && initialValues.runtimeFile) || null
     this.initialValues = initialValues
   }
@@ -102,6 +103,10 @@ function parseCLIArgsCore(set, args) {
       case "-a":
       case "--aggregate-output":
         set.aggregateOutput = true
+        break
+
+      case "--aggregate-table":
+        set.aggregateTable = true
         break
 
       case "-b":
@@ -225,6 +230,7 @@ function parseCLIArgsCore(set, args) {
 
   const invalidWithoutParallel = [
     { prop: "aggregateOutput", long: "--aggregate-output", short: "-a" },
+    { prop: "aggregateTable", long: "--aggregate-table" },
     { prop: "race", long: "--race", short: "-r" },
     { prop: "killOthersOnFail", long: "--kill-others-on-fail", short: "-k" },
     { prop: "balancer", long: "--balancer", short: "-b" },
