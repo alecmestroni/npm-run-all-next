@@ -58,6 +58,10 @@
     "test-task:p:taskFile": "node ../bin/run-p/index.js test-task:append:{a,b} --tasks-file ./tasks/tasks.json",
     "test-task:s:taskFile": "node ../bin/run-s/index.js test-task:append:{a,b} --tasks-file ./tasks/tasks.json",
     "test-task:all:taskFile": "node ../bin/npm-run-all/index.js test-task:append:{a,b} --tasks-file ./tasks/tasks.json",
+    "test-task:large-output:50kb": "node tasks/large-output.js task50 50",
+    "test-task:large-output:64kb": "node tasks/large-output.js task64 64",
+    "test-task:large-output:65kb": "node tasks/large-output.js task65 65",
+    "test-task:large-output:70kb": "node tasks/large-output.js task70 70",
     "!test": "node tasks/append1.js X",
     "?test": "node tasks/append1.js Q"
   },
