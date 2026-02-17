@@ -143,6 +143,41 @@ describe('[aggregated] output', () => {
       assert.strictEqual(stdout.value, EXPECTED_PARALLELIZED_TEXT);
     });
   });
+
+  describe('should handle large output without truncation', () => {
+    let stdout = null;
+
+    beforeEach(() => {
+      stdout = new BufferStream();
+    });
+
+    it('Node API with single task outputting >65KB', async () => {
+      await nodeApi(['test-task:large-output:70kb'], {
+        stdout,
+        parallel: true,
+        silent: true,
+        aggregateOutput: true,
+      });
+      
+      const output = stdout.value;
+      assert.ok(output.includes('[task70]__END__'), 'Large output should be complete');
+      assert.ok(Buffer.byteLength(output, 'utf8') > 65536, 'Output should exceed 65KB');
+    });
+
+    it('Node API with multiple parallel tasks outputting large data', async () => {
+      await nodeApi(['test-task:large-output:64kb', 'test-task:large-output:65kb', 'test-task:large-output:50kb'], {
+        stdout,
+        parallel: true,
+        silent: true,
+        aggregateOutput: true,
+      });
+      
+      const output = stdout.value;
+      assert.ok(output.includes('[task64]__END__'), 'First task output should be complete');
+      assert.ok(output.includes('[task65]__END__'), 'Second task output should be complete');
+      assert.ok(output.includes('[task50]__END__'), 'Third task output should be complete');
+    });
+  });
 });
 
 describe('[aggregate] table', () => {
