@@ -190,7 +190,7 @@ describe('[aggregate] table', () => {
     stdout = new BufferStream();
   });
 
-  it.only('Node API with aggregate table enabled', async () => {
+  it('Node API with aggregate table enabled', async () => {
     await nodeApi(['test-task:delayed first 5000', 'test-task:delayed second 1000', 'test-task:delayed third 3000'], {
       stdout,
       parallel: true,
