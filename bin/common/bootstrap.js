@@ -7,6 +7,30 @@
  */
 'use strict'
 
+/**
+ * Exits the process safely, waiting for stdout/stderr to drain
+ * before calling process.exit(). This prevents output truncation
+ * when large amounts of data (>64KB) are written to stdout.
+ *
+ * @param {number} code - The exit code.
+ */
+function safeExit(code) {
+  process.exitCode = code
+
+  // If stdout has buffered data, wait for it to drain before exiting.
+  // This prevents truncation of aggregate output and summary tables.
+  const needsDrain = process.stdout.writableLength > 0
+  if (needsDrain) {
+    process.stdout.once('drain', () => process.exit(code))
+    // Safety timeout: if drain never fires, exit anyway after 5 seconds.
+    setTimeout(() => process.exit(code), 5000).unref()
+  } else {
+    // On some platforms the process may not exit automatically,
+    // so we still call process.exit() explicitly.
+    process.exit(code)
+  }
+}
+
 module.exports = function bootstrap(name) {
   const argv = process.argv.slice(2)
 
@@ -28,11 +52,10 @@ module.exports = function bootstrap(name) {
 
       return require(`../${name}/main`)(argv, process.stdout, process.stderr).then(
         () => {
-          // On some platforms the process may not exit automatically.
-          process.exit(0)
+          safeExit(0)
         },
         () => {
-          process.exit(1)
+          safeExit(1)
         }
       )
   }
