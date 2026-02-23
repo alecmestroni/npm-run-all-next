@@ -1,30 +1,31 @@
 # filepath: .husky/pre-commit
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/h"
 
 set -e
 set -u
 set -o pipefail
 
 # Debug to inspect context
-echo "[husky.precommit] Running ESLint --fix and checking for .only(]"
+echo "[husky.precommit] Running ESLint --fix and checking for .only()"
 echo "Staged files ready for commit:"
 git diff --cached --name-only --diff-filter=ACMR
 
 # Get modified, added or copied files
 files=$(git diff --cached --name-only --diff-filter=ACMR)
 
-# Filter out ignored files and keep only .js
-files_to_lint=()
+# Filter out ignored files and keep only .js/.sh/.json
+files_to_lint=""
 for file in $files; do
     if [ -f "$file" ] && ! git check-ignore -q "$file"; then
         case "$file" in
         *.js | *.sh | *.json)
-            files_to_lint+=("$file")
+            files_to_lint="$files_to_lint $file"
             ;;
         esac
     fi
 done
+
+# Trim leading space
+files_to_lint=$(echo "$files_to_lint" | sed 's/^ //')
 
 # Debug: show files to lint
 echo "Files to process with ESLint:"
@@ -34,8 +35,8 @@ done
 
 # Check for .only()
 for file in $files_to_lint; do
-    if grep -q ".only(" "$file"; then
-        echo "Error: $file contains .only( on line $(grep -n ".only(" "$file" | cut -d: -f1)"
+    if grep -q '\.only(' "$file"; then
+        echo "Error: $file contains .only( on line $(grep -n '\.only(' "$file" | cut -d: -f1)"
         exit 1
     fi
 done
