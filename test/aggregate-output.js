@@ -245,4 +245,205 @@ describe('[aggregate] table', () => {
     assert.ok(output.includes('Threads running: 2/3'), 'Should show 2 active threads after first completion');
     assert.ok(output.includes('Threads running: 1/3'), 'Should show 1 active thread after second completion');
   });
+
+  describe('should not truncate large aggregate output (>64KB)', () => {
+    let stdout = null;
+
+    beforeEach(() => {
+      stdout = new BufferStream();
+    });
+
+    it('Node API: large output with summary table', async () => {
+      await nodeApi(
+        [
+          'test-task:large-output:50kb',
+          'test-task:large-output:64kb',
+          'test-task:large-output:65kb',
+        ],
+        {
+          stdout,
+          parallel: true,
+          silent: true,
+          aggregateOutput: true,
+          printSummaryTable: true,
+        }
+      );
+
+      const output = stdout.value;
+      const outputLength = Buffer.byteLength(output, 'utf8');
+
+      // Verify total output is > 64KB (50 + 64 + 65 = 179KB of task output)
+      assert.ok(outputLength > 64 * 1024, `Expected >64KB, got ${outputLength} bytes`);
+
+      // Verify all task outputs are present (not truncated)
+      assert.ok(output.includes('task50'), 'Should contain task50 output');
+      assert.ok(output.includes('task64'), 'Should contain task64 output');
+      assert.ok(output.includes('task65'), 'Should contain task65 output');
+
+      // Verify the summary table was written at the end
+      assert.ok(output.includes('Summary'), 'Should contain Summary table');
+      assert.ok(output.includes('test-task:large-output:50kb'), 'Summary should list first task');
+      assert.ok(output.includes('test-task:large-output:64kb'), 'Summary should list second task');
+      assert.ok(output.includes('test-task:large-output:65kb'), 'Summary should list third task');
+
+      // Verify summary table is at the end (after all task output)
+      const summaryIndex = output.indexOf('Summary');
+      const lastTaskOutput = Math.max(
+        output.lastIndexOf('task50'),
+        output.lastIndexOf('task64'),
+        output.lastIndexOf('task65')
+      );
+      assert.ok(summaryIndex > lastTaskOutput, 'Summary table should appear after all task output');
+    });
+
+    it('run-p command: large output with summary table (via subprocess)', async function() {
+      this.timeout(30000);
+      
+      const cp = require('child_process');
+      const path = require('path');
+      
+      // Spawn the actual bin/run-p/index.js as a real subprocess
+      const binPath = path.resolve(__dirname, '../bin/run-p/index.js');
+      const child = cp.spawn(process.execPath, [
+        binPath,
+        'test-task:large-output:50kb',
+        'test-task:large-output:64kb', 
+        'test-task:large-output:65kb',
+        '--silent',
+        '--aggregate-output',
+        '--print-summary-table',
+      ], {
+        cwd: path.resolve(__dirname, '../test-workspace'),
+        stdio: ['ignore', 'pipe', 'pipe'],
+        // Important: use default highWaterMark to allow backpressure
+      });
+
+      let stdout = '';
+      let stderr = '';
+      
+      // Simulate slow reading to create backpressure and force drain logic
+      let readPaused = false;
+      child.stdout.on('data', (chunk) => {
+        stdout += chunk.toString();
+        // Periodically pause reading to build up buffer
+        if (!readPaused && stdout.length > 50000) {
+          readPaused = true;
+          child.stdout.pause();
+          setTimeout(() => {
+            child.stdout.resume();
+            readPaused = false;
+          }, 100);
+        }
+      });
+      
+      child.stderr.on('data', (chunk) => {
+        stderr += chunk.toString();
+      });
+
+      await new Promise((resolve, reject) => {
+        child.on('close', (code) => {
+          if (code !== 0) {
+            reject(new Error(`Process exited with code ${code}\nStderr: ${stderr}`));
+          } else {
+            resolve();
+          }
+        });
+        child.on('error', reject);
+      });
+
+      const outputLength = Buffer.byteLength(stdout, 'utf8');
+      
+      // Verify total output is > 64KB
+      assert.ok(outputLength > 64 * 1024, `Expected >64KB, got ${outputLength} bytes`);
+
+      // Verify all task outputs are present (not truncated)
+      assert.ok(stdout.includes('task50'), 'Should contain task50 output');
+      assert.ok(stdout.includes('task64'), 'Should contain task64 output');
+      assert.ok(stdout.includes('task65'), 'Should contain task65 output');
+      
+      // Verify END markers for all tasks (proves no truncation)
+      assert.ok(stdout.includes('[task50]__END__'), 'task50 should have END marker');
+      assert.ok(stdout.includes('[task64]__END__'), 'task64 should have END marker');
+      assert.ok(stdout.includes('[task65]__END__'), 'task65 should have END marker');
+
+      // Verify the summary table was written at the end
+      assert.ok(stdout.includes('Summary'), 'Should contain Summary table');
+      assert.ok(stdout.includes('FinalExitCode'), 'Summary should have headers');
+      assert.ok(stdout.includes('test-task:large-output:50kb'), 'Summary should list all tasks');
+      
+      // Verify summary is truly at the end (after last END marker)
+      const summaryIndex = stdout.indexOf('Summary');
+      const lastEndMarker = Math.max(
+        stdout.lastIndexOf('[task50]__END__'),
+        stdout.lastIndexOf('[task64]__END__'),
+        stdout.lastIndexOf('[task65]__END__')
+      );
+      assert.ok(summaryIndex > lastEndMarker, 'Summary must appear after all task output including END markers');
+    });
+
+    it('run-p command: extremely large output (2MB) to force drain', async function() {
+      this.timeout(60000);
+      
+      const cp = require('child_process');
+      const path = require('path');
+
+      // Create tasks that output 500KB each (2MB total)
+      const binPath = path.resolve(__dirname, '../bin/run-p/index.js');
+      const child = cp.spawn(process.execPath, [
+        binPath,
+        'test-task:large-output:500kb',
+        'test-task:large-output:500kb-a', 
+        'test-task:large-output:500kb-b',
+        'test-task:large-output:500kb-c',
+        '--silent',
+        '--aggregate-output',
+        '--print-summary-table',
+      ], {
+        cwd: path.resolve(__dirname, '../test-workspace'),
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      const chunks = [];
+      let totalSize = 0;
+      
+      child.stdout.on('data', (chunk) => {
+        chunks.push(chunk);
+        totalSize += chunk.length;
+      });
+      
+      child.stderr.on('data', (chunk) => {
+        // Ignore stderr for this test
+      });
+
+      await new Promise((resolve, reject) => {
+        child.on('close', (code) => {
+          if (code !== 0) {
+            reject(new Error(`Process exited with code ${code}`));
+          } else {
+            resolve();
+          }
+        });
+        child.on('error', reject);
+      });
+
+      const stdout = Buffer.concat(chunks).toString('utf8');
+      const outputLength = Buffer.byteLength(stdout, 'utf8');
+      
+      // Verify massive output (should be ~2MB)
+      assert.ok(outputLength > 1.5 * 1024 * 1024, `Expected >1.5MB, got ${(outputLength / 1024 / 1024).toFixed(2)}MB`);
+
+      // Verify the summary table was written at the end (this proves drain worked)
+      assert.ok(stdout.includes('Summary'), 'Should contain Summary table even with 2MB output');
+      assert.ok(stdout.includes('FinalExitCode'), 'Summary should have headers');
+      
+      // Verify all tasks are listed in summary
+      assert.ok(stdout.includes('test-task:large-output:500kb'), 'Summary should list first task');
+      assert.ok(stdout.includes('test-task:large-output:500kb-a'), 'Summary should list second task');
+      
+      // Verify summary is at the very end
+      const summaryIndex = stdout.indexOf('Summary');
+      const totalLength = stdout.length;
+      assert.ok(summaryIndex > totalLength - 2000, 'Summary should be within last 2000 chars');
+    });
+  });
 });

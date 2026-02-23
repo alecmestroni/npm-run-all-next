@@ -62,6 +62,10 @@
     "test-task:large-output:64kb": "node tasks/large-output.js task64 64",
     "test-task:large-output:65kb": "node tasks/large-output.js task65 65",
     "test-task:large-output:70kb": "node tasks/large-output.js task70 70",
+    "test-task:large-output:500kb": "node tasks/large-output.js task500 500",
+    "test-task:large-output:500kb-a": "node tasks/large-output.js task500a 500",
+    "test-task:large-output:500kb-b": "node tasks/large-output.js task500b 500",
+    "test-task:large-output:500kb-c": "node tasks/large-output.js task500c 500",
     "!test": "node tasks/append1.js X",
     "?test": "node tasks/append1.js Q"
   },
