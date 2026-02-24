@@ -66,6 +66,7 @@
     "test-task:large-output:500kb-a": "node tasks/large-output.js task500a 500",
     "test-task:large-output:500kb-b": "node tasks/large-output.js task500b 500",
     "test-task:large-output:500kb-c": "node tasks/large-output.js task500c 500",
+    "test-task:log-and-wait": "node tasks/log-and-wait.js",
     "!test": "node tasks/append1.js X",
     "?test": "node tasks/append1.js Q"
   },

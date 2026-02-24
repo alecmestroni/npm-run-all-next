@@ -12,6 +12,7 @@
 //------------------------------------------------------------------------------
 
 const assert = require('assert');
+const { Writable } = require('stream');
 const nodeApi = require('../lib');
 const BufferStream = require('./lib/buffer-stream');
 const util = require('./lib/util');
@@ -442,5 +443,117 @@ describe('[aggregate] table', () => {
       const totalLength = stdout.length;
       assert.ok(summaryIndex > totalLength - 2000, 'Summary should be within last 2000 chars');
     });
+  });
+});
+
+describe('[aggregate] live stream switch', () => {
+  before(() => process.chdir('test-workspace'));
+  after(() => process.chdir('..'));
+
+  it('should stream the last remaining task live after the others complete', async function () {
+    this.timeout(15000);
+
+    // A custom writable stream that records the timestamp of each chunk.
+    const chunks = [];
+    const timestampedStream = new Writable({
+      write(chunk, encoding, callback) {
+        chunks.push({ text: chunk.toString(), time: Date.now() });
+        callback();
+      },
+    });
+
+    const startTime = Date.now();
+
+    // Task 1: completes in ~1s (fast)
+    // Task 2: logs immediately, waits 5s, then logs again (slow)
+    await nodeApi(
+      ['test-task:log-and-wait slow 5000', 'test-task:delayed fast 1000'],
+      {
+        stdout: timestampedStream,
+        parallel: true,
+        silent: true,
+        aggregateOutput: true,
+      }
+    );
+
+    const fullOutput = chunks.map((c) => c.text).join('');
+
+    // Verify all output is present
+    assert.ok(fullOutput.includes('[fast]'), 'Should contain fast task output');
+    assert.ok(fullOutput.includes('[slow]__LIVE_START__'), 'Should contain slow task LIVE_START');
+    assert.ok(fullOutput.includes('[slow]__LIVE_END__'), 'Should contain slow task LIVE_END');
+
+    // Find the chunk that contains the slow task's LIVE_START marker.
+    // This should arrive BEFORE the slow task completes (LIVE_END).
+    const liveStartChunk = chunks.find((c) => c.text.includes('__LIVE_START__'));
+    const liveEndChunk = chunks.find((c) => c.text.includes('__LIVE_END__'));
+
+    assert.ok(liveStartChunk, 'LIVE_START chunk should exist');
+    assert.ok(liveEndChunk, 'LIVE_END chunk should exist');
+
+    // The LIVE_START output should arrive well before LIVE_END (~5s gap).
+    // If aggregate output was still buffering, both would arrive at the same time (at task completion).
+    // With live switch, LIVE_START arrives as soon as the fast task completes (~1s) and
+    // LIVE_END arrives ~5s after task start. The gap should be > 2s.
+    const gap = liveEndChunk.time - liveStartChunk.time;
+    assert.ok(
+      gap > 2000,
+      `LIVE_START and LIVE_END should arrive with a significant gap (live streaming), but gap was only ${gap}ms`
+    );
+
+    // Also verify LIVE_START appeared before the slow task completed (within ~2s of start,
+    // since the fast task completes in ~1s and triggers the live switch flush).
+    const liveStartDelay = liveStartChunk.time - startTime;
+    assert.ok(
+      liveStartDelay < 3000,
+      `LIVE_START should appear early (after fast task completes at ~1s), but it appeared at ${liveStartDelay}ms`
+    );
+  });
+
+  it('should stream live when only one task is scheduled', async function () {
+    this.timeout(10000);
+
+    const chunks = [];
+    const timestampedStream = new Writable({
+      write(chunk, encoding, callback) {
+        chunks.push({ text: chunk.toString(), time: Date.now() });
+        callback();
+      },
+    });
+
+    const startTime = Date.now();
+
+    // Single task with aggregate output — should switch to live immediately.
+    await nodeApi(
+      ['test-task:log-and-wait solo 3000'],
+      {
+        stdout: timestampedStream,
+        parallel: true,
+        silent: true,
+        aggregateOutput: true,
+      }
+    );
+
+    const fullOutput = chunks.map((c) => c.text).join('');
+    assert.ok(fullOutput.includes('[solo]__LIVE_START__'), 'Should contain LIVE_START');
+    assert.ok(fullOutput.includes('[solo]__LIVE_END__'), 'Should contain LIVE_END');
+
+    const liveStartChunk = chunks.find((c) => c.text.includes('__LIVE_START__'));
+    const liveEndChunk = chunks.find((c) => c.text.includes('__LIVE_END__'));
+
+    // With only one task, live switch happens immediately.
+    // LIVE_START should arrive very early (< 1s).
+    const liveStartDelay = liveStartChunk.time - startTime;
+    assert.ok(
+      liveStartDelay < 2000,
+      `With a single task, LIVE_START should stream immediately, but arrived at ${liveStartDelay}ms`
+    );
+
+    // And the gap between START and END should be ~3s (proving it's live, not buffered).
+    const gap = liveEndChunk.time - liveStartChunk.time;
+    assert.ok(
+      gap > 1500,
+      `LIVE_START and LIVE_END should have a ~3s gap (live streaming), but gap was only ${gap}ms`
+    );
   });
 });
