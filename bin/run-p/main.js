@@ -62,7 +62,9 @@ module.exports = function npmRunAll(args, stdout, stderr) {
 
     if (!argv.silent) {
       promise.catch((err) => {
-        console.error("\nERROR:", err.message)
+        if (!err.reported) {
+          console.error("\nERROR:", err.message)
+        }
       })
     }
 
