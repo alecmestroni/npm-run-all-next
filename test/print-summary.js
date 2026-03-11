@@ -689,4 +689,31 @@ describe("[print-summary] ", () => {
       })
     })
   })
+
+  describe("completion order", () => {
+    const getAllTaskNamesInOrder = (output) => {
+      const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
+      return output
+        .split("\n")
+        .filter((l) => /^(?:\x1B\[[0-9;]*m)*\|/.test(l))
+        .map(stripAnsi)
+        .filter((l) => !l.includes("Task") && !l.includes("---") && !l.includes("Summary") && !l.includes("Total Time"))
+        .map((l) => l.split("|")[1]?.trim())
+        .filter(Boolean)
+    }
+
+    it("sequential: summary rows follow completion order", async () => {
+      await nodeApi(["test-task:fast a", "test-task:fast b"], { singleMode: true, printSummaryTable: true, stdout })
+      const names = getAllTaskNamesInOrder(stdout.value)
+      assert.deepStrictEqual(names, ["test-task:fast a", "test-task:fast b"])
+    })
+
+    it("parallel: faster tasks appear before slower tasks", async () => {
+      await nodeApi(["test-task:append a", "test-task:fast b"], { parallel: true, printSummaryTable: true, stdout })
+      const names = getAllTaskNamesInOrder(stdout.value)
+      // "test-task:fast b" is instant (empty script), "test-task:append a" has a 3s delay
+      assert.strictEqual(names[0], "test-task:fast b")
+      assert.strictEqual(names[1], "test-task:append a")
+    })
+  })
 })
