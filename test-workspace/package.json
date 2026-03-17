@@ -51,7 +51,7 @@
     "test-task:nest-parallel:error": "node ../bin/run-p/index.js test-task:nest-parallel:jobnotanumber --balancer --jobs 1",
     "test-task:npm-run-all:task-file": "node ../bin/npm-run-all/index.js --tasks-file ./tasks/tasks.json",
     "test-task:run-p:task-file:balancer": "node ../bin/run-p/index.js --tasks-file ./tasks/tasks.json --balancer --jobs 2 --retries 2",
-    "test-task:npm-run-all:task-file:balancer": "node ../bin/npm-run-all/index.js --tasks-file ./tasks/tasks.json --parallel --balancer --jobs 2 --retries 2",
+    "test-task:npm-run-all:task-file:balancer": "node ../bin/npm-run-all/index.js --parallel --tasks-file ./tasks/tasks.json --print-summary-table --balancer --jobs 2 --retries 2",
     "test-task:delayed": "node tasks/output-with-delay.js",
     "test-task:delayed:flaky": "node tasks/output-flaky.js",
     "test-task:yarn": "node ../bin/npm-run-all/index.js test-task:append:{a,b} --npm-path yarn",

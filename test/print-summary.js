@@ -154,7 +154,7 @@ describe("[print-summary] ", () => {
         .split("\n")
         .filter((l) => l)
       const penult = lines[lines.length - 2]
-      assert.strictEqual(penult, "| Estimated Total Time:            1.50 min|")
+      assert.strictEqual(penult, '| Estimated Total Time:              1m 30s|');
     })
 
     it("prints actual total time when provided", () => {
@@ -175,7 +175,7 @@ describe("[print-summary] ", () => {
         .filter((l) => l)
       const penult = lines[lines.length - 2]
       const terzult = lines[lines.length - 3]
-      assert.strictEqual(penult, "| Actual Total Time:               2.00 min|")
+      assert.strictEqual(penult, '| Actual Total Time:                  2m 0s|');
       assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
     })
   })
@@ -694,12 +694,19 @@ describe("[print-summary] ", () => {
     const getAllTaskNamesInOrder = (output) => {
       const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
       return output
-        .split("\n")
-        .filter((l) => /^(?:\x1B\[[0-9;]*m)*\|/.test(l))
+        .split('\n')
+        .filter(l => /^(?:\x1B\[[0-9;]*m)*\|/.test(l))
         .map(stripAnsi)
-        .filter((l) => !l.includes("Task") && !l.includes("---") && !l.includes("Summary") && !l.includes("Total Time"))
-        .map((l) => l.split("|")[1]?.trim())
-        .filter(Boolean)
+        .filter(
+          l =>
+            !l.includes('Task') &&
+            !l.includes('---') &&
+            !l.includes('Summary') &&
+            !l.includes('Total Time') &&
+            !l.includes('Jobs'),
+        )
+        .map(l => l.split('|')[1]?.trim())
+        .filter(Boolean);
     }
 
     it("sequential: summary rows follow completion order", async () => {
