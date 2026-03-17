@@ -70,7 +70,15 @@ jobs:
         run: npm run pretest
 
       - name: Run tests
-        run: npm test
+        run: |
+          CORES=$(node -p "require('os').cpus().length")
+          if [ "$CORES" -gt 4 ]; then
+            CONCURRENCY=4
+          else
+            CONCURRENCY=$CORES
+          fi
+          echo "Using $CONCURRENCY workers on $CORES cores"
+          TEST_CONCURRENCY=$CONCURRENCY npm run test:parallel:coverage
 
       - name: Print Coverage
         run: npm run coverage:report
