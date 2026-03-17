@@ -25,6 +25,8 @@
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
     "test": "nyc --reporter=lcov --reporter=text --reporter=text-summary --require @babel/register npm run _mocha",
+    "test:parallel": "node test/bin/run-tests.js",
+    "test:parallel:coverage": "nyc --reporter=lcov --reporter=text --reporter=text-summary --require @babel/register node test/bin/run-tests.js",
     "coverage:report": "nyc report --reporter=text --reporter=text-summary",
     "watch": "npm run _mocha -- --require @babel/register --watch",
     "prepare": "husky"
