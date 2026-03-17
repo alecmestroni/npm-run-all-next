@@ -19,6 +19,8 @@ Usage:
 Options:
     -a, --aggregate-output      Avoid interleaving output by delaying printing of
                                 each command's output until it has finished.
+    --aggregate-table           Show a live table of running tasks/threads.
+                  Valid only with '--aggregate-output'.
     -c, --continue-on-error     Continue executing other tasks even if a task
                                 threw an error. `run-p` itself will exit with
                                 non-zero code if one or more tasks failed.
@@ -47,7 +49,7 @@ Options:
     For example, '-clns' equals to '-c -l -n -s'.
 
 Examples:
-    $ run-p 'watch:*'*
+    $ run-p --aggregate-output --aggregate-table 'watch:*'*
     $ run-p --print-label "'build:*'* -- --watch"
     $ run-p -l "'build:*'* -- --watch"
     $ run-p start-server start-browser start-electron

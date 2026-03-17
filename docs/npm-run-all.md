@@ -16,7 +16,12 @@ Usage:
 Options:
     -a, --aggregate-output       Avoid interleaving output by delaying printing of
                                  each command's output until it has finished.
+    --aggregate-table            Show a live table of running tasks/threads.
+                   Valid only with '--aggregate-output' and
+                   '--parallel'.
     -b, --balancer               Distribute tasks based on historical runtimes
+    -k, --kill-others-on-fail    Abort all running tasks (and their children)
+                   as soon as one task fails.
     -c, --continue-on-error      Set the flag to continue executing
                                  other/subsequent tasks even if a task threw an
                                  error. 'npm-run-all' itself will exit with
@@ -57,7 +62,7 @@ Options:
 
 Examples:
     $ npm-run-all --serial clean lint 'build:*'*
-    $ npm-run-all --parallel 'watch:*'*
+    $ npm-run-all --parallel --aggregate-output --aggregate-table 'watch:*'*
     $ npm-run-all clean lint --parallel "'build:*'* -- --watch"
     $ npm-run-all -l -p start-server start-browser start-electron
   $ npm-run-all --tasks-file ./tasks.json

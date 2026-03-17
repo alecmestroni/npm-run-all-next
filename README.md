@@ -148,6 +148,7 @@ npm run test & npm run watch & npm run serve
 | Flag                      | Description                                                                |
 | ------------------------- | -------------------------------------------------------------------------- |
 | -a, --aggregate-output    | 🗃️ Buffer each task’s output and print when all finish (requires parallel) |
+| --aggregate-table         | 🧵 Show live thread-usage table during parallel execution (requires `-a`)   |
 | -b, --balancer            | ⚖️ Balance tasks based on historical runtimes                              |
 | -c, --continue-on-error   | 🚧 Don’t stop other tasks when one fails                                   |
 | -k, --kill-others-on-fail | 💥 Kill remaining tasks on first failure (requires parallel)               |
@@ -157,6 +158,7 @@ npm run test & npm run watch & npm run serve
 | -l, --print-label         | 🏷️ Prefix each output line with the task label                             |
 | -n, --print-name          | 📝 Print the task name before running                                      |
 | --retries `<count>`       | 🔁 Retry each failed task up to `<count>` times                            |
+| --runtime-file `<path>`   | ⏱️ Save runtime-history file for balancer stats                            |
 | --npm-path `<path>`       | 📍 Path to a custom npm executable                                         |
 | --silent                  | 🤫 Suppress all output (sets `npm_config_loglevel` to `silent`)            |
 | -h, --help                | ❓ Show help                                                               |
