@@ -7,7 +7,7 @@ The `--tasks-file <file>` option allows you to specify the list of npm scripts t
 ## Usage
 
 ```sh
-npm-run-all --tasks-file ./tasks.json
+npm-run-all-next --tasks-file ./tasks.json
 run-p --tasks-file ./tasks.json
 run-s --tasks-file ./tasks.json
 ```
@@ -20,7 +20,7 @@ Where `tasks.json` contains:
 
 ## Features
 
-- Full CLI support for `--tasks-file` in `npm-run-all`, `run-p`, and `run-s`.
+- Full CLI support for `--tasks-file` in `npm-run-all-next`, `npm-run-all`, `run-p`, and `run-s`.
 - If `--tasks-file` is provided, patterns are ignored and only the tasks from the file are executed.
 - Maintains backward compatibility: if the option is not present, the CLI works as before.
 - Supports all other options (parallel, jobs, retries, etc.) in combination with `--tasks-file`.

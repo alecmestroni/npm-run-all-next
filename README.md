@@ -12,7 +12,7 @@ It lets you run multiple npm scripts in series or in parallel, with smart featur
 - intelligent parallelization / load balancing
 - human-friendly summary tables
 - cross-platform behavior (Windows / macOS / Linux)
-- usable both as CLI (`run-s`, `run-p`, `npm-run-all`) and as a Node API
+- usable both as CLI (`run-s`, `run-p`, `npm-run-all-next`) and as a Node API
 
 ## Why NEXT? 🚀
 
@@ -31,7 +31,7 @@ It lets you run multiple npm scripts in series or in parallel, with smart featur
   Load task lists from an external file (JSON/JS), so your `package.json` doesn’t become unreadable.
 
 - 🧵 Familiar commands  
-  `run-s`, `run-p`, and `npm-run-all` are included and cross-platform.
+  `npm-run-all-next` is the primary command, while `npm-run-all` remains available as a compatibility alias alongside `run-s` and `run-p`.
 
 - 🧪 First-class Node API  
   Run tasks programmatically with `runTasks([...])`.
@@ -66,6 +66,7 @@ npm install --save-dev npm-run-all-next
 All commands are exposed in `node_modules/.bin`:
 
 - ✔️ `npm-run-all-next`
+- ✔️ `npm-run-all`
 - ✔️ `run-s`
 - ✔️ `run-p`
 
@@ -91,10 +92,12 @@ You can also add them to your `package.json` scripts:
 
 ### ⚙️ npm-run-all-next
 
+This is the branded primary command. `npm-run-all` remains available as a compatible alias.
+
 Mix sequential and parallel groups in one command:
 
 ```sh
-npm-run-all clean lint \
+npm-run-all-next clean lint \
   --parallel build:* \
   --sequential test:* \
   --parallel deploy
@@ -111,7 +114,8 @@ This runs:
 
 ### ▶️ run-s (sequential)
 
-Shortcut for `npm-run-all --sequential`:
+Shortcut for `npm-run-all-next --sequential`.
+`npm-run-all --sequential` remains supported as a compatibility alias:
 
 ```sh
 run-s clean lint build:js build:css
@@ -127,7 +131,8 @@ npm run clean && npm run lint && npm run build:js && npm run build:css
 
 ### 🔀 run-p (parallel)
 
-Shortcut for `npm-run-all --parallel`:
+Shortcut for `npm-run-all-next --parallel`.
+`npm-run-all --parallel` remains supported as a compatibility alias:
 
 ```sh
 run-p test watch serve
@@ -171,6 +176,8 @@ Short flags can be combined (e.g. `-crs` ⇔ `-c -r -s`).
 
 ## 🔍 Patterns & Placeholders
 
+Need the full cheat sheet? See the pattern and placeholder reference in [docs/npm-run-all.md](./docs/npm-run-all.md), including `*`, `**`, brace expansion, extglobs like `!(ai)`, and fallback placeholders such as `{1:-default}` and `{1:=default}`.
+
 Use glob-like patterns on script names (separator `:`, globstar `**` supported):
 
 ```sh
@@ -195,7 +202,7 @@ run-p "start -- --port {1}" -- 8080
 
 **Brace expansion**
 
-If your shell doesn’t support brace expansion, `npm-run-all` will expand patterns like:
+If your shell doesn’t support brace expansion, `npm-run-all-next` will expand patterns like:
 
 ```sh
 run-p build:{a,b,c} # ↔> run-p build:a build:b build:c
@@ -260,10 +267,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## 📚 Main docs
 
-| index | [npm-run-all] | [run-s] | [run-p] | [Node API] |
-| ----- | ------------- | ------- | ------- | ---------- |
+| index | [npm-run-all-next] | [run-s] | [run-p] | [Node API] |
+| ----- | ------------------ | ------- | ------- | ---------- |
 
-[npm-run-all]: docs/npm-run-all.md
+[npm-run-all-next]: docs/npm-run-all.md
 [run-s]: docs/run-s.md
 [run-p]: docs/run-p.md
 [node api]: docs/node-api.md

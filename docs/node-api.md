@@ -1,4 +1,4 @@
-| [index](../README.md) | [npm-run-all](npm-run-all.md) | [run-s](run-s.md) | [run-p](run-p.md) | Node API |
+| [index](../README.md) | [npm-run-all-next](npm-run-all.md) | [run-s](run-s.md) | [run-p](run-p.md) | Node API |
 | --------------------- | ----------------------------- | ----------------- | ----------------- | -------- |
 
 
@@ -7,7 +7,7 @@
 A Node module to run given npm-scripts in parallel or sequential.
 
 ```js
-const runAll = require("npm-run-all")
+const runAll = require("npm-run-all-next")
 
 runAll(["clean", "lint", "'build:*'"], { parallel: false })
   .then(() => {
@@ -62,7 +62,7 @@ Run npm-scripts.
     The map-like object to overwrite package configs.
     Keys are package names.
     Every value is a map-like object (Pairs of variable name and value).
-    e.g. `{"npm-run-all": {"test": 777, "test2": 333}}`
+    e.g. `{"npm-run-all-next": {"test": 777, "test2": 333}}`
     Default is `null`.
   - **options.printLabel** `boolean` --
     Set the flag to print the task name as a prefix on each line of output.
@@ -124,5 +124,5 @@ runAll(["clean", "lint", "build"]).then((results) => {
 ## About MaxListenersExceededWarning
 
 - If you use `options.stdin`, `options.stdout`, or `options.stderr` in parallel mode, please configure max listeners by [emitter.setMaxListeners(n)](https://nodejs.org/api/events.html#events_emitter_setmaxlisteners_n) properly.
-- If you don't use those options and `process.stdXXX.isTTY` is `false`, please configure max listeners of the `process.stdXXX` properly. In that case, `npm-run-all` uses piping to connect to child processes.<br>
-  On the other hand, if `process.stdXXX.isTTY` is `true`, `npm-run-all` uses `inherit` option, so the configuration is unnecessary.
+- If you don't use those options and `process.stdXXX.isTTY` is `false`, please configure max listeners of the `process.stdXXX` properly. In that case, `npm-run-all-next` uses piping to connect to child processes.<br>
+  On the other hand, if `process.stdXXX.isTTY` is `true`, `npm-run-all-next` uses `inherit` option, so the configuration is unnecessary.
