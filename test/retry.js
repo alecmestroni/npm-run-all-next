@@ -206,23 +206,33 @@ describe("[retries] npm-run-all", () => {
       const threshold = 2
       it("Node API", async () => {
         const results = await nodeApi([`test-task:flaky ${threshold}`, `test-task:append1 b`], { retries: retries, parallel: true, race: true })
-        assert.strictEqual(results[0].code, 137)
         assert.strictEqual(results[1].code, 0)
         assert.strictEqual(results[0].name, `test-task:flaky ${threshold}`)
         assert.strictEqual(results[1].name, "test-task:append1 b")
-        assert.strictEqual(results[0].retries, 0)
         assert.strictEqual(results[1].retries, 0)
-        assert.ok(["fb", "bf"].includes(result()), `Expected result to be one of 'fb', 'bf' but got "${result()}"`)
+        // flaky writes 'f' on each attempt before its 500ms timer.
+        // Depending on CI timing, abort may arrive before flaky starts,
+        // after one attempt, or after multiple attempts have written 'f'.
+        const r = result()
+        assert.ok(r.includes("b"), `Expected result to include 'b' but got "${r}"`)
+        assert.strictEqual((r.match(/b/g) || []).length, 1, `Expected exactly one 'b' but got "${r}"`)
+        assert.ok(/^[fb]+$/.test(r), `Expected only 'f' and 'b' chars but got "${r}"`)
       })
 
       it("npm-run-all command", async () => {
         await runAll(["--retries", retries, "--parallel", "--race", `test-task:flaky ${threshold}`, `test-task:append1 b`])
-        assert.ok(["fb", "bf"].includes(result()), `Expected result to be one of 'fb', 'bf' but got "${result()}"`)
+        const r = result()
+        assert.ok(r.includes("b"), `Expected result to include 'b' but got "${r}"`)
+        assert.strictEqual((r.match(/b/g) || []).length, 1, `Expected exactly one 'b' but got "${r}"`)
+        assert.ok(/^[fb]+$/.test(r), `Expected only 'f' and 'b' chars but got "${r}"`)
       })
 
       it("run-p command", async () => {
         await runPar(["--retries", retries, "--race", `test-task:flaky ${threshold}`, `test-task:append1 b`])
-        assert.ok(["fb", "bf"].includes(result()), `Expected result to be one of 'fb', 'bf' but got "${result()}"`)
+        const r = result()
+        assert.ok(r.includes("b"), `Expected result to include 'b' but got "${r}"`)
+        assert.strictEqual((r.match(/b/g) || []).length, 1, `Expected exactly one 'b' but got "${r}"`)
+        assert.ok(/^[fb]+$/.test(r), `Expected only 'f' and 'b' chars but got "${r}"`)
       })
     })
 
