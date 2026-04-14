@@ -1,11 +1,12 @@
-| [index](../README.md) | [npm-run-all](npm-run-all.md) | run-s | [run-p](run-p.md) | [Node API](node-api.md) |
+| [index](../README.md) | [npm-run-all-next](npm-run-all.md) | run-s | [run-p](run-p.md) | [Node API](node-api.md) |
 | --------------------- | ----------------------------- | ----- | ----------------- | ----------------------- |
 
 
 # `run-s` command
 
 A CLI command to run given npm-scripts sequentially.
-This command is the shorthand of `npm-run-all -s`.
+This command is the shorthand of `npm-run-all-next -s`.
+`npm-run-all -s` remains supported as a compatibility alias.
 
 ```
 Usage:

@@ -47,6 +47,17 @@ describe("[queue-balancer]", () => {
           `Expected result to be one of 'acadacad', 'adacacad', 'adacadac', 'acadadac' but got "${result()}"`
         )
       })
+
+      it("Node API with npm-run-all-next alias", async () => {
+        const results = await nodeApi(["test-task:nest-parallel:next"], { parallel: true, balancer: true })
+        assert.strictEqual(results.length, 1)
+        assert.strictEqual(results[0].name, "test-task:nest-parallel:next")
+        assert.strictEqual(results[0].code, 0)
+        assert.ok(
+          ["acadacad", "acadadac", "adacacad", "adacadac"].includes(result()),
+          `Expected result to be one of 'acadacad', 'adacacad', 'adacadac', 'acadadac' but got "${result()}"`
+        )
+      })
     })
     describe("should be able to detect script sub-weight using --jobs:", () => {
       it("Node API", async () => {

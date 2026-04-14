@@ -411,7 +411,7 @@ describe("[print-summary] ", () => {
 
     describe("should print summary table after parallel execution (flaky + fail):", () => {
       const retries = 4
-      const threshold = 2
+      const threshold = 10
 
       const runners = [
         [

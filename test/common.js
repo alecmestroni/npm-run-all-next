@@ -18,10 +18,12 @@ const util = require("./lib/util")
 const result = util.result
 const removeResult = util.removeResult
 const runAll = util.runAll
+const runAllNext = util.runAllNext
 const runPar = util.runPar
 const runSeq = util.runSeq
 const fs = require("fs") // added
 const printHelpAll = require("../bin/npm-run-all/help.js")
+const printHelpAllNext = require("../bin/npm-run-all-next/help.js")
 const printHelpPar = require("../bin/run-p/help.js")
 const printHelpSeq = require("../bin/run-s/help.js")
 //------------------------------------------------------------------------------
@@ -36,6 +38,7 @@ describe("[common]", () => {
 
   const helpArray = [
     { name: "npm-run-all", fn: printHelpAll, doc: "npm-run-all.md" },
+    { name: "npm-run-all-next", fn: printHelpAllNext, doc: "npm-run-all.md" },
     { name: "run-p", fn: printHelpPar, doc: "run-p.md" },
     { name: "run-s", fn: printHelpSeq, doc: "run-s.md" },
   ]
@@ -69,6 +72,13 @@ describe("[common]", () => {
       assert.ok(/Usage:/.test(buf.value))
     })
 
+    it("npm-run-all-next command", async () => {
+      const buf = new BufferStream()
+      await runAllNext([], buf)
+      assert.ok(/Usage:/.test(buf.value))
+      assert.ok(/npm-run-all-next/.test(buf.value))
+    })
+
     it("run-s command", async () => {
       const buf = new BufferStream()
       await runSeq([], buf)
@@ -89,6 +99,13 @@ describe("[common]", () => {
       assert.ok(/Usage:/.test(buf.value))
     })
 
+    it("npm-run-all-next command (-h)", async () => {
+      const buf = new BufferStream()
+      await runAllNext(["-h"], buf)
+      assert.ok(/Usage:/.test(buf.value))
+      assert.ok(/npm-run-all-next/.test(buf.value))
+    })
+
     it("run-s command (-h)", async () => {
       const buf = new BufferStream()
       await runSeq(["-h"], buf)
@@ -105,6 +122,13 @@ describe("[common]", () => {
       const buf = new BufferStream()
       await runAll(["--help"], buf)
       assert.ok(/Usage:/.test(buf.value))
+    })
+
+    it("npm-run-all-next command (--help)", async () => {
+      const buf = new BufferStream()
+      await runAllNext(["--help"], buf)
+      assert.ok(/Usage:/.test(buf.value))
+      assert.ok(/npm-run-all-next/.test(buf.value))
     })
 
     it("run-s command (--help)", async () => {
@@ -127,6 +151,12 @@ describe("[common]", () => {
       assert.ok(/v[0-9]+\.[0-9]+\.[0-9]+/.test(buf.value))
     })
 
+    it("npm-run-all-next command (-v)", async () => {
+      const buf = new BufferStream()
+      await runAllNext(["-v"], buf)
+      assert.ok(/v[0-9]+\.[0-9]+\.[0-9]+/.test(buf.value))
+    })
+
     it("run-s command (-v)", async () => {
       const buf = new BufferStream()
       await runSeq(["-v"], buf)
@@ -142,6 +172,12 @@ describe("[common]", () => {
     it("npm-run-all command (--version)", async () => {
       const buf = new BufferStream()
       await runAll(["--version"], buf)
+      assert.ok(/v[0-9]+\.[0-9]+\.[0-9]+/.test(buf.value))
+    })
+
+    it("npm-run-all-next command (--version)", async () => {
+      const buf = new BufferStream()
+      await runAllNext(["--version"], buf)
       assert.ok(/v[0-9]+\.[0-9]+\.[0-9]+/.test(buf.value))
     })
 
@@ -209,6 +245,11 @@ describe("[common]", () => {
 
     it("npm-run-all command", async () => {
       await runAll(["test-task:package-config"])
+      assert.strictEqual(result(), "OK")
+    })
+
+    it("npm-run-all-next command", async () => {
+      await runAllNext(["test-task:package-config"])
       assert.strictEqual(result(), "OK")
     })
 
