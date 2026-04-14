@@ -181,6 +181,11 @@ describe("[retries] npm-run-all", () => {
     })
 
     describe("should kill child processes when killed during retries:", () => {
+      afterEach(async () => {
+        await delay(1000)
+        removeResult()
+      })
+
       it("npm-run-all command", async () => {
         // spawn a long-running failing task with retries, then kill
         await spawnWithKill("node", ["../bin/npm-run-all/index.js", "--retries", "5", "test-task:append2 a"])
