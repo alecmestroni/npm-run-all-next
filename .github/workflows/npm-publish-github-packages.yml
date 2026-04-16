@@ -2,6 +2,12 @@ name: CI, Coverage & Publish
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
     branches:
       - master
   push:
@@ -21,8 +27,102 @@ on:
         type: boolean
 
 jobs:
+  pr-test-release:
+    if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Test release') && github.event.pull_request.head.repo.full_name == github.repository }}
+    name: PR Test Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Ensure npm token exists
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "❌ NPM_TOKEN is missing. Cannot publish test release."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build unique prerelease version
+        id: prerelease
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          RUN_NUMBER="${{ github.run_number }}"
+          CANDIDATE_VERSION="${BASE_VERSION}-test.pr${PR_NUMBER}.${RUN_NUMBER}"
+
+          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$CANDIDATE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Candidate prerelease: $PACKAGE_NAME@$CANDIDATE_VERSION"
+
+      - name: Check prerelease version availability
+        run: |
+          PACKAGE_NAME="${{ steps.prerelease.outputs.package_name }}"
+          CANDIDATE_VERSION="${{ steps.prerelease.outputs.version }}"
+
+          if npm view "$PACKAGE_NAME@$CANDIDATE_VERSION" version >/dev/null 2>&1; then
+            echo "❌ Version $CANDIDATE_VERSION is already published."
+            exit 1
+          fi
+
+          echo "✅ Version $CANDIDATE_VERSION is available"
+
+      - name: Set package version (no git tag)
+        run: npm pkg set version="${{ steps.prerelease.outputs.version }}"
+
+      - name: Lint & pre-test
+        run: npm run pretest
+
+      - name: Run optimized tests (no coverage)
+        run: |
+          CORES=$(node -p "require('os').cpus().length")
+          if [ "$CORES" -gt 4 ]; then
+            CONCURRENCY=4
+          else
+            CONCURRENCY=$CORES
+          fi
+          echo "Using $CONCURRENCY workers on $CORES cores"
+          TEST_CONCURRENCY=$CONCURRENCY npm run test:parallel
+
+      - name: "Publish prerelease to npm (tag: test)"
+        run: npm publish --tag test
+
+      - name: Comment on PR with prerelease info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = `${{ steps.prerelease.outputs.version }}`
+            const pkg = `${{ steps.prerelease.outputs.package_name }}`
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: [
+                '✅ Test release published before merge.',
+                '',
+                `Package: \`${pkg}\``,
+                `Version: \`${version}\``,
+                'Install command:',
+                `\`npm i ${pkg}@${version}\`'
+              ].join('\n')
+            })
+
   check-version:
-    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'skip-version')) }}
+    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || (!contains(github.event.pull_request.labels.*.name, 'skip-version') && !contains(github.event.pull_request.labels.*.name, 'Test release'))) }}
     name: Check Version Publishable
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +148,7 @@ jobs:
           fi
 
   test-and-coverage:
-    if: ${{ always() && (github.event_name == 'pull_request' || inputs.runTest == true) && (needs.check-version.result == 'success' || needs.check-version.result == 'skipped') }}
+    if: ${{ always() && (github.event_name == 'pull_request' || inputs.runTest == true) && (needs.check-version.result == 'success' || needs.check-version.result == 'skipped') && (github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'Test release')) }}
     name: Test & Coverage
     runs-on: ubuntu-latest
     needs: check-version
