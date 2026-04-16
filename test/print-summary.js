@@ -20,6 +20,7 @@ const nodeApi = require("../lib")
 
 const removeResult = util.removeResult
 const runAll = util.runAll
+const runAllNext = util.runAllNext
 const runPar = util.runPar
 const runSeq = util.runSeq
 
@@ -43,6 +44,8 @@ const getTableRawElements = (results, string) => {
     .map((el) => el.trim().replace(/ +/g, " "))
     .filter((el) => el)
 }
+
+const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
 
 //------------------------------------------------------------------------------
 // Test
@@ -721,6 +724,34 @@ describe("[print-summary] ", () => {
       // "test-task:fast b" is instant (empty script), "test-task:append a" has a 3s delay
       assert.strictEqual(names[0], "test-task:fast b")
       assert.strictEqual(names[1], "test-task:append a")
+    })
+  })
+
+  describe("npm-run-all-next unified summary", () => {
+    it("prints a single hierarchical table for nested sequential scripts", async () => {
+      await runAllNext(["--print-summary-table", "test-task:summary:seq"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      const summaryCount = (output.match(/\|\s*Summary\s*\|/g) || []).length
+
+      assert.strictEqual(summaryCount, 1)
+      assert(output.includes("[S] test-task:summary:seq"))
+      assert(output.includes("|-- [S] test-task:summary:child:a"))
+      assert(output.includes("|-- [S] test-task:summary:child:b"))
+    })
+
+    it("tracks child exit codes in the unified hierarchical table", async () => {
+      try {
+        await runAllNext(["--print-summary-table", "test-task:summary:seq:fail"], stdout)
+        assert.fail("Expected nested sequential script to fail")
+      } catch (_) {
+        const output = stripAnsi(stdout.value)
+        const childRow = getTableRawElements(output, "|-- [S] test-task:summary:child:fail")
+        const parentRow = getTableRawElements(output, "[S] test-task:summary:seq:fail")
+
+        assert.strictEqual(childRow[1], "1")
+        assert.strictEqual(parentRow[1], "1")
+      }
     })
   })
 })

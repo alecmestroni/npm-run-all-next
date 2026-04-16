@@ -13,6 +13,10 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const os = require("os")
+const path = require("path")
+const printSummaryTable = require("../../lib/print-summary")
+const { createId, readRows, safeUnlink } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -31,6 +35,9 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 	try {
 		const stdin = process.stdin
 		const argv = parseCLIArgs(args)
+		const startTime = Date.now()
+		const summaryRootId = createId("root")
+		const summaryReportFile = path.join(os.tmpdir(), `npm-run-all-next-summary-${summaryRootId}-${process.pid}.jsonl`)
 
 		const promise = argv.groups.reduce((prev, group) => {
 			if (!group || !group.patterns || group.patterns.length === 0) {
@@ -56,22 +63,52 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					aggregateOutput: group.parallel && argv.aggregateOutput,
 					aggregateTable: group.parallel && argv.aggregateTable,
 					retries: argv.retries,
-					printSummaryTable: argv.printSummaryTable,
+					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,
+					summaryReportFile,
+					summaryRootId,
+					summaryAutoCleanup: false,
 				})
 			)
 		}, Promise.resolve(null))
 
+		const withUnifiedSummary = promise
+			.then((value) => {
+				if (argv.printSummaryTable && stdout) {
+					const reportRows = readRows(summaryReportFile).filter((row) => row.summaryRootId === summaryRootId)
+					if (reportRows.length > 0) {
+						const invocationIds = new Set(reportRows.map((row) => row.invocationId).filter(Boolean))
+						const hasHierarchy = reportRows.some((row) => row.parentInvocationId && invocationIds.has(row.parentInvocationId))
+						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
+					}
+				}
+				return value
+			})
+			.catch((err) => {
+				if (argv.printSummaryTable && stdout) {
+					const reportRows = readRows(summaryReportFile).filter((row) => row.summaryRootId === summaryRootId)
+					if (reportRows.length > 0) {
+						const invocationIds = new Set(reportRows.map((row) => row.invocationId).filter(Boolean))
+						const hasHierarchy = reportRows.some((row) => row.parentInvocationId && invocationIds.has(row.parentInvocationId))
+						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
+					}
+				}
+				throw err
+			})
+			.finally(() => {
+				safeUnlink(summaryReportFile)
+			})
+
 		if (!argv.silent) {
-			promise.catch((err) => {
+			withUnifiedSummary.catch((err) => {
 				if (!err.reported) {
 					console.error("\nERROR:", err.message)
 				}
 			})
 		}
 
-		return promise
+		return withUnifiedSummary
 	} catch (err) {
 		console.error("\nERROR:", err.message)
 		return Promise.reject(err)
