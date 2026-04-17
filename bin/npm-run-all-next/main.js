@@ -100,11 +100,8 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 						const invocationIds = new Set(reportRows.map((row) => row.invocationId).filter(Boolean))
 						const hasHierarchy = reportRows.some((row) => row.parentInvocationId && invocationIds.has(row.parentInvocationId))
 						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
+						err.reported = true
 					}
-				}
-				if (err.detailMessage && stdout) {
-					stdout.write('\n' + err.detailMessage)
-					err.reported = true
 				}
 				throw err
 			})
