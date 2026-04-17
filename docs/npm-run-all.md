@@ -116,7 +116,16 @@ If `--continue-on-error` option is given, this behavior will be disabled.
 
 **Note2:** `&` operator does not work on Windows' `cmd.exe`. But `npm-run-all-next --parallel` works fine there.
 
+**Retries in parallel:** when you use `--retries` with a parallel group, only the failed child task is retried. Parallel tasks are tracked as isolated executions, so successful siblings are not run again.
+
 ### Run a mix of sequential and parallel scripts
+
+### Retries in sequential groups
+
+With sequential groups, `--retries` replays the whole group from the beginning when one child fails.
+This differs from parallel mode, where retries target only the failed child.
+
+If you want sequential execution but only the failing child to be retried, use `--child-retries <count>`.
 
 ```
 $ npm-run-all-next clean lint --parallel watch:html watch:js

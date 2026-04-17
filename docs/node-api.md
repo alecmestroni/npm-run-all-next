@@ -113,6 +113,13 @@ The promise gives `results` to the fulfilled handler.
 The `name` property is the name of a npm-script.
 The `code` property is the exit code of the npm-script. If the npm-script was not executed, the `code` property is `undefined`.
 
+## Retries In Sequential Mode
+
+When you use the Node API with `options.parallel: false`, `options.retries` applies to the current task only.
+If one sequential task fails, that task is retried up to the configured limit; already completed tasks are not run again.
+
+This matches the CLI behavior of `--child-retries <count>` for sequential groups.
+
 ```js
 runAll(["clean", "lint", "build"]).then((results) => {
   console.log(`${results[0].name}: ${results[0].code}`) // clean: 0

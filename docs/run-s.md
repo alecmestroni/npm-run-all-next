@@ -80,6 +80,8 @@ $ npm run clean && npm run lint && npm run build
 
 **Note:** If a script exited with a non-zero code, the following scripts are not run.
 
+**Retries:** with `run-s`, `--retries` replays the whole sequential block from the beginning when one task fails. If you want to retry only the failing task while keeping sequential execution, use `--child-retries` instead.
+
 ### Glob-like pattern matching for script names
 
 We can use [glob]-like patterns to specify npm-scripts.
