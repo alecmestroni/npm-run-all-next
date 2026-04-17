@@ -735,9 +735,9 @@ describe("[print-summary] ", () => {
       const summaryCount = (output.match(/\|\s*Summary\s*\|/g) || []).length
 
       assert.strictEqual(summaryCount, 1)
-      assert(output.includes("[S] test-task:summary:seq"))
-      assert(output.includes("|-- [S] test-task:summary:child:a"))
-      assert(output.includes("|-- [S] test-task:summary:child:b"))
+      assert(output.includes("test-task:summary:seq"))
+      assert(/[├└]── \[S\] test-task:summary:child:a/.test(output))
+      assert(/[├└]── \[S\] test-task:summary:child:b/.test(output))
     })
 
     it("tracks child exit codes in the unified hierarchical table", async () => {
@@ -746,8 +746,8 @@ describe("[print-summary] ", () => {
         assert.fail("Expected nested sequential script to fail")
       } catch (_) {
         const output = stripAnsi(stdout.value)
-        const childRow = getTableRawElements(output, "|-- [S] test-task:summary:child:fail")
-        const parentRow = getTableRawElements(output, "[S] test-task:summary:seq:fail")
+        const childRow = getTableRawElements(output, "└── [S] test-task:summary:child:fail")
+        const parentRow = getTableRawElements(output, "test-task:summary:seq:fail")
 
         assert.strictEqual(childRow[1], "1")
         assert.strictEqual(parentRow[1], "1")
@@ -760,9 +760,9 @@ describe("[print-summary] ", () => {
       const output = stripAnsi(stdout.value)
       const topLevelA = /^\|\s*\[S\] test-task:summary:child:a\s*\|/m
       const topLevelFlaky = /^\|\s*\[S\] test-task:summary:child:flaky\s*\|/m
-      const nestedA = (output.match(/\|-- \[S\] test-task:summary:child:a/g) || []).length
-      const nestedFlaky = (output.match(/\|-- \[S\] test-task:summary:child:flaky/g) || []).length
-      const topLevelParent = (output.match(/^\|\s*\[S\] test-task:summary:seq:retry\s*\|/gm) || []).length
+      const nestedA = (output.match(/[├└]── \[S\] test-task:summary:child:a/g) || []).length
+      const nestedFlaky = (output.match(/[├└]── \[S\] test-task:summary:child:flaky/g) || []).length
+      const topLevelParent = (output.match(/^\|\s*test-task:summary:seq:retry\s*\|/gm) || []).length
 
       assert(!topLevelA.test(output), "Unexpected orphan top-level child:a row")
       assert(!topLevelFlaky.test(output), "Unexpected orphan top-level child:flaky row")
