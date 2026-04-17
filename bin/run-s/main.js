@@ -13,6 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const { ENV_PARENT } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -59,7 +60,10 @@ module.exports = function npmRunAll(args, stdout, stderr) {
 
     if (!argv.silent) {
       promise.catch((err) => {
-        if (!err.reported) {
+        // Suppress if running as a tracked child of npm-run-all-next: the parent's
+        // summary table already captures the error via FinalExitCode. Printing here
+        // would cause stderr/stdout interleaving inside the parent's table.
+        if (!err.reported && !process.env[ENV_PARENT]) {
           console.error("\nERROR:", err.message)
         }
       })

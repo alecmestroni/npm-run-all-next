@@ -13,6 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const { ENV_FILE, ENV_ROOT, ENV_PARENT } = require("../../lib/summary-report")
 const os = require("os")
 const path = require("path")
 const printSummaryTable = require("../../lib/print-summary")
@@ -36,8 +37,12 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 		const stdin = process.stdin
 		const argv = parseCLIArgs(args)
 		const startTime = Date.now()
-		const summaryRootId = createId("root")
-		const summaryReportFile = path.join(os.tmpdir(), `npm-run-all-next-summary-${summaryRootId}-${process.pid}.jsonl`)
+		const inheritedSummaryFile = process.env[ENV_FILE] || null
+		const inheritedSummaryRootId = process.env[ENV_ROOT] || null
+		const inheritedSummaryParentId = process.env[ENV_PARENT] || null
+		const ownsSummaryFile = !inheritedSummaryFile
+		const summaryRootId = inheritedSummaryRootId || createId("root")
+		const summaryReportFile = inheritedSummaryFile || path.join(os.tmpdir(), `npm-run-all-next-summary-${summaryRootId}-${process.pid}.jsonl`)
 
 		const promise = argv.groups.reduce((prev, group) => {
 			if (!group || !group.patterns || group.patterns.length === 0) {
@@ -70,6 +75,7 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					runtimeFile: argv.runtimeFile,
 					summaryReportFile,
 					summaryRootId,
+					summaryParentInvocationId: inheritedSummaryParentId,
 					summaryAutoCleanup: false,
 				})
 			)
@@ -103,12 +109,16 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 				throw err
 			})
 			.finally(() => {
-				safeUnlink(summaryReportFile)
+				if (ownsSummaryFile) {
+					safeUnlink(summaryReportFile)
+				}
 			})
 
 		if (!argv.silent) {
 			withUnifiedSummary.catch((err) => {
-				if (!err.reported) {
+				// Suppress if running as a tracked child of another npm-run-all-next:
+				// the parent's summary table already captures the error.
+				if (!err.reported && !process.env[ENV_PARENT]) {
 					console.error("\nERROR:", err.message)
 				}
 			})
