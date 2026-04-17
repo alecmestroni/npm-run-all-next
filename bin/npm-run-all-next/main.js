@@ -94,6 +94,10 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
 					}
 				}
+				if (err.detailMessage && stdout) {
+					stdout.write('\n' + err.detailMessage)
+					err.reported = true
+				}
 				throw err
 			})
 			.finally(() => {
