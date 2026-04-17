@@ -753,5 +753,22 @@ describe("[print-summary] ", () => {
         assert.strictEqual(parentRow[1], "1")
       }
     })
+
+    it("does not show orphan child rows from previous retry attempts", async () => {
+      await runAllNext(["--print-summary-table", "--retries", "1", "test-task:summary:seq:retry"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      const topLevelA = /^\|\s*\[S\] test-task:summary:child:a\s*\|/m
+      const topLevelFlaky = /^\|\s*\[S\] test-task:summary:child:flaky\s*\|/m
+      const nestedA = (output.match(/\|-- \[S\] test-task:summary:child:a/g) || []).length
+      const nestedFlaky = (output.match(/\|-- \[S\] test-task:summary:child:flaky/g) || []).length
+      const topLevelParent = (output.match(/^\|\s*\[S\] test-task:summary:seq:retry\s*\|/gm) || []).length
+
+      assert(!topLevelA.test(output), "Unexpected orphan top-level child:a row")
+      assert(!topLevelFlaky.test(output), "Unexpected orphan top-level child:flaky row")
+      assert.strictEqual(nestedA, 1)
+      assert.strictEqual(nestedFlaky, 1)
+      assert.strictEqual(topLevelParent, 1)
+    })
   })
 })

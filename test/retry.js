@@ -19,6 +19,7 @@ const delay = util.delay
 const result = util.result
 const removeResult = util.removeResult
 const runAll = util.runAll
+const runAllNext = util.runAllNext
 const runPar = util.runPar
 const runSeq = util.runSeq
 
@@ -286,6 +287,43 @@ describe("[retries] npm-run-all", () => {
   })
 
   describe("[retries + sequential]", () => {
+    describe("should retry only the failing sequential child with --child-retries:", () => {
+      const retries = 4
+      const threshold = 2
+
+      it("npm-run-all-next command", async () => {
+        await runAllNext(["--child-retries", retries, "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        assert.strictEqual(result(), "afffb")
+      })
+
+      it("run-s command", async () => {
+        await runSeq(["--child-retries", retries, "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        assert.strictEqual(result(), "afffb")
+      })
+    })
+
+    describe("should error on invalid child retries count:", () => {
+      it("npm-run-all-next command --child-retries 0", async () => {
+        try {
+          await runAllNext(["--child-retries", 0, "-s", "test-task:append1 a"])
+        } catch (err) {
+          assert.ok(/ERROR: Invalid Option: --child-retries/i.test(err.message))
+          return
+        }
+        assert.fail("Expected an error about invalid child retries count")
+      })
+
+      it("run-s command --child-retries 0", async () => {
+        try {
+          await runSeq(["--child-retries", 0, "test-task:append1 a"])
+        } catch (err) {
+          assert.ok(/ERROR: Invalid Option: --child-retries/i.test(err.message))
+          return
+        }
+        assert.fail("Expected an error about invalid child retries count")
+      })
+    })
+
     describe("should combine retries with race execution (abort):", () => {
       const retries = 1
       it("Node API", async () => {

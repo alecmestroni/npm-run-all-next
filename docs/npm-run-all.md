@@ -50,6 +50,9 @@ Options:
                                  finished with zero. This option is valid only
                                  with 'parallel' option.
     --retries <count>   Retry each failed task up to `<count>` times.
+    --child-retries <count>
+                         Retry only failed sequential children up to `<count>`
+                         times. Parallel groups still use `--retries`.
     --runtime-file <path>        Specify a custom file to store runtime statistics
                                  for the balancer. Default is
                                  '.npm-run-all-next-runtimes.json'.

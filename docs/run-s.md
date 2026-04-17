@@ -30,6 +30,9 @@ Options:
     -n, --print-name            Set the flag to print the task name before
                                 running each task.
     --retries <count>  Retry each failed task up to `<count>` times.
+    --child-retries <count>
+                        Retry only failed sequential children up to `<count>`
+                        times (instead of restarting the whole group).
     --runtime-file <path>       Specify a custom file to store runtime statistics
                                 for the balancer. Default is
                                 '.npm-run-all-next-runtimes.json'.

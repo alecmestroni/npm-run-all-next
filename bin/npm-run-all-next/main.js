@@ -62,7 +62,9 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					npmPath: argv.npmPath,
 					aggregateOutput: group.parallel && argv.aggregateOutput,
 					aggregateTable: group.parallel && argv.aggregateTable,
-					retries: argv.retries,
+					retries: group.parallel
+						? (argv.retries || 0)
+						: (argv.childRetries !== undefined ? argv.childRetries : (argv.retries || 0)),
 					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,
