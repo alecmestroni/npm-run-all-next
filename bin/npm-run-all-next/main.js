@@ -13,11 +13,10 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
-const { ENV_FILE, ENV_ROOT, ENV_PARENT } = require("../../lib/summary-report")
 const os = require("os")
 const path = require("path")
 const printSummaryTable = require("../../lib/print-summary")
-const { createId, readRows, safeUnlink } = require("../../lib/summary-report")
+const { ENV_FILE, ENV_ROOT, ENV_PARENT, createId, readRows, safeUnlink } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
