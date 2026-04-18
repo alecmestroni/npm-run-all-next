@@ -770,5 +770,17 @@ describe("[print-summary] ", () => {
       assert.strictEqual(nestedFlaky, 1)
       assert.strictEqual(topLevelParent, 1)
     })
+
+    it("error summary does not list stale failures from superseded retry attempts", async () => {
+      await runAllNext(["--print-summary-table", "--retries", "1", "test-task:summary:seq:retry"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      // The group succeeds on retry (exit code 0), so no error summary should appear
+      assert(!output.includes("scripts failed"), "Error summary should not appear when group succeeds on retry")
+      assert(!output.includes("ERROR:"), "ERROR line should not appear when group succeeds on retry")
+      // Specifically, stale child failures from the first attempt must not leak
+      assert(!output.includes("• test-task:summary:child:flaky"), "Stale child:flaky failure should not appear in error summary")
+      assert(!output.includes("• _seq:"), "No _seq: children should appear in error summary")
+    })
   })
 })
