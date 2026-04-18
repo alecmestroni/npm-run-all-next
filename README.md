@@ -21,14 +21,10 @@ It lets you run multiple npm scripts in series or in parallel, with smart featur
 - 🔁 `--retries`  
   Automatically retry flaky tasks without rewriting scripts.
 
-- 🌱 `--propagate-retries`  
-  In sequential groups, inherit the parent's retry count and apply it per-child instead of re-running the whole sequence.
-
 
 > N.B. Retry semantics are intentionally different by execution mode:
 > - In parallel mode, `--retries` retries only the failed children, because parallel tasks are managed as isolated executions.
 > - In sequential mode, `--retries` retries the whole sequential block from the beginning.
-> - Use `--propagate-retries` to inherit the parent's `--retries` count and apply it per-child in sequential mode.
 
 - ⚖️ `--balancer`  
   Parallel tasks are scheduled using historical runtime data, so long-running tasks are started earlier and total build time goes down.
@@ -172,7 +168,6 @@ npm run test & npm run watch & npm run serve
 | -l, --print-label         | 🏷️ Prefix each output line with the task label                             |
 | -n, --print-name          | 📝 Print the task name before running                                      |
 | --retries `<count>`       | 🔁 Retry each failed task up to `<count>` times                            |
-| --propagate-retries       | 🌱 Inherit parent retries and apply per-child in sequential groups         |
 | --runtime-file `<path>`   | ⏱️ Save runtime-history file for balancer stats                            |
 | --npm-path `<path>`       | 📍 Path to a custom npm executable                                         |
 | --silent                  | 🤫 Suppress all output (sets `npm_config_loglevel` to `silent`)            |
@@ -186,7 +181,6 @@ Retry behavior summary:
 
 - `--retries` with parallel groups retries only the failed child tasks
 - `--retries` with sequential groups replays the whole sequential block
-- `--propagate-retries` inherits the parent's `--retries` count and applies per-child in sequential groups
 
 ---
 
@@ -271,7 +265,6 @@ interface RunOptions {
 ```
 
 For the Node API, sequential executions already retry per task when you pass `retries`.
-The `--propagate-retries` flag is the CLI equivalent: it inherits the parent runner's retry count and applies it per-child.
 
 ---
 

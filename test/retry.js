@@ -287,50 +287,6 @@ describe("[retries] npm-run-all", () => {
   })
 
   describe("[retries + sequential]", () => {
-    describe("should retry only the failing sequential child with --propagate-retries:", () => {
-      const retries = 4
-      const threshold = 2
-
-      it("npm-run-all-next command", async () => {
-        await runAllNext(["--retries", retries, "--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
-        assert.strictEqual(result(), "afffb")
-      })
-
-      it("run-s command", async () => {
-        await runSeq(["--retries", retries, "--propagate-retries", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
-        assert.strictEqual(result(), "afffb")
-      })
-    })
-
-
-    describe("should inherit retries from parent env var with --propagate-retries:", () => {
-      const retries = 4
-      const threshold = 2
-      const ENV_RETRIES = "NPM_RUN_ALL_NEXT_RETRIES"
-
-      afterEach(() => {
-        delete process.env[ENV_RETRIES]
-      })
-
-      it("npm-run-all-next inherits retries from ENV_RETRIES", async () => {
-        process.env[ENV_RETRIES] = String(retries)
-        await runAllNext(["--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
-        assert.strictEqual(result(), "afffb")
-      })
-
-      it("run-s inherits retries from ENV_RETRIES", async () => {
-        process.env[ENV_RETRIES] = String(retries)
-        await runSeq(["--propagate-retries", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
-        assert.strictEqual(result(), "afffb")
-      })
-
-      it("explicit --retries takes precedence over ENV_RETRIES", async () => {
-        process.env[ENV_RETRIES] = "1"
-        await runAllNext(["--retries", retries, "--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
-        assert.strictEqual(result(), "afffb")
-      })
-    })
-
     describe("should combine retries with race execution (abort):", () => {
       const retries = 1
       it("Node API", async () => {

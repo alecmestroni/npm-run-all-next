@@ -118,7 +118,7 @@ The `code` property is the exit code of the npm-script. If the npm-script was no
 When you use the Node API with `options.parallel: false`, `options.retries` applies to the current task only.
 If one sequential task fails, that task is retried up to the configured limit; already completed tasks are not run again.
 
-This matches the CLI behavior of `--propagate-retries` for sequential groups.
+This is the default behavior of the Node API for sequential groups.
 
 ```js
 runAll(["clean", "lint", "build"]).then((results) => {
