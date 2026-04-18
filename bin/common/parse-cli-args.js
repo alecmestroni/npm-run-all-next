@@ -77,7 +77,7 @@ class ArgumentSet {
     this.silent = process.env.npm_config_loglevel === "silent"
     this.singleMode = Boolean(options && options.singleMode)
     this.retries = (initialValues && initialValues.retries) || 0
-    this.childRetries = (initialValues && initialValues.childRetries !== undefined) ? initialValues.childRetries : undefined
+    this.propagateRetries = (initialValues && initialValues.propagateRetries) || false
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
     this.aggregateTable = (initialValues && initialValues.aggregateTable) || false
     this.runtimeFile = (initialValues && initialValues.runtimeFile) || null
@@ -151,11 +151,8 @@ function parseCLIArgsCore(set, args) {
         }
         break
 
-      case "--child-retries":
-        set.childRetries = parseInt(args[++i], 10)
-        if (!Number.isFinite(set.childRetries) || set.childRetries <= 0) {
-          throw new Error(`Invalid Option: --child-retries ${args[i]}`)
-        }
+      case "--propagate-retries":
+        set.propagateRetries = true
         break
 
       case "-t":

@@ -13,7 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
-const { ENV_FILE, ENV_ROOT, ENV_PARENT } = require("../../lib/summary-report")
+const { ENV_FILE, ENV_ROOT, ENV_PARENT, ENV_RETRIES } = require("../../lib/summary-report")
 const os = require("os")
 const path = require("path")
 const printSummaryTable = require("../../lib/print-summary")
@@ -40,6 +40,7 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 		const inheritedSummaryFile = process.env[ENV_FILE] || null
 		const inheritedSummaryRootId = process.env[ENV_ROOT] || null
 		const inheritedSummaryParentId = process.env[ENV_PARENT] || null
+		const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
 		const ownsSummaryFile = !inheritedSummaryFile
 		const summaryRootId = inheritedSummaryRootId || createId("root")
 		const summaryReportFile = inheritedSummaryFile || path.join(os.tmpdir(), `npm-run-all-next-summary-${summaryRootId}-${process.pid}.jsonl`)
@@ -69,7 +70,7 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					aggregateTable: group.parallel && argv.aggregateTable,
 					retries: group.parallel
 						? (argv.retries || 0)
-						: (argv.childRetries !== undefined ? argv.childRetries : (argv.retries || 0)),
+						: (argv.propagateRetries ? (argv.retries || inheritedRetries || 0) : (argv.retries || 0)),
 					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,

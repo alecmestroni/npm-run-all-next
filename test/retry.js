@@ -287,40 +287,47 @@ describe("[retries] npm-run-all", () => {
   })
 
   describe("[retries + sequential]", () => {
-    describe("should retry only the failing sequential child with --child-retries:", () => {
+    describe("should retry only the failing sequential child with --propagate-retries:", () => {
       const retries = 4
       const threshold = 2
 
       it("npm-run-all-next command", async () => {
-        await runAllNext(["--child-retries", retries, "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        await runAllNext(["--retries", retries, "--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
         assert.strictEqual(result(), "afffb")
       })
 
       it("run-s command", async () => {
-        await runSeq(["--child-retries", retries, "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        await runSeq(["--retries", retries, "--propagate-retries", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
         assert.strictEqual(result(), "afffb")
       })
     })
 
-    describe("should error on invalid child retries count:", () => {
-      it("npm-run-all-next command --child-retries 0", async () => {
-        try {
-          await runAllNext(["--child-retries", 0, "-s", "test-task:append1 a"])
-        } catch (err) {
-          assert.ok(/ERROR: Invalid Option: --child-retries/i.test(err.message))
-          return
-        }
-        assert.fail("Expected an error about invalid child retries count")
+
+    describe("should inherit retries from parent env var with --propagate-retries:", () => {
+      const retries = 4
+      const threshold = 2
+      const ENV_RETRIES = "NPM_RUN_ALL_NEXT_RETRIES"
+
+      afterEach(() => {
+        delete process.env[ENV_RETRIES]
       })
 
-      it("run-s command --child-retries 0", async () => {
-        try {
-          await runSeq(["--child-retries", 0, "test-task:append1 a"])
-        } catch (err) {
-          assert.ok(/ERROR: Invalid Option: --child-retries/i.test(err.message))
-          return
-        }
-        assert.fail("Expected an error about invalid child retries count")
+      it("npm-run-all-next inherits retries from ENV_RETRIES", async () => {
+        process.env[ENV_RETRIES] = String(retries)
+        await runAllNext(["--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        assert.strictEqual(result(), "afffb")
+      })
+
+      it("run-s inherits retries from ENV_RETRIES", async () => {
+        process.env[ENV_RETRIES] = String(retries)
+        await runSeq(["--propagate-retries", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        assert.strictEqual(result(), "afffb")
+      })
+
+      it("explicit --retries takes precedence over ENV_RETRIES", async () => {
+        process.env[ENV_RETRIES] = "1"
+        await runAllNext(["--retries", retries, "--propagate-retries", "-s", "test-task:append1 a", `test-task:flaky ${threshold}`, "test-task:append1 b"])
+        assert.strictEqual(result(), "afffb")
       })
     })
 

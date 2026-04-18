@@ -50,9 +50,8 @@ Options:
                                  finished with zero. This option is valid only
                                  with 'parallel' option.
     --retries <count>   Retry each failed task up to `<count>` times.
-    --child-retries <count>
-                         Retry only failed sequential children up to `<count>`
-                         times. Parallel groups still use `--retries`.
+    --propagate-retries  Inherit the parent's retry count and apply it
+                         per-child in sequential groups.
     --runtime-file <path>        Specify a custom file to store runtime statistics
                                  for the balancer. Default is
                                  '.npm-run-all-next-runtimes.json'.
@@ -125,7 +124,7 @@ If `--continue-on-error` option is given, this behavior will be disabled.
 With sequential groups, `--retries` replays the whole group from the beginning when one child fails.
 This differs from parallel mode, where retries target only the failed child.
 
-If you want sequential execution but only the failing child to be retried, use `--child-retries <count>`.
+Use `--propagate-retries` to inherit the parent's `--retries` count and apply it per-child in sequential groups.
 
 ```
 $ npm-run-all-next clean lint --parallel watch:html watch:js

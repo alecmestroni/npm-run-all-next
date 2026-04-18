@@ -23,7 +23,7 @@ Where `tasks.json` contains:
 - Full CLI support for `--tasks-file` in `npm-run-all-next`, `npm-run-all`, `run-p`, and `run-s`.
 - If `--tasks-file` is provided, patterns are ignored and only the tasks from the file are executed.
 - Maintains backward compatibility: if the option is not present, the CLI works as before.
-- Supports all other options (parallel, jobs, retries, child-retries, etc.) in combination with `--tasks-file`.
+- Supports all other options (parallel, jobs, retries, propagate-retries, etc.) in combination with `--tasks-file`.
 
 ## Error Handling
 
