@@ -37,7 +37,10 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 		const argv = parseCLIArgs(args)
 		const startTime = Date.now()
 		const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
-		const effectiveRetries = argv.retries || inheritedRetries
+		const retryCountToPropagate = argv.retries || inheritedRetries
+		// Explicit --inherit-retries: don't retry at this level, only propagate.
+		// Inherited from env: apply retries here AND continue propagating.
+		const effectiveRetries = argv.inheritRetries ? 0 : (argv.retries || inheritedRetries)
 		const effectiveInheritRetries = argv.inheritRetries || inheritedRetries > 0
 		const inheritedSummaryFile = process.env[ENV_FILE] || null
 		const inheritedSummaryRootId = process.env[ENV_ROOT] || null
@@ -71,6 +74,7 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					aggregateTable: group.parallel && argv.aggregateTable,
 					retries: effectiveRetries,
 					inheritRetries: effectiveInheritRetries,
+					retryCountToPropagate,
 					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,
