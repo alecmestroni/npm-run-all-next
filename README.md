@@ -168,6 +168,7 @@ npm run test & npm run watch & npm run serve
 | -l, --print-label         | 🏷️ Prefix each output line with the task label                             |
 | -n, --print-name          | 📝 Print the task name before running                                      |
 | --retries `<count>`       | 🔁 Retry each failed task up to `<count>` times                            |
+| --inherit-retries         | 🧬 Propagate `--retries` to nested npm-run-all-next/run-s/run-p children   |
 | --runtime-file `<path>`   | ⏱️ Save runtime-history file for balancer stats                            |
 | --npm-path `<path>`       | 📍 Path to a custom npm executable                                         |
 | --silent                  | 🤫 Suppress all output (sets `npm_config_loglevel` to `silent`)            |
@@ -181,6 +182,7 @@ Retry behavior summary:
 
 - `--retries` with parallel groups retries only the failed child tasks
 - `--retries` with sequential groups replays the whole sequential block
+- `--inherit-retries` propagates the retry count to all nested runner children, recursively
 
 ---
 
@@ -252,6 +254,7 @@ interface RunOptions {
   race?: boolean;
   jobs?: number;
   retries?: number;
+  inheritRetries?: boolean;
   printSummaryTable?: boolean;
   printLabel?: boolean;
   printName?: boolean;
@@ -265,6 +268,8 @@ interface RunOptions {
 ```
 
 For the Node API, sequential executions already retry per task when you pass `retries`.
+
+Set `inheritRetries: true` to propagate the retry count to nested npm-run-all-next/run-s/run-p children.
 
 ---
 

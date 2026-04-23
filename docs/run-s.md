@@ -30,6 +30,8 @@ Options:
     -n, --print-name            Set the flag to print the task name before
                                 running each task.
     --retries <count>  Retry each failed task up to `<count>` times.
+    --inherit-retries           Propagate --retries to nested runner children
+                                (npm-run-all-next, run-s, run-p) recursively.
     --runtime-file <path>       Specify a custom file to store runtime statistics
                                 for the balancer. Default is
                                 '.npm-run-all-next-runtimes.json'.

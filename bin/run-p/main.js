@@ -13,6 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const { ENV_RETRIES } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -32,6 +33,9 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     const stdin = process.stdin
     const argv = parseCLIArgs(args, { parallel: true }, { singleMode: true })
     const group = argv.lastGroup
+    const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
+    const effectiveRetries = argv.retries || inheritedRetries
+    const effectiveInheritRetries = argv.inheritRetries || inheritedRetries > 0
 
     if (!group || !group.patterns || group.patterns.length === 0) {
       return Promise.resolve(null)
@@ -54,7 +58,8 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       npmPath: argv.npmPath,
       aggregateOutput: group.parallel && argv.aggregateOutput,
       aggregateTable: group.parallel && argv.aggregateTable,
-      retries: argv.retries,
+      retries: effectiveRetries,
+      inheritRetries: effectiveInheritRetries,
       printSummaryTable: argv.printSummaryTable,
       balancer: argv.balancer,
       runtimeFile: argv.runtimeFile,

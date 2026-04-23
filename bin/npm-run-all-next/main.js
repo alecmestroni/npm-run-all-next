@@ -16,7 +16,7 @@ const parseCLIArgs = require("../common/parse-cli-args")
 const os = require("os")
 const path = require("path")
 const printSummaryTable = require("../../lib/print-summary")
-const { ENV_FILE, ENV_ROOT, ENV_PARENT, createId, readRows, safeUnlink } = require("../../lib/summary-report")
+const { ENV_FILE, ENV_ROOT, ENV_PARENT, ENV_RETRIES, createId, readRows, safeUnlink } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -36,6 +36,9 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 		const stdin = process.stdin
 		const argv = parseCLIArgs(args)
 		const startTime = Date.now()
+		const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
+		const effectiveRetries = argv.retries || inheritedRetries
+		const effectiveInheritRetries = argv.inheritRetries || inheritedRetries > 0
 		const inheritedSummaryFile = process.env[ENV_FILE] || null
 		const inheritedSummaryRootId = process.env[ENV_ROOT] || null
 		const inheritedSummaryParentId = process.env[ENV_PARENT] || null
@@ -66,7 +69,8 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					npmPath: argv.npmPath,
 					aggregateOutput: group.parallel && argv.aggregateOutput,
 					aggregateTable: group.parallel && argv.aggregateTable,
-					retries: argv.retries || 0,
+					retries: effectiveRetries,
+					inheritRetries: effectiveInheritRetries,
 					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,

@@ -120,6 +120,11 @@ If one sequential task fails, that task is retried up to the configured limit; a
 
 This is the default behavior of the Node API for sequential groups.
 
+Set `options.inheritRetries` to `true` to propagate the retry count to nested
+`npm-run-all-next`, `run-s`, or `run-p` child processes via an environment variable.
+Each child layer automatically re-propagates the value, enabling infinite-depth inheritance.
+An explicit `--retries` on a child overrides the inherited value.
+
 ```js
 runAll(["clean", "lint", "build"]).then((results) => {
   console.log(`${results[0].name}: ${results[0].code}`) // clean: 0

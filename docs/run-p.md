@@ -30,6 +30,8 @@ Options:
     -k, --kill-others-on-fail   Abort all running tasks (and their children)
                                 as soon as one task fails.
     --retries <count>  Retry each failed task up to `<count>` times.
+    --inherit-retries           Propagate --retries to nested runner children
+                                (npm-run-all-next, run-s, run-p) recursively.
     --runtime-file <path>       Specify a custom file to store runtime statistics
                                 for the balancer. Default is
                                 '.npm-run-all-next-runtimes.json'.
