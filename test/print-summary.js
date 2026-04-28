@@ -127,8 +127,8 @@ describe("[print-summary] ", () => {
       const lines = printSummary([])
         .split("\n")
         .filter((l) => l)
-      assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
-      const [divider, printSummaryTable, divider2, header, separator, divider3, est] = lines
+      assert.strictEqual(lines.length, 7)
+      const [divider, printSummaryTable, divider2, header, separator, divider3, divider4] = lines
 
       const summaryInner = printSummaryTable.slice(1, -1).trim()
       assert.strictEqual(summaryInner, "Summary")
@@ -136,50 +136,68 @@ describe("[print-summary] ", () => {
       assert.strictEqual(divider2, divider3)
       assert(header.includes("Task"))
       assert(separator.includes("-".repeat(header.split("|")[1].trim().length)))
-      assert.strictEqual(est, "| Estimated Total Time:              0.00 s|")
     })
 
-    it("formats estimated total time in seconds when <60s", () => {
+    it("does not show estimated total time when jobs <= 1", () => {
       const results = [
         { name: "a", code: 0, retries: 0, durationMs: 1500 },
         { name: "b", code: 0, retries: 0, durationMs: 2500 },
       ]
-      const lines = printSummary(results)
-        .split("\n")
-        .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      assert.strictEqual(penult, "| Estimated Total Time:              4.00 s|")
+      const output = printSummary(results)
+      assert(!output.includes("Estimated Total Time"))
     })
 
-    it("converts estimated total time to minutes when ≥60s", () => {
-      const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
-      const lines = printSummary(results)
+    it("formats estimated total time in seconds when <60s (parallel, jobs > 1)", () => {
+      const results = [
+        { name: "a", code: 0, retries: 0, durationMs: 1500 },
+        { name: "b", code: 0, retries: 0, durationMs: 2500 },
+      ]
+      const lines = printSummary(results, undefined, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      assert.strictEqual(penult, '| Estimated Total Time:              1m 30s|');
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      assert(estLine)
+      assert(estLine.includes("4.00 s"))
+    })
+
+    it("converts estimated total time to minutes when ≥60s (parallel, jobs > 1)", () => {
+      const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
+      const lines = printSummary(results, undefined, 2)
+        .split("\n")
+        .filter((l) => l)
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      assert(estLine)
+      assert(estLine.includes("1m 30s"))
     })
 
     it("prints actual total time when provided", () => {
       const results = [{ name: "x", code: 0, retries: 0, durationMs: 1000 }]
-      const lines = printSummary(results, 2000)
+      const lines = printSummary(results, 2000, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      const terzult = lines[lines.length - 3]
-      assert.strictEqual(penult, "| Actual Total Time:                 2.00 s|")
-      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      const actLine = lines.find((l) => l.includes("Actual Total Time"))
+      assert(estLine && estLine.includes("1.00 s"))
+      assert(actLine && actLine.includes("2.00 s"))
     })
 
     it("converts actual total time to minutes when ≥60s", () => {
       const results = [{ name: "y", code: 0, retries: 0, durationMs: 1000 }]
-      const lines = printSummary(results, 120000)
+      const lines = printSummary(results, 120000, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      const terzult = lines[lines.length - 3]
-      assert.strictEqual(penult, '| Actual Total Time:                  2m 0s|');
-      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      const actLine = lines.find((l) => l.includes("Actual Total Time"))
+      assert(estLine && estLine.includes("1.00 s"))
+      assert(actLine && actLine.includes("2m 0s"))
+    })
+
+    it("always shows start time when provided in options", () => {
+      const results = [{ name: "z", code: 0, retries: 0, durationMs: 1000 }]
+      const startTs = new Date("2026-04-28T08:33:04.345Z").getTime()
+      const output = printSummary(results, 1000, 1, { startTime: startTs })
+      assert(output.includes("Start time:"))
+      assert(output.includes("2026-04-28T08:33:04.345Z"))
     })
   })
 
@@ -706,7 +724,8 @@ describe("[print-summary] ", () => {
             !l.includes('---') &&
             !l.includes('Summary') &&
             !l.includes('Total Time') &&
-            !l.includes('Jobs'),
+            !l.includes('Jobs') &&
+            !l.includes('Start time'),
         )
         .map(l => l.split('|')[1]?.trim())
         .filter(Boolean);
