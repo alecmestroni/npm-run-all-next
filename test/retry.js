@@ -19,6 +19,7 @@ const delay = util.delay
 const result = util.result
 const removeResult = util.removeResult
 const runAll = util.runAll
+const runAllNext = util.runAllNext
 const runPar = util.runPar
 const runSeq = util.runSeq
 
@@ -710,6 +711,41 @@ describe("[retries] npm-run-all", () => {
         }
         assert.fail("Expected command to fail after retries")
       })
+    })
+  })
+
+  describe("[--inherit-retries]", () => {
+    beforeEach(removeResult)
+
+    it("children inherit retries via env var (npm-run-all-next)", async () => {
+      // Parent passes --retries 1 --inherit-retries.
+      // Inner run-s (test-task:inherit:wrapper) has no explicit --retries but
+      // inherits retries=1 from env → retries the flaky child and succeeds.
+      await runAllNext(["--retries", "1", "--inherit-retries", "test-task:inherit:wrapper"])
+    })
+
+    it("without --inherit-retries children do NOT inherit retries", async () => {
+      // No --retries on the parent → inner run-s has no retries → flaky child fails.
+      try {
+        await runAllNext(["test-task:inherit:wrapper"])
+      } catch (_) {
+        return
+      }
+      assert.fail("Expected command to fail when --inherit-retries is not set")
+    })
+
+    it("propagation works through 3 levels (deep-wrapper)", async () => {
+      // Level 1: npm-run-all-next --retries 1 --inherit-retries test-task:inherit:deep-wrapper
+      // Level 2: run-s test-task:inherit:wrapper  (inherits retries=1 from env)
+      // Level 3: run-s test-task:append:a test-task:inherit:flaky1  (inherits retries=1 from env)
+      await runAllNext(["--retries", "1", "--inherit-retries", "test-task:inherit:deep-wrapper"])
+    })
+
+    it("run-s inherits retries from parent", async () => {
+      // Directly test that run-s picks up inherited retries.
+      // Parent: run-s --retries 1 --inherit-retries test-task:inherit:wrapper
+      // Level 2 (wrapper = run-s): inherits retries=1 → retries the flaky child → succeeds.
+      await runSeq(["--retries", "1", "--inherit-retries", "test-task:inherit:wrapper"])
     })
   })
 })

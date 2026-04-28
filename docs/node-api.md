@@ -113,6 +113,18 @@ The promise gives `results` to the fulfilled handler.
 The `name` property is the name of a npm-script.
 The `code` property is the exit code of the npm-script. If the npm-script was not executed, the `code` property is `undefined`.
 
+## Retries In Sequential Mode
+
+When you use the Node API with `options.parallel: false`, `options.retries` applies to the current task only.
+If one sequential task fails, that task is retried up to the configured limit; already completed tasks are not run again.
+
+This is the default behavior of the Node API for sequential groups.
+
+Set `options.inheritRetries` to `true` to propagate the retry count to nested
+`npm-run-all-next`, `run-s`, or `run-p` child processes via an environment variable.
+Each child layer automatically re-propagates the value, enabling infinite-depth inheritance.
+An explicit `--retries` on a child overrides the inherited value.
+
 ```js
 runAll(["clean", "lint", "build"]).then((results) => {
   console.log(`${results[0].name}: ${results[0].code}`) // clean: 0

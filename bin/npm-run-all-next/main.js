@@ -13,6 +13,10 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const os = require("os")
+const path = require("path")
+const printSummaryTable = require("../../lib/print-summary")
+const { ENV_FILE, ENV_ROOT, ENV_PARENT, ENV_RETRIES, createId, readRows, safeUnlink } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -31,6 +35,19 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 	try {
 		const stdin = process.stdin
 		const argv = parseCLIArgs(args)
+		const startTime = Date.now()
+		const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
+		const retryCountToPropagate = argv.retries || inheritedRetries
+		// Explicit --inherit-retries: don't retry at this level, only propagate.
+		// Inherited from env: apply retries here AND continue propagating.
+		const effectiveRetries = argv.inheritRetries ? 0 : (argv.retries || inheritedRetries)
+		const effectiveInheritRetries = argv.inheritRetries || inheritedRetries > 0
+		const inheritedSummaryFile = process.env[ENV_FILE] || null
+		const inheritedSummaryRootId = process.env[ENV_ROOT] || null
+		const inheritedSummaryParentId = process.env[ENV_PARENT] || null
+		const ownsSummaryFile = !inheritedSummaryFile
+		const summaryRootId = inheritedSummaryRootId || createId("root")
+		const summaryReportFile = inheritedSummaryFile || path.join(os.tmpdir(), `npm-run-all-next-summary-${summaryRootId}-${process.pid}.jsonl`)
 
 		const promise = argv.groups.reduce((prev, group) => {
 			if (!group || !group.patterns || group.patterns.length === 0) {
@@ -55,23 +72,61 @@ module.exports = function npmRunAllNext(args, stdout, stderr) {
 					npmPath: argv.npmPath,
 					aggregateOutput: group.parallel && argv.aggregateOutput,
 					aggregateTable: group.parallel && argv.aggregateTable,
-					retries: argv.retries,
-					printSummaryTable: argv.printSummaryTable,
+					retries: effectiveRetries,
+					inheritRetries: effectiveInheritRetries,
+					retryCountToPropagate,
+					printSummaryTable: false,
 					balancer: argv.balancer,
 					runtimeFile: argv.runtimeFile,
+					summaryReportFile,
+					summaryRootId,
+					summaryParentInvocationId: inheritedSummaryParentId,
+					summaryAutoCleanup: false,
 				})
 			)
 		}, Promise.resolve(null))
 
+		const withUnifiedSummary = promise
+			.then((value) => {
+				if (argv.printSummaryTable && stdout) {
+					const reportRows = readRows(summaryReportFile).filter((row) => row.summaryRootId === summaryRootId)
+					if (reportRows.length > 0) {
+						const invocationIds = new Set(reportRows.map((row) => row.invocationId).filter(Boolean))
+						const hasHierarchy = reportRows.some((row) => row.parentInvocationId && invocationIds.has(row.parentInvocationId))
+						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
+					}
+				}
+				return value
+			})
+			.catch((err) => {
+				if (argv.printSummaryTable && stdout) {
+					const reportRows = readRows(summaryReportFile).filter((row) => row.summaryRootId === summaryRootId)
+					if (reportRows.length > 0) {
+						const invocationIds = new Set(reportRows.map((row) => row.invocationId).filter(Boolean))
+						const hasHierarchy = reportRows.some((row) => row.parentInvocationId && invocationIds.has(row.parentInvocationId))
+						stdout.write(printSummaryTable(reportRows, Date.now() - startTime, argv.jobs || 1, { hierarchical: hasHierarchy, showMode: hasHierarchy }))
+						err.reported = true
+					}
+				}
+				throw err
+			})
+			.finally(() => {
+				if (ownsSummaryFile) {
+					safeUnlink(summaryReportFile)
+				}
+			})
+
 		if (!argv.silent) {
-			promise.catch((err) => {
-				if (!err.reported) {
+			withUnifiedSummary.catch((err) => {
+				// Suppress if running as a tracked child of another npm-run-all-next:
+				// the parent's summary table already captures the error.
+				if (!err.reported && !process.env[ENV_PARENT]) {
 					console.error("\nERROR:", err.message)
 				}
 			})
 		}
 
-		return promise
+		return withUnifiedSummary
 	} catch (err) {
 		console.error("\nERROR:", err.message)
 		return Promise.reject(err)

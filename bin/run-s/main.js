@@ -13,6 +13,7 @@
 
 const runAll = require("../../lib")
 const parseCLIArgs = require("../common/parse-cli-args")
+const { ENV_PARENT, ENV_RETRIES } = require("../../lib/summary-report")
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -32,6 +33,12 @@ module.exports = function npmRunAll(args, stdout, stderr) {
     const stdin = process.stdin
     const argv = parseCLIArgs(args, { parallel: false }, { singleMode: true })
     const group = argv.lastGroup
+    const inheritedRetries = parseInt(process.env[ENV_RETRIES], 10) || 0
+    const retryCountToPropagate = argv.retries || inheritedRetries
+    // Explicit --inherit-retries: don't retry at this level, only propagate.
+    // Inherited from env: apply retries here AND continue propagating.
+    const effectiveRetries = argv.inheritRetries ? 0 : (argv.retries || inheritedRetries)
+    const effectiveInheritRetries = argv.inheritRetries || inheritedRetries > 0
 
     if (!group || !group.patterns || group.patterns.length === 0) {
       return Promise.resolve(null)
@@ -50,7 +57,9 @@ module.exports = function npmRunAll(args, stdout, stderr) {
       silent: argv.silent,
       arguments: argv.rest,
       npmPath: argv.npmPath,
-      retries: argv.retries,
+      retries: effectiveRetries,
+      inheritRetries: effectiveInheritRetries,
+      retryCountToPropagate,
       printSummaryTable: argv.printSummaryTable,
       aggregateTable: argv.aggregateTable,
       balancer: argv.balancer,
@@ -59,7 +68,10 @@ module.exports = function npmRunAll(args, stdout, stderr) {
 
     if (!argv.silent) {
       promise.catch((err) => {
-        if (!err.reported) {
+        // Suppress if running as a tracked child of npm-run-all-next: the parent's
+        // summary table already captures the error via FinalExitCode. Printing here
+        // would cause stderr/stdout interleaving inside the parent's table.
+        if (!err.reported && !process.env[ENV_PARENT]) {
           console.error("\nERROR:", err.message)
         }
       })

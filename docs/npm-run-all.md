@@ -50,6 +50,8 @@ Options:
                                  finished with zero. This option is valid only
                                  with 'parallel' option.
     --retries <count>   Retry each failed task up to `<count>` times.
+    --inherit-retries            Propagate --retries to nested runner children
+                                 (npm-run-all-next, run-s, run-p) recursively.
     --runtime-file <path>        Specify a custom file to store runtime statistics
                                  for the balancer. Default is
                                  '.npm-run-all-next-runtimes.json'.
@@ -113,7 +115,21 @@ If `--continue-on-error` option is given, this behavior will be disabled.
 
 **Note2:** `&` operator does not work on Windows' `cmd.exe`. But `npm-run-all-next --parallel` works fine there.
 
+**Retries in parallel:** when you use `--retries` with a parallel group, only the failed child task is retried. Parallel tasks are tracked as isolated executions, so successful siblings are not run again.
+
 ### Run a mix of sequential and parallel scripts
+
+### Retries in sequential groups
+
+With sequential groups, `--retries` replays the whole group from the beginning when one child fails.
+This differs from parallel mode, where retries target only the failed child.
+
+### Inheriting retries in nested runners
+
+Use `--inherit-retries` alongside `--retries` to propagate the retry count to every nested
+`npm-run-all-next`, `run-s`, or `run-p` invocation, recursively through any depth of wrappers.
+Each child layer that detects the inherited value will automatically continue propagating it.
+An explicit `--retries` on a child overrides the inherited value.
 
 ```
 $ npm-run-all-next clean lint --parallel watch:html watch:js

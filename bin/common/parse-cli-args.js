@@ -79,6 +79,7 @@ class ArgumentSet {
     this.retries = (initialValues && initialValues.retries) || 0
     this.printSummaryTable = (initialValues && initialValues.printSummaryTable) || false
     this.aggregateTable = (initialValues && initialValues.aggregateTable) || false
+    this.inheritRetries = (initialValues && initialValues.inheritRetries) || false
     this.runtimeFile = (initialValues && initialValues.runtimeFile) || null
     this.initialValues = initialValues
   }
@@ -148,6 +149,10 @@ function parseCLIArgsCore(set, args) {
         if (!Number.isFinite(set.retries) || set.retries <= 0) {
           throw new Error(`Invalid Option: --retries ${args[i]}`)
         }
+        break
+
+      case "--inherit-retries":
+        set.inheritRetries = true
         break
 
       case "-t":

@@ -20,6 +20,7 @@ const nodeApi = require("../lib")
 
 const removeResult = util.removeResult
 const runAll = util.runAll
+const runAllNext = util.runAllNext
 const runPar = util.runPar
 const runSeq = util.runSeq
 
@@ -43,6 +44,8 @@ const getTableRawElements = (results, string) => {
     .map((el) => el.trim().replace(/ +/g, " "))
     .filter((el) => el)
 }
+
+const stripAnsi = (str) => str.replace(/\u001b\[[0-9;]*m/g, "")
 
 //------------------------------------------------------------------------------
 // Test
@@ -124,8 +127,8 @@ describe("[print-summary] ", () => {
       const lines = printSummary([])
         .split("\n")
         .filter((l) => l)
-      assert.strictEqual(lines.length, 8) // ora c’è anche Estimated Total Time
-      const [divider, printSummaryTable, divider2, header, separator, divider3, est] = lines
+      assert.strictEqual(lines.length, 7)
+      const [divider, printSummaryTable, divider2, header, separator, divider3, divider4] = lines
 
       const summaryInner = printSummaryTable.slice(1, -1).trim()
       assert.strictEqual(summaryInner, "Summary")
@@ -133,50 +136,68 @@ describe("[print-summary] ", () => {
       assert.strictEqual(divider2, divider3)
       assert(header.includes("Task"))
       assert(separator.includes("-".repeat(header.split("|")[1].trim().length)))
-      assert.strictEqual(est, "| Estimated Total Time:              0.00 s|")
     })
 
-    it("formats estimated total time in seconds when <60s", () => {
+    it("does not show estimated total time when jobs <= 1", () => {
       const results = [
         { name: "a", code: 0, retries: 0, durationMs: 1500 },
         { name: "b", code: 0, retries: 0, durationMs: 2500 },
       ]
-      const lines = printSummary(results)
-        .split("\n")
-        .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      assert.strictEqual(penult, "| Estimated Total Time:              4.00 s|")
+      const output = printSummary(results)
+      assert(!output.includes("Estimated Total Time"))
     })
 
-    it("converts estimated total time to minutes when ≥60s", () => {
-      const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
-      const lines = printSummary(results)
+    it("formats estimated total time in seconds when <60s (parallel, jobs > 1)", () => {
+      const results = [
+        { name: "a", code: 0, retries: 0, durationMs: 1500 },
+        { name: "b", code: 0, retries: 0, durationMs: 2500 },
+      ]
+      const lines = printSummary(results, undefined, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      assert.strictEqual(penult, '| Estimated Total Time:              1m 30s|');
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      assert(estLine)
+      assert(estLine.includes("4.00 s"))
+    })
+
+    it("converts estimated total time to minutes when ≥60s (parallel, jobs > 1)", () => {
+      const results = [{ name: "long", code: 0, retries: 0, durationMs: 90000 }]
+      const lines = printSummary(results, undefined, 2)
+        .split("\n")
+        .filter((l) => l)
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      assert(estLine)
+      assert(estLine.includes("1m 30s"))
     })
 
     it("prints actual total time when provided", () => {
       const results = [{ name: "x", code: 0, retries: 0, durationMs: 1000 }]
-      const lines = printSummary(results, 2000)
+      const lines = printSummary(results, 2000, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      const terzult = lines[lines.length - 3]
-      assert.strictEqual(penult, "| Actual Total Time:                 2.00 s|")
-      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      const actLine = lines.find((l) => l.includes("Actual Total Time"))
+      assert(estLine && estLine.includes("1.00 s"))
+      assert(actLine && actLine.includes("2.00 s"))
     })
 
     it("converts actual total time to minutes when ≥60s", () => {
       const results = [{ name: "y", code: 0, retries: 0, durationMs: 1000 }]
-      const lines = printSummary(results, 120000)
+      const lines = printSummary(results, 120000, 2)
         .split("\n")
         .filter((l) => l)
-      const penult = lines[lines.length - 2]
-      const terzult = lines[lines.length - 3]
-      assert.strictEqual(penult, '| Actual Total Time:                  2m 0s|');
-      assert.strictEqual(terzult, "| Estimated Total Time:              1.00 s|")
+      const estLine = lines.find((l) => l.includes("Estimated Total Time"))
+      const actLine = lines.find((l) => l.includes("Actual Total Time"))
+      assert(estLine && estLine.includes("1.00 s"))
+      assert(actLine && actLine.includes("2m 0s"))
+    })
+
+    it("always shows start time when provided in options", () => {
+      const results = [{ name: "z", code: 0, retries: 0, durationMs: 1000 }]
+      const startTs = new Date("2026-04-28T08:33:04.345Z").getTime()
+      const output = printSummary(results, 1000, 1, { startTime: startTs })
+      assert(output.includes("Start time:"))
+      assert(output.includes("2026-04-28T08:33:04.345Z"))
     })
   })
 
@@ -572,7 +593,7 @@ describe("[print-summary] ", () => {
 
     describe("should print summary table after execution with jobs limit (fail):", () => {
       const retries = 3
-      const threshold = 1
+      const threshold = 2
       const jobs = 2
 
       const runners = [
@@ -585,8 +606,8 @@ describe("[print-summary] ", () => {
                   "test-task:fastError",
                   `test-task:flaky ${threshold}`,
                   "test-task:fast a",
-                  "test-task:removeResult",
-                  `test-task:flaky ${threshold + 1}`,
+                  "test-task:fast b",
+                  "test-task:error",
                 ],
                 {
                   retries: retries,
@@ -618,8 +639,8 @@ describe("[print-summary] ", () => {
                   "test-task:fastError",
                   `test-task:flaky ${threshold}`,
                   "test-task:fast a",
-                  "test-task:removeResult",
-                  `test-task:flaky ${threshold + 1}`,
+                  "test-task:fast b",
+                  "test-task:error",
                 ],
                 stdout
               )
@@ -643,8 +664,8 @@ describe("[print-summary] ", () => {
                   "test-task:fastError",
                   `test-task:flaky ${threshold}`,
                   "test-task:fast a",
-                  "test-task:removeResult",
-                  `test-task:flaky ${threshold + 1}`,
+                  "test-task:fast b",
+                  "test-task:error",
                 ],
                 stdout
               )
@@ -659,26 +680,26 @@ describe("[print-summary] ", () => {
         const [, t1, e1, r1] = getTableRawElements(stdout.value, "test-task:fastError")
         const [, t2, e2, r2] = getTableRawElements(stdout.value, `test-task:flaky ${threshold}`)
         const [, t3, e3, r3] = getTableRawElements(stdout.value, "test-task:fast a")
-        const [, t4, e4, r4] = getTableRawElements(stdout.value, "test-task:removeResult")
-        const [, t5, e5, r5] = getTableRawElements(stdout.value, `test-task:flaky ${threshold + 1}`)
+        const [, t4, e4, r4] = getTableRawElements(stdout.value, "test-task:fast b")
+        const [, t5, e5, r5] = getTableRawElements(stdout.value, "test-task:error")
 
         assert.strictEqual(t1, "test-task:fastError")
         assert.strictEqual(t2, `test-task:flaky ${threshold}`)
         assert.strictEqual(t3, "test-task:fast a")
-        assert.strictEqual(t4, "test-task:removeResult")
-        assert.strictEqual(t5, `test-task:flaky ${threshold + 1}`)
+        assert.strictEqual(t4, "test-task:fast b")
+        assert.strictEqual(t5, "test-task:error")
 
         assert.strictEqual(e1, "1")
         assert.strictEqual(e2, "0")
         assert.strictEqual(e3, "0")
         assert.strictEqual(e4, "0")
-        assert.strictEqual(e5, "0")
+        assert.strictEqual(e5, "1")
 
         assert.strictEqual(r1, `${retries}`)
         assert.strictEqual(r2, `${threshold}`)
         assert.strictEqual(r3, "0")
         assert.strictEqual(r4, "0")
-        assert.strictEqual(r5, `${threshold + 1}`)
+        assert.strictEqual(r5, `${retries}`)
       }
 
       runners.forEach(([name, runFn]) => {
@@ -703,7 +724,8 @@ describe("[print-summary] ", () => {
             !l.includes('---') &&
             !l.includes('Summary') &&
             !l.includes('Total Time') &&
-            !l.includes('Jobs'),
+            !l.includes('Jobs') &&
+            !l.includes('Start time'),
         )
         .map(l => l.split('|')[1]?.trim())
         .filter(Boolean);
@@ -721,6 +743,63 @@ describe("[print-summary] ", () => {
       // "test-task:fast b" is instant (empty script), "test-task:append a" has a 3s delay
       assert.strictEqual(names[0], "test-task:fast b")
       assert.strictEqual(names[1], "test-task:append a")
+    })
+  })
+
+  describe("npm-run-all-next unified summary", () => {
+    it("prints a single hierarchical table for nested sequential scripts", async () => {
+      await runAllNext(["--print-summary-table", "test-task:summary:seq"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      const summaryCount = (output.match(/\|\s*Summary\s*\|/g) || []).length
+
+      assert.strictEqual(summaryCount, 1)
+      assert(output.includes("test-task:summary:seq"))
+      assert(/[├└]── \[S\] test-task:summary:child:a/.test(output))
+      assert(/[├└]── \[S\] test-task:summary:child:b/.test(output))
+    })
+
+    it("tracks child exit codes in the unified hierarchical table", async () => {
+      try {
+        await runAllNext(["--print-summary-table", "test-task:summary:seq:fail"], stdout)
+        assert.fail("Expected nested sequential script to fail")
+      } catch (_) {
+        const output = stripAnsi(stdout.value)
+        const childRow = getTableRawElements(output, "└── [S] test-task:summary:child:fail")
+        const parentRow = getTableRawElements(output, "test-task:summary:seq:fail")
+
+        assert.strictEqual(childRow[1], "1")
+        assert.strictEqual(parentRow[1], "1")
+      }
+    })
+
+    it("does not show orphan child rows from previous retry attempts", async () => {
+      await runAllNext(["--print-summary-table", "--retries", "1", "test-task:summary:seq:retry"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      const topLevelA = /^\|\s*\[S\] test-task:summary:child:a\s*\|/m
+      const topLevelFlaky = /^\|\s*\[S\] test-task:summary:child:flaky\s*\|/m
+      const nestedA = (output.match(/[├└]── \[S\] test-task:summary:child:a/g) || []).length
+      const nestedFlaky = (output.match(/[├└]── \[S\] test-task:summary:child:flaky/g) || []).length
+      const topLevelParent = (output.match(/^\|\s*test-task:summary:seq:retry\s*\|/gm) || []).length
+
+      assert(!topLevelA.test(output), "Unexpected orphan top-level child:a row")
+      assert(!topLevelFlaky.test(output), "Unexpected orphan top-level child:flaky row")
+      assert.strictEqual(nestedA, 1)
+      assert.strictEqual(nestedFlaky, 1)
+      assert.strictEqual(topLevelParent, 1)
+    })
+
+    it("error summary does not list stale failures from superseded retry attempts", async () => {
+      await runAllNext(["--print-summary-table", "--retries", "1", "test-task:summary:seq:retry"], stdout)
+
+      const output = stripAnsi(stdout.value)
+      // The group succeeds on retry (exit code 0), so no error summary should appear
+      assert(!output.includes("scripts failed"), "Error summary should not appear when group succeeds on retry")
+      assert(!output.includes("ERROR:"), "ERROR line should not appear when group succeeds on retry")
+      // Specifically, stale child failures from the first attempt must not leak
+      assert(!output.includes("• test-task:summary:child:flaky"), "Stale child:flaky failure should not appear in error summary")
+      assert(!output.includes("• _seq:"), "No _seq: children should appear in error summary")
     })
   })
 })

@@ -2,6 +2,12 @@ name: CI, Coverage & Publish
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
     branches:
       - master
   push:
@@ -21,8 +27,106 @@ on:
         type: boolean
 
 jobs:
+  pr-test-release:
+    if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Test release') && github.event.pull_request.head.repo.full_name == github.repository }}
+    name: PR Test Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build unique prerelease version
+        id: prerelease
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          RUN_NUMBER="${{ github.run_number }}"
+          CANDIDATE_VERSION="${BASE_VERSION}-test.pr${PR_NUMBER}.${RUN_NUMBER}"
+
+          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$CANDIDATE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Candidate prerelease: $PACKAGE_NAME@$CANDIDATE_VERSION"
+
+      - name: Check prerelease version availability
+        run: |
+          PACKAGE_NAME="${{ steps.prerelease.outputs.package_name }}"
+          CANDIDATE_VERSION="${{ steps.prerelease.outputs.version }}"
+
+          if npm view "$PACKAGE_NAME@$CANDIDATE_VERSION" version >/dev/null 2>&1; then
+            echo "❌ Version $CANDIDATE_VERSION is already published."
+            exit 1
+          fi
+
+          echo "✅ Version $CANDIDATE_VERSION is available"
+
+      - name: Set package version (no git tag)
+        run: npm pkg set version="${{ steps.prerelease.outputs.version }}"
+
+      - name: Lint & pre-test
+        run: npm run pretest
+
+      - name: Run optimized tests (no coverage)
+        run: |
+          CORES=$(node -p "require('os').cpus().length")
+          if [ "$CORES" -gt 4 ]; then
+            CONCURRENCY=4
+          else
+            CONCURRENCY=$CORES
+          fi
+          echo "Using $CONCURRENCY workers on $CORES cores"
+          TEST_CONCURRENCY=$CONCURRENCY npm run test:parallel
+
+      - name: "Publish prerelease to npm (tag: test)"
+        run: npm publish --tag test
+
+      - name: Comment on PR with prerelease info
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PRERELEASE_VERSION: ${{ steps.prerelease.outputs.version }}
+          PACKAGE_NAME: ${{ steps.prerelease.outputs.package_name }}
+        with:
+          script: |
+            const issueNumber = Number(process.env.PR_NUMBER)
+            if (!Number.isFinite(issueNumber)) {
+              core.setFailed(`Invalid PR number: ${process.env.PR_NUMBER}`)
+              return
+            }
+
+            const version = process.env.PRERELEASE_VERSION || ""
+            const pkg = process.env.PACKAGE_NAME || ""
+            const body = [
+              "✅ Test release published before merge.",
+              "",
+              "Package: `" + pkg + "`",
+              "Version: `" + version + "`",
+              "Install command:",
+              "`npm i " + pkg + "@" + version + "`",
+            ].join("\n")
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body,
+            })
+
   check-version:
-    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'skip-version')) }}
+    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || (!contains(github.event.pull_request.labels.*.name, 'skip-version') && !contains(github.event.pull_request.labels.*.name, 'Test release'))) }}
     name: Check Version Publishable
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +152,7 @@ jobs:
           fi
 
   test-and-coverage:
-    if: ${{ always() && (github.event_name == 'pull_request' || inputs.runTest == true) && (needs.check-version.result == 'success' || needs.check-version.result == 'skipped') }}
+    if: ${{ always() && (github.event_name == 'pull_request' || inputs.runTest == true) && (needs.check-version.result == 'success' || needs.check-version.result == 'skipped') && (github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'Test release')) }}
     name: Test & Coverage
     runs-on: ubuntu-latest
     needs: check-version
@@ -131,25 +235,36 @@ jobs:
       - name: Comment on PR - Success
         if: steps.pr.outputs.number && steps.publish.outputs.success == 'true'
         uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         with:
           script: |
+            const issueNumber = Number(process.env.PR_NUMBER)
+            const version = require('./package.json').version
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: ${{ steps.pr.outputs.number }},
-              body: '🎉 Package published successfully to npm!\n\nPublished version: `' + require('./package.json').version + '`\n\n✅ Available at: https://www.npmjs.com/package/npm-run-all-next'
+              issue_number: issueNumber,
+              body: '🎉 Package published successfully to npm!\n\nPublished version: `' + version + '`\n\n✅ Available at: https://www.npmjs.com/package/npm-run-all-next'
             })
       
       - name: Comment on PR - Failure
         if: steps.pr.outputs.number && steps.publish.outputs.success != 'true'
         uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         with:
           script: |
+            const issueNumber = Number(process.env.PR_NUMBER)
+            const runUrl = `${process.env.SERVER_URL}/${process.env.REPOSITORY}/actions/runs/${process.env.RUN_ID}`
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: ${{ steps.pr.outputs.number }},
-              body: '❌ Package publication to npm failed.\n\nCheck the action logs for more details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+              issue_number: issueNumber,
+              body: `❌ Package publication to npm failed.\n\nCheck the action logs for more details: ${runUrl}`
             })
       
       - name: Fail if publish failed
