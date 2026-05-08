@@ -98,4 +98,23 @@ describe("[runtime-file] npm-run-all", () => {
     const actual = result()
     assert.ok(actual === null, `Expected null, received ${JSON.stringify(actual)}`)
   })
+
+  it("should save total parallel group time under pattern key when all tasks succeed", async () => {
+    const patterns = ["test-task:append1 a", "test-task:append2 b"]
+    await runAll(["--parallel", "--runtime-file", RUNTIME_FILE, ...patterns])
+    assert.ok(fs.existsSync(RUNTIME_FILE), "Runtime file should exist")
+    const data = JSON.parse(fs.readFileSync(RUNTIME_FILE, "utf8"))
+    const groupKey = patterns.join(" ")
+    assert.ok(groupKey in data, `Expected group key "${groupKey}" in runtime file, got keys: ${JSON.stringify(Object.keys(data))}`)
+    assert.ok(typeof data[groupKey].avgRuntime === "number" && data[groupKey].avgRuntime > 0, "Expected avgRuntime > 0 for group key")
+  })
+
+  it("should NOT save parallel group time when a task fails", async () => {
+    const patterns = ["test-task:append1 a", "test-task:error"]
+    await runAll(["--parallel", "--continue-on-error", "--runtime-file", RUNTIME_FILE, ...patterns]).catch(() => {})
+    const groupKey = patterns.join(" ")
+    if (!fs.existsSync(RUNTIME_FILE)) return // no file at all is also fine
+    const data = JSON.parse(fs.readFileSync(RUNTIME_FILE, "utf8"))
+    assert.ok(!(groupKey in data), `Group key "${groupKey}" should NOT be in runtime file on partial failure`)
+  })
 })
