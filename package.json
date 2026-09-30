@@ -33,7 +33,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "ansi-styles": "5.2.0",
+    "ansi-styles": "7.0.0",
     "chalk": "^4.1.2",
     "cross-spawn": "^7.0.6",
     "minimatch": "^10.0.1",
