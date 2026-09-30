@@ -13,14 +13,14 @@ function loadTasksFile(filePath) {
   let data
   try {
     data = fs.readFileSync(absPath, "utf8")
-  } catch (_err) {
-    throw new Error(`Cannot read tasks file: ${filePath}`)
+  } catch (err) {
+    throw new Error(`Cannot read tasks file: ${filePath}`, { cause: err })
   }
   let arr
   try {
     arr = JSON.parse(data)
-  } catch (_err) {
-    throw new Error(`Tasks file is not valid JSON: ${filePath}`)
+  } catch (err) {
+    throw new Error(`Tasks file is not valid JSON: ${filePath}`, { cause: err })
   }
   if (!Array.isArray(arr) || !arr.every((x) => typeof x === "string")) {
     throw new Error(`Tasks file must be a JSON array of strings: ${filePath}`)

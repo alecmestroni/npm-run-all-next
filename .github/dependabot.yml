@@ -4,10 +4,23 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
       dev-dependencies:
         dependency-type: development
+    ignore:
+      # ESM-only majors: require() in lib/ gets a namespace, not the function or object it uses.
+      - dependency-name: chalk
+        update-types: ["version-update:semver-major"]
+      - dependency-name: ansi-styles
+        update-types: ["version-update:semver-major"]
+      - dependency-name: read-pkg
+        update-types: ["version-update:semver-major"]
+      - dependency-name: pidtree
+        update-types: ["version-update:semver-major"]
+      # Babel 8 is ESM-only and needs Node ^22.18; the test job runs on Node 20.
+      - dependency-name: "@babel/*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

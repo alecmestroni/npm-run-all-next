@@ -126,7 +126,8 @@ jobs:
             })
 
   check-version:
-    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || (!contains(github.event.pull_request.labels.*.name, 'skip-version') && !contains(github.event.pull_request.labels.*.name, 'Test release'))) }}
+    # Dependabot PRs change only dependencies and never carry a version bump.
+    if: ${{ (github.event_name == 'pull_request' || inputs.runTest == true) && (github.event_name != 'pull_request' || (!contains(github.event.pull_request.labels.*.name, 'skip-version') && !contains(github.event.pull_request.labels.*.name, 'Test release') && github.event.pull_request.user.login != 'dependabot[bot]')) }}
     name: Check Version Publishable
     runs-on: ubuntu-latest
     steps:
@@ -187,7 +188,9 @@ jobs:
       - name: Print Coverage
         run: npm run coverage:report
 
+      # Dependabot runs cannot read CODECOV_TOKEN, and the upload is set to fail the job.
       - name: Upload coverage to Codecov
+        if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -210,7 +210,7 @@ function parseCLIArgsCore(set, args) {
         break
 
       default: {
-        let m = null
+        let m
         if ((m = OVERWRITE_OPTION.exec(arg))) {
           overwriteConfig(set.packageConfig, m[1], m[2], m[3] || args[++i])
         } else if ((m = CONFIG_OPTION.exec(arg))) {

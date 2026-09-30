@@ -30,7 +30,7 @@ const { default: PQueue } = require("p-queue")
 const ROOT_PATH = path.resolve(__dirname, "../")
 const PROJECT_ROOT = path.resolve(__dirname, "../../")
 const WORKSPACE_PATH = path.resolve(__dirname, "../../test-workspace")
-const MOCHA_PATH = path.resolve(__dirname, "../../node_modules/mocha/bin/_mocha")
+const MOCHA_PATH = require.resolve("mocha/bin/mocha.js")
 const ORDER_LARGEST_FIRST = "largest-first"
 
 // Runtime hints in seconds, used to start heavier files first.
