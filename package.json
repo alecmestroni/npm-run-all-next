@@ -36,7 +36,7 @@
     "ansi-styles": "5.2.0",
     "chalk": "^4.1.2",
     "cross-spawn": "^7.0.6",
-    "minimatch": "^10.0.1",
+    "minimatch": "^11.0.5",
     "pidtree": "^0.6.0",
     "read-pkg": "^5.2.0",
     "shell-quote": "^1.8.2",
